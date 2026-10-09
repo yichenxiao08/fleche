@@ -81,9 +81,13 @@ function render({ keepScroll = false, focus = false } = {}) {
     volume: coachVideo.volume,
     muted: coachVideo.muted,
     rate: coachVideo.playbackRate,
+    aspect: coachVideo.videoWidth && coachVideo.videoHeight
+      ? coachVideo.videoWidth / coachVideo.videoHeight
+      : Number(coachVideo.parentElement.style.getPropertyValue("--video-aspect")),
   } : null;
   const dark = ["review", "coach", "analysis"].includes(state.screen);
   document.body.className = dark ? "studio" : "piste";
+  document.documentElement.classList.toggle("coach-page", state.screen === "coach");
   document.querySelector('meta[name="theme-color"]').content = dark
     ? "#0e121a"
     : "#faf9f6";
@@ -143,6 +147,8 @@ function mountMedia(playback = null) {
     video.controls = true;
     if (state.reviewResult?.width > 0 && state.reviewResult?.height > 0)
       video.parentElement.style.setProperty("--video-aspect", state.reviewResult.width / state.reviewResult.height);
+    else if (playback?.sessionId === video.dataset.sessionId && playback.aspect > 0)
+      video.parentElement.style.setProperty("--video-aspect", playback.aspect);
     video.parentElement.insertAdjacentHTML("afterend", replayControls(state));
     stopPlayback = mountReplayControls(video, $("replay-controls"));
     video.src = state.session.video_job_id
@@ -521,6 +527,18 @@ document.addEventListener("change", async (event) => {
     else notice(error.message);
   }
 });
+document.addEventListener("click", (event) => {
+  const settings = document.querySelector(".coach-model-control[open]");
+  if (settings && !settings.contains(event.target)) settings.open = false;
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+  const settings = document.querySelector(".coach-model-control[open]");
+  if (settings) {
+    settings.open = false;
+    settings.querySelector("summary")?.focus({ preventScroll: true });
+  }
+});
 document.addEventListener("input", (event) => {
   if (event.target.id === "question") state.question = event.target.value;
 });
@@ -543,7 +561,6 @@ document.addEventListener("submit", async (event) => {
     try {
       await pending;
       render({ keepScroll: true });
-      $("question")?.focus({ preventScroll: true });
     } catch (error) {
       state.question = question;
       render({ keepScroll: true });
