@@ -13,192 +13,161 @@
     />
     <link rel="stylesheet" href="/static/styles.css" />
     <link rel="stylesheet" href="/static/dataset.css" />
-    <script type="module" src="/static/dataset.js"></script>
+    <script type="module" src="/static/dataset.js?v=20261009-auto-training"></script>
   </head>
-  <body class="piste">
+  <body class="piste dataset-workspace">
     <header class="app-header">
       <a class="wordmark" href="/"
-        ><img src="/static/mark.svg" alt="" />FENCECOACH<span
-          >DATASET REVIEW</span
-        ></a
-      ><a href="/">Back to training</a>
+        ><img src="/static/mark.svg" alt="" />FENCECOACH<span>DATASET REVIEW</span></a
+      >
+      <a href="/">Back to training</a>
     </header>
     <main class="dataset-main">
-      <span class="eyebrow">GESTURE RECOGNITION / SOURCE MATERIAL</span>
-      <h1>Build the movement library.</h1>
-      <p>
-        Inspect the source, choose the athlete, and review each interval.
-        Provisional labels are drafts and do not enter normal training. Attack
-        and counterattack labels require both fencers and coach review.
-      </p>
-      <p id="dataset-status" role="status">Loading collected footage…</p>
+      <div class="workspace-heading">
+        <div>
+          <span class="eyebrow">GESTURE RECOGNITION / SOURCE MATERIAL</span>
+          <h1>Review fencing footage</h1>
+        </div>
+        <p id="dataset-status" role="status" aria-live="polite">Loading footage…</p>
+        <p id="automatic-training-status" role="status" aria-live="polite">Automatic training: checking progress…</p>
+        <details class="readiness-drawer">
+          <summary id="readiness-summary">Training readiness</summary>
+          <section
+            id="training-readiness"
+            aria-labelledby="training-readiness-title"
+          ></section>
+        </details>
+      </div>
       <div class="dataset-layout">
-        <aside class="dataset-card">
-          <label for="source-filter">Find footage</label
-          ><input
-            id="source-filter"
-            type="search"
-            placeholder="advance, retreat, lunge…"
-          />
-          <label
-            ><input type="checkbox" id="show-excluded" /> Show excluded source
-            archive</label
-          >
+        <aside class="dataset-card source-panel" aria-label="Footage list">
+          <div class="source-panel-heading">
+            <h2>Footage</h2>
+            <label for="source-filter">Find a clip</label>
+            <input
+              id="source-filter"
+              type="search"
+              placeholder="lunge, retreat, bout…"
+            />
+            <label for="queue-order">Review order</label>
+            <select id="queue-order">
+              <option value="priority">Needs attention first</option>
+              <option value="name">Source name</option>
+            </select>
+            <label class="show-excluded-control"
+              ><input type="checkbox" id="drafts-only" /> Show clips with draft labels only</label
+            >
+            <label class="show-excluded-control"
+              ><input type="checkbox" id="show-excluded" /> Show excluded footage</label
+            >
+          </div>
           <div id="source-list"></div>
+          <p id="source-status" role="status" aria-live="polite"></p>
         </aside>
-        <section class="dataset-card" id="dataset-review" hidden>
-          <h2 id="clip-title"></h2>
-          <video
-            id="dataset-video"
-            controls
-            playsinline
-            preload="metadata"
-          ></video>
-          <div class="dataset-controls">
-            <button id="step-back" type="button">−1 frame</button
-            ><button id="step-forward" type="button">+1 frame</button
-            ><select id="playback-speed" aria-label="Playback speed">
-              <option value="1">1×</option>
-              <option value="0.5">0.5×</option>
-              <option value="0.25">0.25×</option></select
-            ><output id="video-time">0.000 s</output>
+
+        <section class="dataset-card review-panel" id="dataset-review" hidden>
+          <div class="review-panel-heading">
+            <h2 id="clip-title"></h2>
+            <p id="source-context"></p>
           </div>
-          <p id="source-credit"></p>
-          <p id="source-context"></p>
-          <div id="footwork-summary"></div>
-          <details>
-            <summary>Athlete and review context</summary>
-            <div class="dataset-form-grid">
-              <label
-                >Reviewer<input
-                  id="reviewer"
-                  maxlength="100"
-                  placeholder="Your name"
-              /></label>
-              <label
-                >Reviewer role<select id="reviewer-role">
-                  <option value="athlete">Athlete</option>
-                  <option value="coach">Coach</option>
-                </select></label
-              >
-              <label
-                >Weapon<select id="weapon">
-                  <option value="unknown">Unknown</option>
-                  <option value="foil">Foil</option>
-                  <option value="epee">Épée</option>
-                  <option value="sabre">Sabre</option>
-                </select></label
-              >
-              <label
-                >Facing<select id="facing">
-                  <option value="unknown">Unknown</option>
-                  <option value="left">Screen left</option>
-                  <option value="right">Screen right</option>
-                </select></label
-              >
-              <label class="dataset-wide"
-                >Athlete description<input
-                  id="track-description"
-                  maxlength="500"
-                  placeholder="Which person is being labeled?"
-              /></label>
-              <label
-                >Camera motion<select id="camera-motion">
-                  <option value="unknown">Not checked</option>
-                  <option value="fixed">Fixed throughout this clip</option>
-                  <option value="moving">Panning, zooming or cuts</option>
-                </select></label
-              >
-              <label class="dataset-wide"
-                ><input type="checkbox" id="opponent-visible" /> Opponent and
-                exchange context are visible</label
-              >
-              <label
-                >Crop x<input
-                  id="crop-x"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="0.99" /></label
-              ><label
-                >Crop y<input
-                  id="crop-y"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="0.99"
-              /></label>
-              <label
-                >Crop width<input
-                  id="crop-width"
-                  type="number"
-                  step="0.01"
-                  min="0.11"
-                  max="1" /></label
-              ><label
-                >Crop height<input
-                  id="crop-height"
-                  type="number"
-                  step="0.01"
-                  min="0.11"
-                  max="1"
-              /></label>
-            </div>
+
+          <div class="review-workspace">
+            <section class="review-video-column" aria-label="Video and review setup">
+              <section class="review-guide" aria-labelledby="review-guide-title">
+                <h3 id="review-guide-title">Start reviewing</h3>
+                <p>Enter your name, inspect a movement, then use the interval list beside the video. Accept marks it locally; Save review keeps it.</p>
+                <label for="reviewer">Reviewer name <span>(required to accept)</span></label>
+                <input id="reviewer" maxlength="100" placeholder="Your name" autocomplete="name" />
+                <p id="review-feedback" role="status" aria-live="polite">Choose an interval to start.</p>
+              </section>
+              <video id="dataset-video" controls playsinline preload="metadata"></video>
+              <div class="dataset-controls video-controls">
+                <button id="step-back" type="button" title="Step back one frame">−1 frame</button>
+                <button id="step-forward" type="button" title="Step forward one frame">+1 frame</button>
+                <label for="playback-speed">Speed</label>
+                <select id="playback-speed" aria-label="Playback speed">
+                  <option value="1">1×</option>
+                  <option value="0.5">0.5×</option>
+                  <option value="0.25">0.25×</option>
+                </select>
+                <output id="video-time">0.000 s</output>
+              </div>
+              <p id="source-credit" class="source-credit"></p>
+              <details class="video-extra">
+                <summary>Pose and athlete details</summary>
+                <div id="footwork-summary"></div>
+                <div class="context-grid">
+                  <label>Reviewer role<select id="reviewer-role"><option value="athlete">Athlete</option><option value="coach">Coach</option></select></label>
+                  <label>Weapon<select id="weapon"><option value="unknown">Unknown</option><option value="foil">Foil</option><option value="epee">Épée</option><option value="sabre">Sabre</option></select></label>
+                  <label>Facing<select id="facing"><option value="unknown">Unknown</option><option value="left">Screen left</option><option value="right">Screen right</option></select></label>
+                  <label>Primary athlete track<input id="primary-track-id" maxlength="60" value="primary" /></label>
+                  <label>Athlete ID<input id="athlete-id" maxlength="100" placeholder="Same ID across this person's clips" /></label>
+                  <label>Recording session ID<input id="recording-session-id" maxlength="100" placeholder="Reuse within a session" /></label>
+                  <label>Camera setup ID<input id="camera-setup-id" maxlength="100" placeholder="e.g. gym-side-fixed" /></label>
+                  <label>Camera motion<select id="camera-motion"><option value="unknown">Not checked</option><option value="fixed">Fixed throughout</option><option value="moving">Panning, zooming or cuts</option></select></label>
+                  <label class="context-wide">Athlete description<input id="track-description" maxlength="500" placeholder="Which person is being labeled?" /></label>
+                  <label class="context-wide"><input type="checkbox" id="opponent-visible" /> Opponent and exchange context are visible</label>
+                  <label>Crop x<input id="crop-x" type="number" step="0.01" min="0" max="0.99" /></label>
+                  <label>Crop y<input id="crop-y" type="number" step="0.01" min="0" max="0.99" /></label>
+                  <label>Crop width<input id="crop-width" type="number" step="0.01" min="0.11" max="1" /></label>
+                  <label>Crop height<input id="crop-height" type="number" step="0.01" min="0.11" max="1" /></label>
+                </div>
+              </details>
+              <details class="video-extra">
+                <summary>Event markers</summary>
+                <p>Pause at a visible event, then add a timestamp marker.</p>
+                <div id="event-buttons" class="dataset-controls"></div>
+                <div id="event-list"></div>
+              </details>
+            </section>
+
+            <section class="review-annotation-column" aria-label="Movement labels and interval editor">
+              <section class="interval-queue">
+                <div class="queue-heading">
+                  <div>
+                    <h3>Movement intervals</h3>
+                    <p id="draft-selection">Choose an interval to review.</p>
+                  </div>
+                  <div class="queue-tools">
+                    <button type="button" id="load-suggestions" title="Add unreviewed pose-based suggestions">Add suggestions</button>
+                    <button type="button" id="previous-draft" title="Select the previous draft">Previous</button>
+                    <button type="button" id="next-draft" title="Select the next draft">Next</button>
+                  </div>
+                </div>
+                <div id="segment-list"></div>
+                <div class="review-save-bar">
+                  <span>Save persists this clip’s labels.</span>
+                  <button id="save-labels" type="button">Save review</button>
+                  <button id="export-labels" type="button">Export</button>
+                </div>
+              </section>
+
+              <section class="interval-editor" aria-labelledby="editor-title">
+                <div class="editor-heading">
+                  <h3 id="editor-title">Interval editor</h3>
+                  <button type="button" id="cancel-edit">Clear</button>
+                </div>
+                <p id="editor-mode" role="status" aria-live="polite">Choose Watch / edit on an interval to change it. The editor stays here beside the list.</p>
+                <form id="segment-form" class="dataset-form-grid">
+                  <label>Start (seconds)<input name="start" type="number" min="0" step="0.001" required /><button type="button" data-mark="start">Use video time</button></label>
+                  <label>End (seconds)<input name="end" type="number" min="0" step="0.001" required /><button type="button" data-mark="end">Use video time</button></label>
+                  <label>Layer<select name="layer"><option value="footwork">Footwork</option><option value="activity">Exercise / setup / rest</option><option value="bladework">Bladework</option><option value="tactics">Tactics</option></select></label>
+                  <label>Movement<select name="label"></select></label>
+                  <label>Athlete track<input name="track" value="primary" maxlength="60" required /></label>
+                  <label>Boundary uncertainty (ms)<input name="boundary" type="number" min="0" max="5000" step="1" value="250" required /></label>
+                  <details class="context-wide interval-extras" id="interval-extras">
+                    <summary>Notes and training exclusions</summary>
+                    <label class="context-wide">Note<input name="note" maxlength="500" /></label>
+                    <fieldset class="context-wide"><legend>Exclude this interval from training</legend><div id="segment-exclusions" class="exclusion-options"></div></fieldset>
+                  </details>
+                </form>
+                <button id="apply-interval" type="submit" form="segment-form">Apply interval edit</button>
+              </section>
+            </section>
+          </div>
+          <details class="keyboard-help">
+            <summary>Keyboard shortcuts and review guidance</summary>
+            <p>Space plays or pauses; left/right step a frame; I/O mark interval boundaries; N/P select a draft; A accepts and R rejects the selected interval; C focuses the movement choice. Apply interval edits before switching intervals. Confirm the athlete and boundaries from the footage—suggestions are not ground truth.</p>
           </details>
-          <h3>Timestamped labels</h3>
-          <div id="segment-list"></div>
-          <form id="segment-form" class="dataset-form-grid">
-            <label
-              >Start (seconds)<input
-                name="start"
-                type="number"
-                min="0"
-                step="0.001"
-                required
-              /><button type="button" data-mark="start">
-                Use current time
-              </button></label
-            >
-            <label
-              >End (seconds)<input
-                name="end"
-                type="number"
-                min="0"
-                step="0.001"
-                required
-              /><button type="button" data-mark="end">
-                Use current time
-              </button></label
-            >
-            <label
-              >Layer<select name="layer">
-                <option value="footwork">Footwork</option>
-                <option value="bladework">Bladework</option>
-                <option value="tactics">Tactics</option>
-              </select></label
-            >
-            <label>Movement<select name="label"></select></label>
-            <label
-              >Athlete track<input
-                name="track"
-                value="primary"
-                maxlength="60"
-                required
-            /></label>
-            <label>Note<input name="note" maxlength="500" /></label>
-            <button class="dataset-wide" type="submit">
-              Add provisional label
-            </button>
-          </form>
-          <p>
-            Confirm a label only after inspecting its athlete and boundaries.
-            Frame stepping uses timestamp seeks; slow playback is useful for
-            checking fast transitions.
-          </p>
-          <div class="dataset-controls">
-            <button id="save-labels">Save review</button
-            ><button id="export-labels">Export labels</button>
-          </div>
         </section>
       </div>
     </main>

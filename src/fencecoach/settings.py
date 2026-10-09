@@ -6,15 +6,22 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    fencecoach_examples_dir: Path = Path("examples/video")
+    fencecoach_seed_examples: bool = False
+    fencecoach_phoenix_endpoint: str = ""
+    fencecoach_input_usd_per_million: float | None = None
+    fencecoach_output_usd_per_million: float | None = None
+    fencecoach_automatic_training: bool = False
     fencecoach_chat_provider: str = "local"
     fencecoach_coaching_worker: bool = True
     fencecoach_coaching_concurrency: int = 1
     ollama_base_url: str = "http://127.0.0.1:11434"
-    ollama_chat_model: str = "qwen3:4b"
+    ollama_chat_model: str = "qwen2.5:1.5b"
     fencecoach_database_url: str = ""
     fencecoach_worker_concurrency: int = 1
     fencecoach_queue_limit: int = 100
     fencecoach_gesture_model: Path = Path("models/gestures.json")
+    fencecoach_activity_model: Path = Path("models/activity.json")
     fencecoach_s3_bucket: str = ""
     fencecoach_s3_prefix: str = "fencecoach"
     fencecoach_s3_endpoint: str = ""

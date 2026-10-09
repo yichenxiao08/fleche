@@ -46,9 +46,20 @@ Original uploads and landmarks remain on the local server, without automatic del
 - Frames with multiple poses or large sudden hip-position jumps are excluded. This cannot guarantee identity continuity through occlusion; use solo footage or a crop.
 - `stance_ratio` is horizontal ankle separation divided by mean shoulder-to-hip length in image pixels. Knee angles are 2D debug features. No physical-distance, contact, balance or technique score is produced.
 - `stance-return-v1` assumes the first 1.5 seconds contain en garde. Expansion must exceed both 1.3 × median initial stance and that median + 0.3. Return means being within median + 0.2 for at least 333 ms. Proposed peak-to-return intervals range from 250 ms to six seconds. These are engineering thresholds, not validated fencing standards.
+- Saved reviewed reps include arm-extension shape at movement onset and lunge peak, plus per-side knee flexion from onset to peak when those landmarks are visible. These extra samples support a within-rep timing discussion; they do not reveal blade extension, contact, attack intent, or a universal knee-depth target. Re-upload a clip to regenerate measurements with updated feature extraction.
 - Missing/ambiguous/low-quality frames and gaps over 300 ms interrupt proposals. Partial actions are not completed automatically. Jumps, resets and turns can produce false proposals.
 - Quality averages each frame's minimum hip/knee/ankle visibility and presence. It is **not calibrated accuracy**, event confidence or technique correctness. Manually added/edited intervals have no automatic quality estimate; the existing confidence field is zero with explicit provenance.
 - Saving requires review. Metrics retain job ID, method version, model SHA, timestamps and annotation type. User review is not expert ground truth.
+
+## Long bout multi-person scan
+
+For a curated master bout longer than the app's 120-second upload limit, run
+`python scripts/scan_multiactor_fencing.py`. It writes line-delimited, upright full-frame pose
+detections at the same 12 fps rate to `prepared/multi-pose-scan.jsonl`, plus a summary JSON. It
+retains up to two people per sample and lower-body geometry, but detection order is frame-local:
+there are no athlete IDs, activity phases or gesture labels. Review source frames and establish
+identity/timing before converting any interval to a training annotation. This scan supplements the
+single-athlete cropped review pipeline; it does not bypass label or model-readiness gates.
 
 ## Public demo
 

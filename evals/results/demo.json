@@ -1,0 +1,7 @@
+{
+  "duration_ms": 89000,
+  "path": "docs/demo.mp4",
+  "synthetic_coach_section": true,
+  "live_trace_dashboard": true,
+  "claude_client": "not exercised"
+}

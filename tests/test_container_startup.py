@@ -9,6 +9,10 @@ class ContainerStartupTests(unittest.TestCase):
         responses = [
             ConnectionResetError("Startup race"),
             {"status": "ok"},
+            [{"job_id": str(i), "packaged_example": True} for i in range(3)],
+            {"quality_gate": {"coaching_allowed": False}},
+            {"quality_gate": {"coaching_allowed": False}},
+            {"quality_gate": {"coaching_allowed": False}},
             {"session_id": "test-session"},
             {"citation_ids_valid": True, "citation_count": 1},
         ]
@@ -18,7 +22,7 @@ class ContainerStartupTests(unittest.TestCase):
             patch("builtins.print"),
         ):
             main()
-        self.assertEqual(call.call_count, 4)
+        self.assertEqual(call.call_count, 8)
         sleep.assert_called_once_with(1)
 
     def test_unhealthy_container_eventually_fails(self):

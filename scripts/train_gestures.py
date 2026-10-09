@@ -1,163 +1,137 @@
-"""Train on human labels, split by original video hash, export safe JSON weights.
+"""Train a gesture or activity classifier from human-reviewed pose windows.
 
-Usage: python scripts/train_gestures.py --data data/videos --output models/gestures.json
-Promotion is explicit: --promote, after enough independent clips and held-out macro F1 >= .75.
+The trainer writes its readiness report first and stops before fitting unless
+all versioned data, diversity, integrity, and athlete-held-out split gates pass.
 """
 
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
 
 import numpy as np
+from sklearn.dummy import DummyClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, classification_report, f1_score
-from sklearn.model_selection import GroupShuffleSplit
+from sklearn.metrics import accuracy_score, classification_report, f1_score, log_loss
 from sklearn.preprocessing import StandardScaler
 
-from fencecoach.data_policy import eligible_source
-from fencecoach.footwork import VERSION, enrich_frames
-from fencecoach.gestures import FEATURES, Annotations, temporal_features
+from fencecoach.footwork import VERSION
+from fencecoach.gestures import FEATURES
+from fencecoach.training_data import collect_corpus, readiness
+
+
+def calibration_error(probabilities, truth, bins=10):
+    confidence = probabilities.max(axis=1)
+    prediction = probabilities.argmax(axis=1)
+    correct = prediction == truth
+    error = 0.0
+    for lower in np.linspace(0, 1, bins, endpoint=False):
+        selected = (confidence >= lower) & (confidence < lower + 1 / bins)
+        if selected.any():
+            error += selected.mean() * abs(correct[selected].mean() - confidence[selected].mean())
+    return float(error)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--data", type=Path, default=Path("data/videos"))
-    parser.add_argument("--output", type=Path, default=Path("models/gestures.json"))
+    parser.add_argument("--task", choices=("gesture", "activity"), default="gesture")
+    parser.add_argument("--data", type=Path, default=Path("data/training"))
+    parser.add_argument("--output", type=Path)
+    parser.add_argument("--readiness-report", type=Path)
+    parser.add_argument(
+        "--classes", help="Optional comma-separated class set; every class must pass."
+    )
     parser.add_argument("--promote", action="store_true")
     parser.add_argument("--window-ms", type=int, choices=(500, 750, 1000, 1500), default=750)
     args = parser.parse_args()
-    examples, labels, groups, sources = [], [], [], []
-    parents, hash_groups = {}, {}
 
-    def root(value):
-        parents.setdefault(value, value)
-        if parents[value] != value:
-            parents[value] = root(parents[value])
-        return parents[value]
+    classes = (
+        [label.strip() for label in args.classes.split(",") if label.strip()]
+        if args.classes
+        else None
+    )
+    report_path = args.readiness_report or args.data / f"readiness-{args.task}.json"
+    try:
+        corpus = collect_corpus(args.data, args.task, classes, args.window_ms)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
+    report, split = readiness(corpus)
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    if not report["training_ready"] or split is None:
+        blocked = sum(not check["passed"] for check in report["checks"])
+        raise SystemExit(
+            f"Training stopped before model fitting: {blocked} readiness checks are blocked. "
+            f"See {report_path} for per-class counts and collection gaps."
+        )
 
-    skipped_provisional = skipped_domain = 0
-    for annotation in args.data.rglob("annotations.json"):
-        directory = annotation.parent
-        if not (directory / "result.json").is_file() or not (directory / "source.video").is_file():
-            continue
-        marked = json.loads(annotation.read_text(encoding="utf-8"))
-        curated_digest = None
-        if marked.get("source_collection"):
-            source_record = directory.parent / "source.json"
-            if not source_record.is_file() or not eligible_source(
-                json.loads(source_record.read_text(encoding="utf-8"))
-            ):
-                skipped_domain += 1
-                continue
-            curated_digest = json.loads(source_record.read_text(encoding="utf-8"))["sha256"]
-        elif not marked.get("domain_verified"):
-            skipped_domain += 1
-            continue
-        if (
-            marked.get("review_status") == "provisional"
-            or marked.get("reviewer_role") == "assistant"
-        ):
-            skipped_provisional += 1
-            continue
-        Annotations.model_validate(marked)
-        result = json.loads((directory / "result.json").read_text(encoding="utf-8"))
-        profile = result.get("capture_profile", {})
-        enrich_frames(result["frames"], result["width"], result["height"], profile)
-        # Identical uploads must stay in the same split. Hash source bytes, not generated job ID.
-        with (directory / "source.video").open("rb") as source_file:
-            digest = hashlib.file_digest(source_file, "sha256").hexdigest()
-        if marked.get("source_sha256", digest) != digest:
-            raise SystemExit(f"Annotation source checksum changed: {annotation}")
-        if curated_digest is not None and curated_digest != digest:
-            raise SystemExit(f"Prepared video differs from the curated source: {annotation}")
-        # Dataset recordings/crops from one event or cohort remain together, even
-        # when encoded bytes differ. A future athlete-disjoint split can refine this.
-        split_group = marked.get("split_group") or digest
-        if digest in hash_groups:
-            parents[root(split_group)] = root(hash_groups[digest])
-        hash_groups[digest] = split_group
-        sources.append(
-            {
-                "hash": digest,
-                "job_id": directory.name,
-                "reviewer": marked["reviewer"],
-                "license": marked["license"],
-                "credit": marked.get("source_credit"),
-                "split_group": split_group,
-            }
-        )
-        for label in marked["labels"]:
-            if label["label"] in {
-                "advance",
-                "retreat",
-                "jump_forward",
-                "jump_back",
-            } and profile.get("facing") not in {"left", "right"}:
-                continue
-            for start in range(
-                label["start_ms"], label["end_ms"] - args.window_ms + 1, args.window_ms // 2
-            ):
-                vector = temporal_features(result["frames"], start, start + args.window_ms)
-                if vector is not None:
-                    examples.append(vector)
-                    labels.append(label["label"])
-                    groups.append(split_group)
-    groups = [root(value) for value in groups]
-    counts = Counter(labels)
-    if len(counts) < 2 or min(counts.values(), default=0) < 20:
-        raise SystemExit(
-            f"Need at least two gesture classes with 20 reviewed visible windows each. Available: {dict(counts)}; skipped {skipped_provisional} provisional and {skipped_domain} excluded/unreviewed-domain files. Label more modern fencing footage; no model was promoted."
-        )
-    per_class = {
-        label: len({group for group, value in zip(groups, labels) if value == label})
-        for label in counts
-    }
-    if min(per_class.values()) < 3:
-        raise SystemExit(
-            f"Need at least three independent source groups per class. Available: {per_class}. Related clips and crops do not count separately."
-        )
-    x = np.asarray(examples)
-    y = np.asarray(labels)
-    group = np.asarray(groups)
-    split = None
-    for train, held_out in GroupShuffleSplit(n_splits=100, test_size=0.25, random_state=740).split(
-        x, y, group
-    ):
-        if set(y[train]) == set(y[held_out]) == set(counts):
-            split = train, held_out
-            break
-    if split is None:
-        raise SystemExit("No independent video split covers all classes. Add more labeled videos.")
+    rows, sources = corpus["rows"], corpus["sources"]
+    x = np.asarray([row["features"] for row in rows])
+    y = np.asarray([row["label"] for row in rows])
+    groups = np.asarray([row["group"] for row in rows])
     train, held_out = split
     scaler = StandardScaler().fit(x[train])
     classifier = LogisticRegression(max_iter=2000, class_weight="balanced", random_state=740).fit(
         scaler.transform(x[train]), y[train]
     )
-    predictions = classifier.predict(scaler.transform(x[held_out]))
-    score = float(f1_score(y[held_out], predictions, average="macro"))
+    held_x = scaler.transform(x[held_out])
+    predictions = classifier.predict(held_x)
+    probabilities = classifier.predict_proba(held_x)
+    majority = DummyClassifier(strategy="most_frequent").fit(x[train], y[train])
+    majority_predictions = majority.predict(x[held_out])
+    class_report = classification_report(
+        y[held_out], predictions, output_dict=True, zero_division=0
+    )
+    recalls = {label: class_report.get(label, {}).get("recall", 0.0) for label in corpus["classes"]}
+    macro_f1 = float(f1_score(y[held_out], predictions, average="macro"))
+    baseline_f1 = float(f1_score(y[held_out], majority_predictions, average="macro"))
+    ece = calibration_error(probabilities, classifier.classes_.searchsorted(y[held_out]))
+    confidence = probabilities.max(axis=1)
+    accepted = confidence >= 0.65
+    accepted_accuracy = (
+        float((predictions[accepted] == y[held_out][accepted]).mean()) if accepted.any() else 0.0
+    )
     evaluation = {
-        "macro_f1": score,
+        "macro_f1": macro_f1,
+        "majority_baseline_macro_f1": baseline_f1,
+        "beats_majority_baseline": macro_f1 > baseline_f1,
         "accuracy": float(accuracy_score(y[held_out], predictions)),
-        "classification_report": classification_report(
-            y[held_out], predictions, output_dict=True, zero_division=0
+        "per_class_recall": recalls,
+        "classification_report": class_report,
+        "held_out_log_loss": float(
+            log_loss(y[held_out], probabilities, labels=classifier.classes_)
         ),
-        "train_groups": sorted(set(group[train])),
-        "held_out_groups": sorted(set(group[held_out])),
+        "expected_calibration_error_10_bins": ece,
+        "confidence_at_least_0_65_coverage": float(accepted.mean()),
+        "confidence_at_least_0_65_accuracy": accepted_accuracy,
+        "train_athletes": sorted({sources[rows[i]["source_index"]]["athlete_id"] for i in train}),
+        "held_out_athletes": sorted(
+            {sources[rows[i]["source_index"]]["athlete_id"] for i in held_out}
+        ),
+        "train_groups": sorted(set(groups[train])),
+        "held_out_groups": sorted(set(groups[held_out])),
         "train_windows": len(train),
         "held_out_windows": len(held_out),
-        "split": "source_cohort_or_video_sha256",
+        "split": "athlete-disjoint, connected source/session/cohort groups",
     }
-    version = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
-    promoted = bool(args.promote and score >= 0.75)
+    promotion_checks = {
+        "macro_f1_at_least_0_75": macro_f1 >= 0.75,
+        "beats_majority_baseline": macro_f1 > baseline_f1,
+        "every_class_recall_at_least_0_60": all(value >= 0.60 for value in recalls.values()),
+        "expected_calibration_error_at_most_0_15": ece <= 0.15,
+    }
+    promoted = bool(args.promote and all(promotion_checks.values()))
+    output_path = args.output or Path(
+        "models/gestures.json" if args.task == "gesture" else "models/activity.json"
+    )
     model = {
         "schema": "fencecoach-linear-v2",
+        "task": args.task,
         "feature_version": VERSION,
-        "version": version,
+        "version": datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ"),
         "promoted": promoted,
         "features": list(FEATURES),
         "window_ms": args.window_ms,
@@ -168,34 +142,25 @@ def main():
         "mean": scaler.mean_.tolist(),
         "scale": scaler.scale_.tolist(),
         "evaluation": evaluation,
-        "class_windows": dict(counts),
+        "promotion_checks": promotion_checks,
+        "class_windows": dict(Counter(y)),
         "sources": sources,
         "limitations": [
-            "Human labels may contain errors.",
-            "Single source-video split is not a generalization guarantee.",
-            "2D pose classification requires matching capture conditions.",
-            "Scores are not calibrated accuracy.",
+            "Labels are human-reviewed but may still contain errors.",
+            "Readiness thresholds are collection targets, not fencing technique standards.",
+            "Evaluation uses held-out athletes but does not replace prospective testing.",
+            "The logistic model probabilities are not formally calibrated beyond the reported check.",
+            "2D pose classification depends on matching capture conditions.",
         ],
     }
     destination = (
-        args.output if promoted else args.output.with_name(args.output.stem + "-candidate.json")
+        output_path if promoted else output_path.with_name(output_path.stem + "-candidate.json")
     )
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(json.dumps(model, indent=2), encoding="utf-8")
-    print(
-        json.dumps(
-            {
-                "path": str(destination),
-                "promoted": promoted,
-                "held_out_macro_f1": score,
-                "counts": dict(counts),
-            }
-        )
-    )
+    print(json.dumps({"path": str(destination), "promoted": promoted, "evaluation": evaluation}))
     if args.promote and not promoted:
-        raise SystemExit(
-            "Promotion refused: held-out macro F1 below .75. Existing active model preserved."
-        )
+        raise SystemExit(f"Promotion refused: {promotion_checks}. Existing active model preserved.")
 
 
 if __name__ == "__main__":

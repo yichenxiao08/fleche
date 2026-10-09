@@ -1,0 +1,465 @@
+{
+  "schema": "fencecoach-draft-labels-v1",
+  "version": "2026-10-04-rigin-expansion-v1",
+  "review_method": "Assistant inspected 0.5-second full-frame sequences and overview grids; boundaries require continuous-playback human review.",
+  "limitations": [
+    "All labels provisional; zero human-reviewed ground truth.",
+    "Camera pans/oblique viewpoint and background bouts may degrade pose or actor identity.",
+    "Four excerpts share one original match split; no new independent athletes/events claimed.",
+    "Bout phase suggestions are separate from the drill activity-training labels."
+  ],
+  "clips": [
+    {
+      "collection": "footwork-clips",
+      "clip_id": "rigin-meinhardt-2016-t8-95000-103000",
+      "source_sha256": "e066f67a2a61423aba3f3f6e78b5c1f3ba3fc105447fa86aee59fcd6c022410e",
+      "annotations": {
+        "revision": 0,
+        "reviewer": "Codex assistant visual draft; not human reviewed",
+        "reviewer_role": "assistant",
+        "track_description": "Foreground left-side masked fencer (Rigin per scoreboard); provisional identity. Crop excludes much of the right opponent and background piste but may overlap during close actions.",
+        "weapon": "foil",
+        "facing": "right",
+        "camera_motion": "moving",
+        "opponent_visible": true,
+        "crop": {
+          "x": 0.12,
+          "y": 0.32,
+          "width": 0.57,
+          "height": 0.64
+        },
+        "segments": [
+          {
+            "start_ms": 0,
+            "end_ms": 800,
+            "layer": "footwork",
+            "label": "en_garde",
+            "track_id": "foreground-left-rigin",
+            "status": "provisional",
+            "origin": "assistant_visual",
+            "confidence": "medium",
+            "boundary_uncertainty_ms": 400,
+            "note": "Apparent en garde in a 0.5-second frame sequence; verify exact boundaries and athlete identity in continuous playback."
+          },
+          {
+            "start_ms": 900,
+            "end_ms": 1700,
+            "layer": "footwork",
+            "label": "lunge",
+            "track_id": "foreground-left-rigin",
+            "status": "provisional",
+            "origin": "assistant_visual",
+            "confidence": "medium",
+            "boundary_uncertainty_ms": 400,
+            "note": "Apparent lunge in a 0.5-second frame sequence; verify exact boundaries and athlete identity in continuous playback."
+          },
+          {
+            "start_ms": 1800,
+            "end_ms": 2400,
+            "layer": "footwork",
+            "label": "recovery",
+            "track_id": "foreground-left-rigin",
+            "status": "provisional",
+            "origin": "assistant_visual",
+            "confidence": "medium",
+            "boundary_uncertainty_ms": 400,
+            "note": "Apparent recovery in a 0.5-second frame sequence; verify exact boundaries and athlete identity in continuous playback."
+          },
+          {
+            "start_ms": 3200,
+            "end_ms": 3800,
+            "layer": "footwork",
+            "label": "lunge",
+            "track_id": "foreground-left-rigin",
+            "status": "provisional",
+            "origin": "assistant_visual",
+            "confidence": "medium",
+            "boundary_uncertainty_ms": 400,
+            "note": "Apparent lunge in a 0.5-second frame sequence; verify exact boundaries and athlete identity in continuous playback."
+          },
+          {
+            "start_ms": 3900,
+            "end_ms": 4500,
+            "layer": "footwork",
+            "label": "recovery",
+            "track_id": "foreground-left-rigin",
+            "status": "provisional",
+            "origin": "assistant_visual",
+            "confidence": "medium",
+            "boundary_uncertainty_ms": 400,
+            "note": "Apparent recovery in a 0.5-second frame sequence; verify exact boundaries and athlete identity in continuous playback."
+          },
+          {
+            "start_ms": 6000,
+            "end_ms": 8000,
+            "layer": "footwork",
+            "label": "other",
+            "track_id": "foreground-left-rigin",
+            "status": "provisional",
+            "origin": "assistant_visual",
+            "confidence": "medium",
+            "boundary_uncertainty_ms": 400,
+            "note": "Upright walking/reset after halt; negative example for deliberate footwork."
+          }
+        ]
+      },
+      "bout_phase_proposals": {
+        "schema": "fencecoach-provisional-bout-phases-v1",
+        "reviewer_role": "assistant",
+        "status": "provisional",
+        "training_export": false,
+        "source_sha256": "e066f67a2a61423aba3f3f6e78b5c1f3ba3fc105447fa86aee59fcd6c022410e",
+        "source_start_ms": 95000,
+        "note": "Bout live/ready/stoppage context; not automatically equivalent to drill exercise/between_reps phases.",
+        "segments": [
+          {
+            "start_ms": 0,
+            "end_ms": 5600,
+            "phase": "live_exchange",
+            "origin": "assistant_visual",
+            "boundary_uncertainty_ms": 500
+          },
+          {
+            "start_ms": 6000,
+            "end_ms": 8000,
+            "phase": "stoppage",
+            "origin": "assistant_visual",
+            "boundary_uncertainty_ms": 500
+          }
+        ]
+      },
+      "preparation_quality": {
+        "tracked_frames": 63,
+        "sampled_frames": 96,
+        "coverage": 0.656,
+        "reviewed_training_intervals": 0,
+        "visual_overlay_review": "Six sampled overlays stayed on foreground left fencer when landmarks present; this is not exhaustive track validation."
+      }
+    },
+    {
+      "collection": "footwork-clips",
+      "clip_id": "rigin-meinhardt-2016-t8-175000-185000",
+      "source_sha256": "10c523d6193887da1681d9b9cf79a3bb70ef35d93606b29ee2c81af07f745210",
+      "annotations": {
+        "revision": 0,
+        "reviewer": "Codex assistant visual draft; not human reviewed",
+        "reviewer_role": "assistant",
+        "track_description": "Foreground left-side masked fencer (Rigin per scoreboard); provisional identity. Crop excludes much of the right opponent and background piste but may overlap during close actions.",
+        "weapon": "foil",
+        "facing": "right",
+        "camera_motion": "moving",
+        "opponent_visible": true,
+        "crop": {
+          "x": 0.22,
+          "y": 0.33,
+          "width": 0.5,
+          "height": 0.62
+        },
+        "segments": [
+          {
+            "start_ms": 0,
+            "end_ms": 3500,
+            "layer": "footwork",
+            "label": "other",
+            "track_id": "foreground-left-rigin",
+            "status": "provisional",
+            "origin": "assistant_visual",
+            "confidence": "medium",
+            "boundary_uncertainty_ms": 400,
+            "note": "Upright walking/reset after halt; negative example for deliberate footwork."
+          },
+          {
+            "start_ms": 4200,
+            "end_ms": 7000,
+            "layer": "footwork",
+            "label": "en_garde",
+            "track_id": "foreground-left-rigin",
+            "status": "provisional",
+            "origin": "assistant_visual",
+            "confidence": "medium",
+            "boundary_uncertainty_ms": 400,
+            "note": "Apparent en garde in a 0.5-second frame sequence; verify exact boundaries and athlete identity in continuous playback."
+          },
+          {
+            "start_ms": 8000,
+            "end_ms": 10000,
+            "layer": "footwork",
+            "label": "advance",
+            "track_id": "foreground-left-rigin",
+            "status": "provisional",
+            "origin": "assistant_visual",
+            "confidence": "low",
+            "boundary_uncertainty_ms": 400,
+            "note": "Apparent advance in a 0.5-second frame sequence; verify exact boundaries and athlete identity in continuous playback."
+          }
+        ]
+      },
+      "bout_phase_proposals": {
+        "schema": "fencecoach-provisional-bout-phases-v1",
+        "reviewer_role": "assistant",
+        "status": "provisional",
+        "training_export": false,
+        "source_sha256": "10c523d6193887da1681d9b9cf79a3bb70ef35d93606b29ee2c81af07f745210",
+        "source_start_ms": 175000,
+        "note": "Bout live/ready/stoppage context; not automatically equivalent to drill exercise/between_reps phases.",
+        "segments": [
+          {
+            "start_ms": 0,
+            "end_ms": 3800,
+            "phase": "stoppage",
+            "origin": "assistant_visual",
+            "boundary_uncertainty_ms": 500
+          },
+          {
+            "start_ms": 4200,
+            "end_ms": 7500,
+            "phase": "ready",
+            "origin": "assistant_visual",
+            "boundary_uncertainty_ms": 500
+          },
+          {
+            "start_ms": 8000,
+            "end_ms": 10000,
+            "phase": "live_exchange",
+            "origin": "assistant_visual",
+            "boundary_uncertainty_ms": 500
+          }
+        ]
+      },
+      "preparation_quality": {
+        "tracked_frames": 83,
+        "sampled_frames": 120,
+        "coverage": 0.692,
+        "reviewed_training_intervals": 0,
+        "visual_overlay_review": "Six sampled overlays stayed on foreground left fencer when landmarks present; this is not exhaustive track validation."
+      }
+    },
+    {
+      "collection": "footwork-clips",
+      "clip_id": "rigin-meinhardt-2016-t8-416000-424000",
+      "source_sha256": "145031f9554a817d31d609418d5ad51131447acdd83995ec05dcfa898fea8244",
+      "annotations": {
+        "revision": 0,
+        "reviewer": "Codex assistant visual draft; not human reviewed",
+        "reviewer_role": "assistant",
+        "track_description": "Foreground left-side masked fencer (Rigin per scoreboard); provisional identity. Crop excludes much of the right opponent and background piste but may overlap during close actions.",
+        "weapon": "foil",
+        "facing": "right",
+        "camera_motion": "moving",
+        "opponent_visible": true,
+        "crop": {
+          "x": 0.22,
+          "y": 0.32,
+          "width": 0.45,
+          "height": 0.64
+        },
+        "segments": [
+          {
+            "start_ms": 700,
+            "end_ms": 1700,
+            "layer": "footwork",
+            "label": "lunge",
+            "track_id": "foreground-left-rigin",
+            "status": "provisional",
+            "origin": "assistant_visual",
+            "confidence": "medium",
+            "boundary_uncertainty_ms": 400,
+            "note": "Apparent lunge in a 0.5-second frame sequence; verify exact boundaries and athlete identity in continuous playback."
+          },
+          {
+            "start_ms": 2000,
+            "end_ms": 3700,
+            "layer": "footwork",
+            "label": "other",
+            "track_id": "foreground-left-rigin",
+            "status": "provisional",
+            "origin": "assistant_visual",
+            "confidence": "medium",
+            "boundary_uncertainty_ms": 400,
+            "note": "Upright walking/reset after halt; negative example for deliberate footwork."
+          },
+          {
+            "start_ms": 4200,
+            "end_ms": 6200,
+            "layer": "footwork",
+            "label": "en_garde",
+            "track_id": "foreground-left-rigin",
+            "status": "provisional",
+            "origin": "assistant_visual",
+            "confidence": "medium",
+            "boundary_uncertainty_ms": 400,
+            "note": "Apparent en garde in a 0.5-second frame sequence; verify exact boundaries and athlete identity in continuous playback."
+          },
+          {
+            "start_ms": 7000,
+            "end_ms": 8000,
+            "layer": "footwork",
+            "label": "lunge",
+            "track_id": "foreground-left-rigin",
+            "status": "provisional",
+            "origin": "assistant_visual",
+            "confidence": "medium",
+            "boundary_uncertainty_ms": 400,
+            "note": "Apparent lunge in a 0.5-second frame sequence; verify exact boundaries and athlete identity in continuous playback."
+          }
+        ]
+      },
+      "bout_phase_proposals": {
+        "schema": "fencecoach-provisional-bout-phases-v1",
+        "reviewer_role": "assistant",
+        "status": "provisional",
+        "training_export": false,
+        "source_sha256": "145031f9554a817d31d609418d5ad51131447acdd83995ec05dcfa898fea8244",
+        "source_start_ms": 416000,
+        "note": "Bout live/ready/stoppage context; not automatically equivalent to drill exercise/between_reps phases.",
+        "segments": [
+          {
+            "start_ms": 0,
+            "end_ms": 1800,
+            "phase": "live_exchange",
+            "origin": "assistant_visual",
+            "boundary_uncertainty_ms": 500
+          },
+          {
+            "start_ms": 2000,
+            "end_ms": 3700,
+            "phase": "stoppage",
+            "origin": "assistant_visual",
+            "boundary_uncertainty_ms": 500
+          },
+          {
+            "start_ms": 4200,
+            "end_ms": 6200,
+            "phase": "ready",
+            "origin": "assistant_visual",
+            "boundary_uncertainty_ms": 500
+          },
+          {
+            "start_ms": 6800,
+            "end_ms": 8000,
+            "phase": "live_exchange",
+            "origin": "assistant_visual",
+            "boundary_uncertainty_ms": 500
+          }
+        ]
+      },
+      "preparation_quality": {
+        "tracked_frames": 92,
+        "sampled_frames": 96,
+        "coverage": 0.958,
+        "reviewed_training_intervals": 0,
+        "visual_overlay_review": "Six sampled overlays stayed on foreground left fencer when landmarks present; this is not exhaustive track validation."
+      }
+    },
+    {
+      "collection": "footwork-clips",
+      "clip_id": "rigin-meinhardt-2016-t8-576000-584000",
+      "source_sha256": "c464eb9e564d756519e3417a7ccf1bdcb635b39bb993f7fbbce09538ded1fe19",
+      "annotations": {
+        "revision": 0,
+        "reviewer": "Codex assistant visual draft; not human reviewed",
+        "reviewer_role": "assistant",
+        "track_description": "Foreground left-side masked fencer (Rigin per scoreboard); provisional identity. Crop excludes much of the right opponent and background piste but may overlap during close actions.",
+        "weapon": "foil",
+        "facing": "right",
+        "camera_motion": "moving",
+        "opponent_visible": true,
+        "crop": {
+          "x": 0.08,
+          "y": 0.32,
+          "width": 0.56,
+          "height": 0.64
+        },
+        "segments": [
+          {
+            "start_ms": 0,
+            "end_ms": 2000,
+            "layer": "footwork",
+            "label": "other",
+            "track_id": "foreground-left-rigin",
+            "status": "provisional",
+            "origin": "assistant_visual",
+            "confidence": "medium",
+            "boundary_uncertainty_ms": 400,
+            "note": "Upright walking/reset after halt; negative example for deliberate footwork."
+          },
+          {
+            "start_ms": 2500,
+            "end_ms": 4800,
+            "layer": "footwork",
+            "label": "en_garde",
+            "track_id": "foreground-left-rigin",
+            "status": "provisional",
+            "origin": "assistant_visual",
+            "confidence": "medium",
+            "boundary_uncertainty_ms": 400,
+            "note": "Apparent en garde in a 0.5-second frame sequence; verify exact boundaries and athlete identity in continuous playback."
+          },
+          {
+            "start_ms": 5200,
+            "end_ms": 5800,
+            "layer": "footwork",
+            "label": "lunge",
+            "track_id": "foreground-left-rigin",
+            "status": "provisional",
+            "origin": "assistant_visual",
+            "confidence": "medium",
+            "boundary_uncertainty_ms": 400,
+            "note": "Apparent lunge in a 0.5-second frame sequence; verify exact boundaries and athlete identity in continuous playback."
+          },
+          {
+            "start_ms": 6000,
+            "end_ms": 7200,
+            "layer": "footwork",
+            "label": "recovery",
+            "track_id": "foreground-left-rigin",
+            "status": "provisional",
+            "origin": "assistant_visual",
+            "confidence": "medium",
+            "boundary_uncertainty_ms": 400,
+            "note": "Apparent recovery in a 0.5-second frame sequence; verify exact boundaries and athlete identity in continuous playback."
+          }
+        ]
+      },
+      "bout_phase_proposals": {
+        "schema": "fencecoach-provisional-bout-phases-v1",
+        "reviewer_role": "assistant",
+        "status": "provisional",
+        "training_export": false,
+        "source_sha256": "c464eb9e564d756519e3417a7ccf1bdcb635b39bb993f7fbbce09538ded1fe19",
+        "source_start_ms": 576000,
+        "note": "Bout live/ready/stoppage context; not automatically equivalent to drill exercise/between_reps phases.",
+        "segments": [
+          {
+            "start_ms": 0,
+            "end_ms": 2300,
+            "phase": "stoppage",
+            "origin": "assistant_visual",
+            "boundary_uncertainty_ms": 500
+          },
+          {
+            "start_ms": 2500,
+            "end_ms": 4800,
+            "phase": "ready",
+            "origin": "assistant_visual",
+            "boundary_uncertainty_ms": 500
+          },
+          {
+            "start_ms": 5000,
+            "end_ms": 8000,
+            "phase": "live_exchange",
+            "origin": "assistant_visual",
+            "boundary_uncertainty_ms": 500
+          }
+        ]
+      },
+      "preparation_quality": {
+        "tracked_frames": 87,
+        "sampled_frames": 96,
+        "coverage": 0.906,
+        "reviewed_training_intervals": 0,
+        "visual_overlay_review": "Six sampled overlays stayed on foreground left fencer when landmarks present; this is not exhaustive track validation."
+      }
+    }
+  ]
+}

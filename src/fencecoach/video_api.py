@@ -11,6 +11,7 @@ from pydantic import ValidationError
 from starlette.concurrency import run_in_threadpool
 
 from fencecoach.gestures import Annotations
+from fencecoach.movement_timeline import build_movement_timeline
 from fencecoach.storage import ensure, publish_source
 from fencecoach.video_jobs import MAX_BYTES, AcceptReview, CaptureProfile, Crop, availability
 
@@ -53,6 +54,10 @@ def video_router(jobs, settings):
             profile = CaptureProfile.model_validate_json(capture_profile)
         except ValidationError as exc:
             raise HTTPException(422, "Choose a valid crop inside the frame.") from exc
+        if profile.scene_type == "bout" and profile.target_side == "unknown" and roi == Crop():
+            raise HTTPException(
+                422, "Choose the starting side of the fencer to analyze, or crop to that fencer."
+            )
         job = None
         try:
             job = jobs.create(title.strip() or "Lunge practice", skill_level, roi, profile=profile)
@@ -135,9 +140,17 @@ def video_router(jobs, settings):
         job = get_job(job_id)
         if job["status"] not in {"review_ready", "completed"}:
             raise HTTPException(409, "Analysis is not ready.")
-        return json.loads(
+        payload = json.loads(
             ensure(jobs.directory / job_id, job, "result.json").read_text(encoding="utf-8")
         )
+        # Older analyses can expose their existing movement evidence without
+        # rerunning pose inference or changing the stored review/annotations.
+        if "movement_timeline" not in payload:
+            payload["movement_timeline"] = build_movement_timeline(payload)
+        from fencecoach.quality import assess_quality
+
+        payload["quality_gate"] = payload.get("quality_gate") or assess_quality(payload)
+        return payload
 
     @router.get("/{job_id}/annotations")
     def annotations(job_id: str):
@@ -148,17 +161,37 @@ def video_router(jobs, settings):
         return (
             json.loads(path.read_text(encoding="utf-8"))
             if path.is_file()
-            else {"labels": [], "reviewer": "athlete"}
+            else {
+                "labels": [],
+                "activity_labels": [],
+                "reviewer": "athlete",
+                "domain_verified": False,
+            }
         )
+
+    @router.get("/{job_id}/evidence")
+    def evidence(job_id: str):
+        from fencecoach.evidence_cache import prepare_evidence
+
+        analysis = result(job_id)
+        path = jobs.directory / job_id / "evidence.json"
+        if path.is_file():
+            return json.loads(path.read_text(encoding="utf-8"))
+        return prepare_evidence(analysis)
 
     @router.put("/{job_id}/annotations")
     def save_annotations(job_id: str, data: Annotations):
         analysis = result(job_id)
         ordered = sorted(data.labels, key=lambda label: label.start_ms)
+        activity_labels = sorted(data.activity_labels, key=lambda label: label.start_ms)
         if any(label.end_ms > analysis["duration_ms"] for label in ordered):
             raise HTTPException(422, "A label extends past the clip.")
         if any(a.end_ms > b.start_ms for a, b in zip(ordered, ordered[1:])):
             raise HTTPException(422, "Gesture labels cannot overlap.")
+        if any(label.end_ms > analysis["duration_ms"] for label in activity_labels):
+            raise HTTPException(422, "A phase label extends past the clip.")
+        if any(a.end_ms > b.start_ms for a, b in zip(activity_labels, activity_labels[1:])):
+            raise HTTPException(422, "Activity phase labels cannot overlap.")
         payload = data.model_dump()
         payload.update(
             job_id=job_id,
@@ -198,6 +231,17 @@ def video_router(jobs, settings):
             media_type="video/mp4",
             headers={"Cache-Control": "private, no-cache"},
         )
+
+    @router.get("/{job_id}/contact-sheet")
+    def contact_sheet(job_id: str):
+        get_job(job_id)
+        from fencecoach.contact_sheets import generate_contact_sheet
+
+        directory = jobs.directory / job_id
+        path = directory / "contact-sheet.jpg"
+        if not path.exists():
+            generate_contact_sheet(result(job_id), directory)
+        return FileResponse(path, media_type="image/jpeg")
 
     @router.get("/{job_id}/poster")
     def poster(job_id: str):

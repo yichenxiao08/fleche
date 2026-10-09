@@ -1,0 +1,446 @@
+{
+  "$defs": {
+    "Crop": {
+      "properties": {
+        "x": {
+          "default": 0,
+          "exclusiveMaximum": 1,
+          "minimum": 0,
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "default": 0,
+          "exclusiveMaximum": 1,
+          "minimum": 0,
+          "title": "Y",
+          "type": "number"
+        },
+        "width": {
+          "default": 1,
+          "exclusiveMinimum": 0.1,
+          "maximum": 1,
+          "title": "Width",
+          "type": "number"
+        },
+        "height": {
+          "default": 1,
+          "exclusiveMinimum": 0.1,
+          "maximum": 1,
+          "title": "Height",
+          "type": "number"
+        }
+      },
+      "title": "Crop",
+      "type": "object"
+    },
+    "DatasetEvent": {
+      "properties": {
+        "id": {
+          "default": "",
+          "maxLength": 100,
+          "title": "Id",
+          "type": "string"
+        },
+        "track_id": {
+          "maxLength": 60,
+          "minLength": 1,
+          "title": "Track Id",
+          "type": "string"
+        },
+        "status": {
+          "default": "provisional",
+          "enum": [
+            "provisional",
+            "reviewed",
+            "rejected"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "origin": {
+          "default": "human",
+          "enum": [
+            "assistant_visual",
+            "human",
+            "published_dataset",
+            "heuristic",
+            "model"
+          ],
+          "title": "Origin",
+          "type": "string"
+        },
+        "suggested_by": {
+          "default": "",
+          "maxLength": 100,
+          "title": "Suggested By",
+          "type": "string"
+        },
+        "reviewed_by": {
+          "default": "",
+          "maxLength": 100,
+          "title": "Reviewed By",
+          "type": "string"
+        },
+        "reviewed_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewed At"
+        },
+        "confidence": {
+          "default": "medium",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "title": "Confidence",
+          "type": "string"
+        },
+        "certainty": {
+          "default": "unsure",
+          "enum": [
+            "confident",
+            "unsure"
+          ],
+          "title": "Certainty",
+          "type": "string"
+        },
+        "exclusion_flags": {
+          "items": {
+            "enum": [
+              "occluded",
+              "out_of_frame",
+              "ambiguous_athlete",
+              "camera_moving",
+              "non_modern",
+              "unusable"
+            ],
+            "type": "string"
+          },
+          "maxItems": 6,
+          "title": "Exclusion Flags",
+          "type": "array"
+        },
+        "boundary_uncertainty_ms": {
+          "default": 250,
+          "maximum": 5000,
+          "minimum": 0,
+          "title": "Boundary Uncertainty Ms",
+          "type": "integer"
+        },
+        "suggestion_disagreement": {
+          "default": false,
+          "title": "Suggestion Disagreement",
+          "type": "boolean"
+        },
+        "note": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Note",
+          "type": "string"
+        },
+        "time_ms": {
+          "minimum": 0,
+          "title": "Time Ms",
+          "type": "integer"
+        },
+        "kind": {
+          "enum": [
+            "arm_motion_onset",
+            "foot_launch",
+            "landing",
+            "stance_peak",
+            "recovery_complete"
+          ],
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "track_id",
+        "time_ms",
+        "kind"
+      ],
+      "title": "DatasetEvent",
+      "type": "object"
+    },
+    "DatasetSegment": {
+      "properties": {
+        "id": {
+          "default": "",
+          "maxLength": 100,
+          "title": "Id",
+          "type": "string"
+        },
+        "track_id": {
+          "maxLength": 60,
+          "minLength": 1,
+          "title": "Track Id",
+          "type": "string"
+        },
+        "status": {
+          "default": "provisional",
+          "enum": [
+            "provisional",
+            "reviewed",
+            "rejected"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "origin": {
+          "default": "human",
+          "enum": [
+            "assistant_visual",
+            "human",
+            "published_dataset",
+            "heuristic",
+            "model"
+          ],
+          "title": "Origin",
+          "type": "string"
+        },
+        "suggested_by": {
+          "default": "",
+          "maxLength": 100,
+          "title": "Suggested By",
+          "type": "string"
+        },
+        "reviewed_by": {
+          "default": "",
+          "maxLength": 100,
+          "title": "Reviewed By",
+          "type": "string"
+        },
+        "reviewed_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewed At"
+        },
+        "confidence": {
+          "default": "medium",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "title": "Confidence",
+          "type": "string"
+        },
+        "certainty": {
+          "default": "unsure",
+          "enum": [
+            "confident",
+            "unsure"
+          ],
+          "title": "Certainty",
+          "type": "string"
+        },
+        "exclusion_flags": {
+          "items": {
+            "enum": [
+              "occluded",
+              "out_of_frame",
+              "ambiguous_athlete",
+              "camera_moving",
+              "non_modern",
+              "unusable"
+            ],
+            "type": "string"
+          },
+          "maxItems": 6,
+          "title": "Exclusion Flags",
+          "type": "array"
+        },
+        "boundary_uncertainty_ms": {
+          "default": 250,
+          "maximum": 5000,
+          "minimum": 0,
+          "title": "Boundary Uncertainty Ms",
+          "type": "integer"
+        },
+        "suggestion_disagreement": {
+          "default": false,
+          "title": "Suggestion Disagreement",
+          "type": "boolean"
+        },
+        "note": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Note",
+          "type": "string"
+        },
+        "start_ms": {
+          "minimum": 0,
+          "title": "Start Ms",
+          "type": "integer"
+        },
+        "end_ms": {
+          "exclusiveMinimum": 0,
+          "title": "End Ms",
+          "type": "integer"
+        },
+        "layer": {
+          "enum": [
+            "footwork",
+            "activity",
+            "bladework",
+            "tactics"
+          ],
+          "title": "Layer",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "track_id",
+        "start_ms",
+        "end_ms",
+        "layer",
+        "label"
+      ],
+      "title": "DatasetSegment",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "schema_version": {
+      "default": "legacy_v0",
+      "enum": [
+        "legacy_v0",
+        "label_schema_v1"
+      ],
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "revision": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "reviewer": {
+      "default": "unreviewed",
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "Reviewer",
+      "type": "string"
+    },
+    "reviewer_role": {
+      "default": "athlete",
+      "enum": [
+        "assistant",
+        "athlete",
+        "coach"
+      ],
+      "title": "Reviewer Role",
+      "type": "string"
+    },
+    "primary_track_id": {
+      "default": "primary",
+      "maxLength": 60,
+      "minLength": 1,
+      "title": "Primary Track Id",
+      "type": "string"
+    },
+    "athlete_id": {
+      "default": "",
+      "maxLength": 100,
+      "title": "Athlete Id",
+      "type": "string"
+    },
+    "recording_session_id": {
+      "default": "",
+      "maxLength": 100,
+      "title": "Recording Session Id",
+      "type": "string"
+    },
+    "camera_setup_id": {
+      "default": "",
+      "maxLength": 100,
+      "title": "Camera Setup Id",
+      "type": "string"
+    },
+    "track_description": {
+      "default": "",
+      "maxLength": 500,
+      "title": "Track Description",
+      "type": "string"
+    },
+    "weapon": {
+      "default": "unknown",
+      "enum": [
+        "unknown",
+        "foil",
+        "epee",
+        "sabre"
+      ],
+      "title": "Weapon",
+      "type": "string"
+    },
+    "facing": {
+      "default": "unknown",
+      "enum": [
+        "unknown",
+        "left",
+        "right"
+      ],
+      "title": "Facing",
+      "type": "string"
+    },
+    "camera_motion": {
+      "default": "unknown",
+      "enum": [
+        "unknown",
+        "fixed",
+        "moving"
+      ],
+      "title": "Camera Motion",
+      "type": "string"
+    },
+    "opponent_visible": {
+      "default": false,
+      "title": "Opponent Visible",
+      "type": "boolean"
+    },
+    "crop": {
+      "$ref": "#/$defs/Crop"
+    },
+    "segments": {
+      "items": {
+        "$ref": "#/$defs/DatasetSegment"
+      },
+      "maxItems": 1000,
+      "title": "Segments",
+      "type": "array"
+    },
+    "events": {
+      "items": {
+        "$ref": "#/$defs/DatasetEvent"
+      },
+      "maxItems": 2000,
+      "title": "Events",
+      "type": "array"
+    }
+  },
+  "title": "FenceCoach label_schema_v1 with legacy import support",
+  "type": "object"
+}

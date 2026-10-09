@@ -501,7 +501,7 @@ document.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (state.generating || !state.session) return;
     const question = $("question").value.trim();
-    if (question.length < 3) return;
+    if (!question) return;
     notice();
     state.question = question;
     const pending = generateReport(question);
@@ -509,7 +509,7 @@ document.addEventListener("submit", async (event) => {
     try {
       await pending;
       render({ keepScroll: true });
-      toast("Your coaching review has been saved.");
+      $("question")?.focus();
     } catch (error) {
       state.question = question;
       render({ keepScroll: true });

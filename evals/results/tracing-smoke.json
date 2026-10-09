@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "trace_id": "938fcb1be28ea9d41b152db5c79713c1",
+  "model": "qwen2.5:1.5b",
+  "latency_ms": 2392.23,
+  "input_tokens": 1043,
+  "output_tokens": 83,
+  "token_usage_available": true,
+  "cost_usd": 0.0,
+  "spans": [
+    "get_session_metrics",
+    "search_coaching_library",
+    "model_response",
+    "coaching_turn"
+  ],
+  "input": "Synthetic sample measurements; live local model, tools, and actual Phoenix collector."
+}

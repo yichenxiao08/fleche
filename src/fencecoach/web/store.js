@@ -24,8 +24,8 @@ export const state = {
   trendKey: "",
   libraryFilter: "all",
   mode: "local",
-  question:
-    "Review my recovery measurements and suggest one focus for next practice.",
+  question: "",
+  partialReply: "",
   preferences: read("fencecoach.preferences", {
     goal: 3,
     skill: "beginner",
@@ -112,8 +112,7 @@ export async function selectSession(id) {
     state.metricIndex = 0;
     state.groupIndex = 0;
     restoreRunFocus();
-    state.question =
-      "Review my supplied measurements and suggest one focus for next practice.";
+    state.question = "";
     try {
       localStorage.setItem("fencecoach.session", id);
     } catch {
@@ -159,17 +158,15 @@ export async function importSession(data) {
 export async function generateReport(question) {
   if (!state.session || state.generating) return;
   const id = state.session.session_id;
-  const focus = groups(state.session.metrics)[state.groupIndex]?.[
-    state.metricIndex
-  ];
   state.generating = true;
+  state.partialReply = "";
   try {
     const job = await api(`${sessionPath(id)}/coaching-jobs`, {
       method: "POST",
       body: JSON.stringify({
         question,
         mode: state.mode,
-        focus_metric_id: focus?.metric_id,
+        focus_metric_id: null,
       }),
     });
     state.coachingJob = job;
@@ -195,6 +192,12 @@ export async function waitForCoaching(id) {
     state.coachingJob = job;
     const stage = document.getElementById("coaching-stage");
     if (stage) stage.textContent = job.stage;
+    state.partialReply = job.partial_reply || "";
+    const partial = document.getElementById("coaching-partial");
+    if (partial) {
+      partial.textContent = state.partialReply;
+      partial.closest(".chat-message").hidden = !state.partialReply;
+    }
     if (job.status === "completed") {
       try {
         localStorage.removeItem("fencecoach.coachingJob");
@@ -207,7 +210,7 @@ export async function waitForCoaching(id) {
       } catch {}
       throw new Error(job.error || "Coaching request failed. Try again.");
     }
-    await new Promise((resolve) => setTimeout(resolve, 1200));
+    await new Promise((resolve) => setTimeout(resolve, 300));
   }
   throw new Error(
     "Your coaching request is still running. Reload to reconnect to its progress.",

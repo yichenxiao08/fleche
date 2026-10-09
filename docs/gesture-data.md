@@ -2,24 +2,28 @@
 
 ## Actual starter collection
 
-On 2026-10-04 the raw archive contains **35 unique originals**, approximately
-25 minutes 54 seconds. This is **not** the usable modern fencing training duration.
-The checksum-bound domain registry approves **30 modern originals / 7 minutes 50 seconds**
-and **one 5.7-second modern foil excerpt**. Eight mixed or historical recordings/excerpts
-are excluded. Unlisted future downloads default to excluded.
+On 2026-10-04 the raw archive contains **45 unique original videos**, approximately
+49 minutes 40 seconds. This is **not** the usable modern fencing training duration.
+The checksum-bound domain registry approves **40 modern originals / 31 minutes 35 seconds**
+and seven derived review excerpts (the original 5.7, 30 and 7.5 second excerpts plus four new bout clips totaling 34 seconds). Eight mixed or
+historical recordings/excerpts are excluded. Unlisted future downloads default to excluded.
 
 - **Modern drills:** 23 MIT OCW sport fencing videos, CC BY-NC-SA 3.0. Unarmed fencing
   footwork drills are relevant; these are noncommercial development sources.
-- **Electric competition:** seven modern Dourdan sabre bout recordings, six CC0 and one
-  CC BY-SA 3.0. Resets, walking and breaks are not advance/retreat ground truth.
+- **Electric competition:** 12 Dourdan sabre video files from several bouts at the same 2014 event
+  (11 CC0, one CC BY-SA 3.0); the five new Dourdan files are segments from the same men's final.
+  They all stay in one event split group. Also collected: one complete 7:48 Moscow sabre bout
+  (CC BY 3.0), one 49-second 2010 European foil exchange (CC BY-SA 3.0), and two very short 2007
+  Amarillo Open foil/épée excerpts (CC BY-SA 2.5, 320×240). Resets, walking and breaks are not
+  advance/retreat ground truth.
 - **Mixed instruction:** five EVD originals are archived but excluded as complete training
   sources. `evd-esgrima-004` is explicitly historical, including ancient depictions, and
   is excluded from positive and negative training examples. Only the separately inspected
   37.0–42.7 second modern foil excerpt from EVD 001 is eligible for label review.
-- **Labels:** 64 assistant draft intervals across 16 clips, including six new footwork drafts.
+- **Labels:** 83 assistant draft intervals, including 17 new foreground-athlete bout drafts.
   All remain provisional. Group footage needs athlete identity and crop review. There are
   **zero approved ground-truth labels**, no verified bounce intervals, and no trained model.
-- **Pose preparation:** 12 clips prepared; the modern foil excerpt has 67/69 tracked frames.
+- **Pose preparation:** 18 clips prepared; the modern foil excerpt has 67/69 tracked frames.
   Whole-frame group footage often loses identity or visibility; raw clip counts do not imply
   usable single-athlete training examples.
 
@@ -51,14 +55,43 @@ approved modern originals, derived excerpts and excluded material. Media stays i
 | Source | Useful coverage | Current decision |
 |---|---|---|
 | [MIT OCW](https://ocw.mit.edu/courses/pe-740-fencing-spring-2007/pages/video/) | Basic footwork and staged thrust/parry drills | Collected; noncommercial restriction retained |
-| [Commons](https://commons.wikimedia.org/wiki/Category:Videos_of_fencing) | Competition and instructional recordings | Seven modern bouts approved; historical/mixed instruction excluded; collection paused at rate limit |
+| [Commons](https://commons.wikimedia.org/wiki/Category:Videos_of_fencing) | Continuous modern bouts and competition exchanges | 21 licensed video files collected; 16 Commons sources are approved for review. The five Dourdan additions share one event group; Moscow provides one separate full bout. Mixed/historical instruction stays excluded. |
 | [FFD](https://galaxy.agh.edu.pl/~fmal/ffd/) | Advances, retreats and four lunge dynamics | Publisher supplies depth/skeleton/IMU, no RGB; linked Drive folder currently requires access; reuse license unverified |
 | [MFAD](https://github.com/EMRGSZU/MFAD) | Lunge, advance-lunge and flèche skeleton sequences | Research lead; no explicit reuse license verified; requires skeleton adapter |
 | [FACTS](https://arxiv.org/abs/2412.16454) | Attack, counterattack, riposte and remise with actor sides | Promising tactical corpus; download API returned 403; video license unverified |
 | [FD-7 paper](https://arxiv.org/abs/2404.19383) | Fine-grained fencing actions | No working official corpus download established |
 | [Fencingly card](https://huggingface.co/datasets/EXCALORIO/fencingly-datos) | Generated pose/motion events | Not imported as ground truth; rights and annotation quality need clarification |
 
-There are currently **no verified flèche or counterattack intervals** in our downloaded/annotated
+### YouTube CC BY candidates: one user-supplied source and four leads
+
+Five video pages displayed Creative Commons Attribution when checked on 2026-10-04. I initially inspected one paused frame from each page to assess camera framing. The user later supplied a local MP4 matching the Rigin–Meinhardt video; the full source is indexed with RUSFENCING-TV attribution. A 7.5-second live excerpt at original 05:00–05:07.5 was prepared at 12 fps: 82 of 90 sampled frames had pose features, one was ambiguous and one had no pose. Two assistant visual suggestions are provisional and none is human-reviewed. A wider 30-second crop test tracked only 69 of 360 samples (19%) after a camera reframe, so it remains available for playback but should not be treated as useful pose training evidence.
+
+| Video | Sampled live-footage view | Dataset fit |
+|---|---|---|
+| [Rigin vs. Meinhardt, St Petersburg 2016 foil T8](https://www.youtube.com/watch?v=oifnxIJA8vA) | 05:00; wide, nearly side-on, both fencers and most of the strip visible | Best of these samples for footwork pose tracking |
+| [Zherebchenko vs. Baldini, St Petersburg 2016 foil semifinal](https://www.youtube.com/watch?v=P9dO5H8MCbw) | 07:46; full piste from an elevated oblique angle; 10:00 is a tight stoppage close-up | Useful only in wide live stretches; framing changes |
+| [Napoli 2019 women's foil semis/final](https://www.youtube.com/watch?v=ntVpCDRWsbg) | 07:15; closer three-quarter highlight shot with event graphics | Lower-body area partly obscured; review cuts before pose extraction |
+| [Napoli 2019 men's sabre semis/final](https://www.youtube.com/watch?v=wFzglS8K06s) | 08:20; tight three-quarter crop | Feet and full piste are largely out of frame; poor for footwork labels |
+| [Napoli 2019 men's epee team final](https://www.youtube.com/watch?v=2t-SjeVURf4) | 10:00; active exchange from a three-quarter angle, graphic over the left side | Repeated live exchanges, but team relays change fencer identity and overlays/cuts need review |
+
+The four other videos remain source leads rather than dataset entries. The Rigin–Meinhardt master recording is a user-provided local file. Its full multi-person scan contains 8,577 timestamped samples at approximately 12 fps, with 13,521 pose detections and 5,535 frames containing multiple people. Detection indices are local to each frame; this scan has no stable athlete identities or ground-truth labels. Short crops use the bounded single-athlete pipeline. Source eligibility records domain relevance, not label accuracy. Keep all assistant suggestions provisional until a person reviews them. For other YouTube titles, obtain files from the rights holder or another explicitly permitted source and retain the source attribution.
+
+### Additional Rigin–Meinhardt bout breakdown
+
+Four foreground-left athlete excerpts were inspected using 0.5-second timestamped frame sequences, then prepared at 12 fps. Six sampled overlay frames per excerpt were checked against the foreground athlete. Missing frames and close-action occlusion remain; coverage is a visibility measure, not recognition accuracy.
+
+| Original source interval | Duration | Pose-feature frames | Coverage |
+|---|---:|---:|---:|
+| 01:35–01:43 | 8 s | 63/96 | 65.6% |
+| 02:55–03:05 | 10 s | 83/120 | 69.2% |
+| 06:56–07:04 | 8 s | 92/96 | 95.8% |
+| 09:36–09:44 | 8 s | 87/96 | 90.6% |
+
+These add 17 provisional movement intervals: five apparent lunges, three recoveries, four en-garde intervals, one advance sequence and four walking/reset negatives. All carry `assistant_visual` provenance and boundary uncertainty; none is human-reviewed or exported as a training label. The reproducible draft bundle is `datasets/rigin-meinhardt-expansion-annotations.json`. The original source offsets, SHA-256 checksums, attribution and single-match split group are retained. Camera motion is marked moving, so absolute travel is masked in the feature extractor. Oblique views, background fencing and actor identity require further review.
+
+The bundle also preserves 12 provisional **bout-context** intervals (live exchange, ready and stoppage). They are deliberately not exported as drill activity labels: a competition halt is not automatically a between-repetition interval. No tactical outcome, bounce count or technique-quality label is inferred. Prepared media and `pose-check-grid.jpg` files live beneath each excerpt in `data/training/footwork-clips/` and remain outside Git.
+
+There are currently **no verified flèche or counterattack intervals** in our collected/annotated
 set. An announced dataset or publicly viewable YouTube video is not automatically cleared training
 data. No messages have been sent to authors or video creators.
 
@@ -95,8 +128,86 @@ data. No messages have been sent to authors or video creators.
 
 ## Local workflow
 
+### Versioned human review
+
+The [version 1 labeling guide](labeling-guide-v1.md) defines interval boundaries,
+event markers, uncertainty, exclusion and stable athlete IDs. The schema is stored
+in `datasets/label-schema-v1.json`; the Python definition is `dataset_labels.py`.
+The dataset screen supports keyboard review (N/P, A/R, C), pose-suggestion import,
+independent event markers, interval exclusions, reviewer attribution on each label,
+and progress by class, athlete, recording session and camera setup. Review order
+prioritizes recorded model/pose disagreements, fleche and underrepresented classes.
+
+Imported legacy annotations retain stable IDs and their suggestion source. Their
+certainty starts as unsure; human review must explicitly confirm it. No labels were
+automatically promoted during this migration. Reviewed unsure/excluded labels stay
+out of training exports. Only the primary athlete track is exported against the
+prepared pose crop. Exports retain the annotation IDs and athlete/session metadata.
+The trainer skips stale exports and groups known athlete IDs together with related
+source footage. New version 1 exports require an athlete ID for training.
+
+The dataset page's strict readiness report and `scripts/train_gestures.py` share the
+same gate: 150 usable reviewed windows per common class (50 for fleche), six training
+athletes and two held-out athletes, minimum video/session/camera diversity, independent
+source groups, and an athlete-disjoint split. These project-specific collection targets
+are not fencing technique standards or proof of model accuracy. The command writes a
+readiness report and stops before fitting if any gate is blocked. Promotion separately
+checks held-out macro F1, per-class recall, a majority-class baseline and a confidence
+calibration estimate. Independent second review and prospective phone-video evaluation
+remain to be done.
+
+### Movement timeline integration
+
+An external action-recognition research baseline was trained from the published
+[MFAD skeleton dataset](https://github.com/EMRGSZU/MFAD) at pinned commit
+`153c5a630230805a1d469bd9fb46cde2fc128eda`. All 928 author-labeled sequences
+loaded; 27 participant IDs were kept separate across a prespecified train/held-out
+split. The three classes were whole-action lunge, one-step forward lunge and the
+repository's `a3` class, which the README calls fleche in one place and jumps in
+another. On 346 sequences from nine held-out participant IDs, the research model
+reached 87.3% accuracy and 0.873 macro F1 (majority-class baseline 32.9%).
+The source file hashes, split assignments, class report and confusion matrix are
+recorded in `data/research/mfad/training-report.json`; the reproducible trainer is
+`scripts/train_mfad_research.py`. No explicit license file was found, so source
+sequences stay outside Git and redistribution remains unverified.
+
+This candidate uses depth-camera 18-joint skeletons and whole-action labels. It is
+not compatible with the app's MediaPipe 33-joint phone-video classifier and does not
+identify within-action phase boundaries. It remains unpromoted. The existing
+phone-video training path still has zero eligible reviewed movement windows; seven
+provisional and eleven excluded/unreviewed-domain annotation files were skipped.
+The next model step is source-verified pose conversion or matched video training,
+followed by independent cross-camera evaluation and event-boundary annotation.
+
+`movement_timeline.py` connects gesture inference to video review. Overlapping model
+windows become contiguous movement intervals only with at least two-thirds local
+label agreement; uncertain windows count against agreement. Intervals shorter than
+200 ms are withheld. These are development settings, not validated accuracy gates.
+Uncovered and conflicting spans are not bridged.
+
+Existing complete stance cycles supply proposed expansion and return phases. Phase
+intervals require continuous usable tracking; a return completed through a tracking
+gap is not displayed as an observed recovery phase. The stance maximum is not a
+heel-strike, launch or touch detector. Model/pose movement disagreements are exposed
+for review. Translation proposals are restricted to fixed-camera detected practice
+sets and retain heuristic provenance.
+
+The review screen provides seek buttons for movements and phases. Older saved
+analyses receive the timeline on read using their existing evidence; pose inference
+and saved annotations are unchanged. New analyses store the timeline in their result.
+No generated timeline entries are exported as reviewed training labels.
+
+This integration does not train or promote a model. Next recognition milestones are
+reviewed class-balanced movement intervals, event-specific launch/landing labels,
+and evaluation of both movement recognition and phase-boundary error on independent
+athletes. Fleche still lacks verified examples and a trained recognizer.
+
 Open **http://127.0.0.1:8000/dataset** for the source library, slow playback, timestamp seeks,
-athlete/crop context, provisional/confirmed labels and JSON export. Saves keep revision history.
+athlete/crop context, provisional/confirmed labels and JSON export. Its readiness panel counts
+human-reviewed footwork intervals by class, approved clip and independent source group. These are
+label counts, not usable model windows; the trainer still checks pose visibility and split coverage.
+Rejected proposals remain in revision history and can be replaced by overlapping corrected labels.
+Saves keep revision history.
 This local research workspace is separate from the athlete's practice minutes and daily logs.
 
 ```powershell
@@ -110,12 +221,19 @@ This local research workspace is separate from the athlete's practice minutes an
 .\.venv\Scripts\python.exe scripts/audit_fencing_data.py
 # After actual human review and sufficient independent data:
 .\.venv\Scripts\python.exe scripts/train_gestures.py --data data/training --window-ms 750 --output models/gestures.json
+# Activity phases are collected separately from movement labels:
+.\.venv\Scripts\python.exe scripts/train_gestures.py --task activity --data data/videos --window-ms 750
 ```
 
 Re-run preparation after changing a crop or label review. Approved footwork labels supported by the
 current baseline are exported to `prepared/annotations.json`; provisional labels remain only in
 the review records. Bounce/jump/shuffle labels are supported by the feature baseline; flèche and tactical labels stay in the richer schema for later models. User-upload training labels also require explicit modern fencing domain confirmation.
 Training refuses insufficient reviewed examples/groups and never silently lowers the data gate.
+For activity training, use the review screen’s phase suggestions only to set timestamps; watch the
+clip, correct the boundaries, and save each label. The activity labels are setup, exercise,
+between-reps, rest and exit. At least two phase classes must have 20 usable windows each across
+three independent source groups before a candidate model can be trained. Explicit `--promote` is
+still required, and the held-out macro-F1 gate remains in force.
 
 Dataset saves and revision locks are local filesystem operations. This research workspace is not
 yet a distributed annotation platform or an authenticated public endpoint.

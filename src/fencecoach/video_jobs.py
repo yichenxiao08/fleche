@@ -65,6 +65,9 @@ class AcceptReview(BaseModel):
 
 
 class CaptureProfile(BaseModel):
+    camera_setup_id: str = Field(default="", max_length=80)
+    scene_type: Literal["solo", "bout"] = "solo"
+    target_side: Literal["unknown", "left", "right"] = "unknown"
     weapon: Literal["foil", "epee", "sabre"] = "foil"
     weapon_arm: Literal["unknown", "left", "right"] = "unknown"
     front_leg: Literal["unknown", "left", "right"] = "unknown"
@@ -223,6 +226,15 @@ class VideoJobs:
             return job
 
     def accept(self, job_id, review: AcceptReview, result):
+        from fencecoach.quality import assess_quality
+
+        if result.get("width") and result.get("height"):
+            quality = result.get("quality_gate") or assess_quality(result)
+            if not quality["coaching_allowed"]:
+                raise ValueError(
+                    "Clip unsupported for coaching: "
+                    + " ".join(i["tip"] for i in quality["issues"] if i["severity"] == "reject")
+                )
         with closing(self.connect()) as db, db:
             db.execute("BEGIN IMMEDIATE")
             row = db.execute("SELECT payload FROM video_jobs WHERE id=?", (job_id,)).fetchone()
@@ -292,6 +304,7 @@ class VideoJobs:
                     window.start_ms,
                     window.end_ms,
                     onset_evidence,
+                    job.get("capture_profile", {}),
                 )
                 for j, measurement in enumerate(detail):
                     metrics.append(
@@ -336,6 +349,21 @@ class VideoJobs:
                         ),
                     )
                 )
+            for number, event in enumerate(result.get("fleche_events", []), 1):
+                for j, measurement in enumerate(event["measurements"], 1):
+                    metrics.append(
+                        MetricObservation(
+                            metric_id=f"video-{job_id[:10]}-fleche-{number:02}-detail-{j:02}",
+                            **measurement,
+                            provenance=VideoProvenance(
+                                job_id=job_id,
+                                method=METHOD,
+                                model_sha256=result["model_sha256"],
+                                annotation="reviewed_proposal",
+                                quality_note="Beta rule-based flèche proposal; geometry is image-plane evidence, not validated action classification or balance.",
+                            ),
+                        )
+                    )
             if not metrics:
                 raise ValueError(
                     "No visible measurements or reviewed intervals are available to save."
@@ -345,7 +373,10 @@ class VideoJobs:
                 skill_level=job["skill_level"],
                 notes=review.notes,
                 practiced_on=review.practiced_on,
-                capture_profile=job.get("capture_profile", {}),
+                capture_profile={
+                    **job.get("capture_profile", {}),
+                    "inference_crop": job.get("crop"),
+                },
                 metrics=metrics,
             )
             session = SessionRecord(

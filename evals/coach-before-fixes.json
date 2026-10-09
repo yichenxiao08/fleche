@@ -1,0 +1,2251 @@
+[
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "commons/dourdan-04:0",
+    "clip": "commons/dourdan-04",
+    "question": "What can you tell me about my lunge from this evidence?",
+    "answer": "I can't give your lunge a reliable pass or fail from these measurements. They describe the tracked movement, but don't establish that you need to bend more or change your arm timing. I don't want to give you a correction the clip doesn't support. What felt hardest when you performed the movement?",
+    "latency_ms": 12239.29,
+    "first_text_ms": 9905.74899999774,
+    "citation_ids_valid": true,
+    "has_evidence": true,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "54a1b93cf9304d6dae86e299afc4c5b8",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:02:45.708242Z",
+      "question": "What can you tell me about my lunge from this evidence?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "I can't give your lunge a reliable pass or fail from these measurements. They describe the tracked movement, but don't establish that you need to bend more or change your arm timing. I don't want to give you a correction the clip doesn't support. What felt hardest when you performed the movement?",
+        "observations": [
+          {
+            "claim": "Session measurements consulted for this answer.",
+            "evidence": [
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-01",
+                "note": "left knee angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-02",
+                "note": "right knee angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-03",
+                "note": "torso tilt at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-04",
+                "note": "left elbow angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-05",
+                "note": "right elbow angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-07",
+                "note": "left knee flexion from onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-08",
+                "note": "left arm extension at onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-09",
+                "note": "left arm extension at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-10",
+                "note": "left arm extension change to peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-11",
+                "note": "right knee flexion from onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-12",
+                "note": "right arm extension at onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-13",
+                "note": "right arm extension at peak"
+              }
+            ]
+          }
+        ],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "get_session_metrics",
+          "detail": "Read evidence for the requested assessment.",
+          "elapsed_ms": 1.81
+        },
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 12221.93
+        }
+      ],
+      "latency_ms": 12239.29,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "citation_count": 12,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "commons/dourdan-04:1",
+    "clip": "commons/dourdan-04",
+    "question": "Which measurements can help me understand my arm extension?",
+    "answer": "I can't give your movement a reliable pass or fail from these measurements. They describe the tracked movement, but don't establish that you need to bend more or change your arm timing. I don't want to give you a correction the clip doesn't support. What felt hardest when you performed the movement?",
+    "latency_ms": 14335.95,
+    "first_text_ms": 14335.877200006507,
+    "citation_ids_valid": true,
+    "has_evidence": true,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 3504,
+    "output_tokens": 240,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "8d303cffb2704a2291f130d42eead01b",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:03:00.046419Z",
+      "question": "Which measurements can help me understand my arm extension?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "I can't give your movement a reliable pass or fail from these measurements. They describe the tracked movement, but don't establish that you need to bend more or change your arm timing. I don't want to give you a correction the clip doesn't support. What felt hardest when you performed the movement?",
+        "observations": [
+          {
+            "claim": "Session measurements consulted for this answer.",
+            "evidence": [
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-01",
+                "note": "left knee angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-02",
+                "note": "right knee angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-03",
+                "note": "torso tilt at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-04",
+                "note": "left elbow angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-05",
+                "note": "right elbow angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-06",
+                "note": "recovery image hip speed"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-07",
+                "note": "left knee flexion from onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-08",
+                "note": "left arm extension at onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-09",
+                "note": "left arm extension at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-10",
+                "note": "left arm extension change to peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-11",
+                "note": "right knee flexion from onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-12",
+                "note": "right arm extension at onset"
+              }
+            ]
+          }
+        ],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "get_session_metrics",
+          "detail": "Read evidence for the requested assessment.",
+          "elapsed_ms": 2.42
+        },
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 14297.04
+        }
+      ],
+      "latency_ms": 14335.95,
+      "input_tokens": 3504,
+      "output_tokens": 240,
+      "citation_count": 12,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "commons/dourdan-04:2",
+    "clip": "commons/dourdan-04",
+    "question": "How consistent are the measured recovery intervals?",
+    "answer": "I don't have usable movement evidence for that assessment yet. Tell me what you're trying to improve and what feels difficult, and we can work through it together.",
+    "latency_ms": 4483.2,
+    "first_text_ms": 3632.5953000050504,
+    "citation_ids_valid": true,
+    "has_evidence": false,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": false,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "bf90c78ccc624e8ab4f4a923ad2372af",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:03:04.530526Z",
+      "question": "How consistent are the measured recovery intervals?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "I don't have usable movement evidence for that assessment yet. Tell me what you're trying to improve and what feels difficult, and we can work through it together.",
+        "observations": [],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 4468.6
+        }
+      ],
+      "latency_ms": 4483.2,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "citation_count": 0,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "commons/dourdan-04:3",
+    "clip": "commons/dourdan-04",
+    "question": "Give me one supported observation, one practice cue, and one drill. Explain why.",
+    "answer": "I can't give your movement a reliable pass or fail from these measurements. They describe the tracked movement, but don't establish that you need to bend more or change your arm timing. I don't want to give you a correction the clip doesn't support. What felt hardest when you performed the movement?",
+    "latency_ms": 37440.08,
+    "first_text_ms": 37439.89589999546,
+    "citation_ids_valid": true,
+    "has_evidence": true,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 4096,
+    "output_tokens": 341,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "b01c78e1763945949037ff7c8dd50f83",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:03:41.971977Z",
+      "question": "Give me one supported observation, one practice cue, and one drill. Explain why.",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "I can't give your movement a reliable pass or fail from these measurements. They describe the tracked movement, but don't establish that you need to bend more or change your arm timing. I don't want to give you a correction the clip doesn't support. What felt hardest when you performed the movement?",
+        "observations": [
+          {
+            "claim": "Session measurements consulted for this answer.",
+            "evidence": [
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-01",
+                "note": "left knee angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-02",
+                "note": "right knee angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-03",
+                "note": "torso tilt at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-04",
+                "note": "left elbow angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-05",
+                "note": "right elbow angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-06",
+                "note": "recovery image hip speed"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-07",
+                "note": "left knee flexion from onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-08",
+                "note": "left arm extension at onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-09",
+                "note": "left arm extension at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-10",
+                "note": "left arm extension change to peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-11",
+                "note": "right knee flexion from onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-12",
+                "note": "right arm extension at onset"
+              }
+            ]
+          }
+        ],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "conversation",
+          "detail": "Requested coaching evidence.",
+          "elapsed_ms": 7121.88
+        },
+        {
+          "step": "inspect_reviewed_rep",
+          "detail": "Returned tool result.",
+          "elapsed_ms": 1.07
+        },
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 30281.93
+        }
+      ],
+      "latency_ms": 37440.08,
+      "input_tokens": 4096,
+      "output_tokens": 341,
+      "citation_count": 12,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "commons/dourdan-04:4",
+    "clip": "commons/dourdan-04",
+    "question": "What does this video not establish about my technique?",
+    "answer": "At 00:15, your right knee angle is 120\u00b0. This is too high. Try lowering it to 90\u00b0 for better balance and control.",
+    "latency_ms": 2402.55,
+    "first_text_ms": 1322.9865000030259,
+    "citation_ids_valid": true,
+    "has_evidence": false,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [
+      "120",
+      "90"
+    ],
+    "input_tokens": 330,
+    "output_tokens": 39,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "be299c7e45c34eea82f395a84a66964f",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:03:44.376376Z",
+      "question": "What does this video not establish about my technique?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "At 00:15, your right knee angle is 120\u00b0. This is too high. Try lowering it to 90\u00b0 for better balance and control.",
+        "observations": [],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 2379.64
+        }
+      ],
+      "latency_ms": 2402.55,
+      "input_tokens": 330,
+      "output_tokens": 39,
+      "citation_count": 0,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000:5",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000",
+    "question": "What can you tell me about my lunge from this evidence?",
+    "answer": "From the evidence, your right knee angle during the lunge is quite high at 161 degrees. This suggests you might be leaning too far forward. Try to deepen your lunge slightly to bring your right knee closer to the ground. This will help maintain balance and improve your stance.",
+    "latency_ms": 9171.73,
+    "first_text_ms": 7193.805900009465,
+    "citation_ids_valid": true,
+    "has_evidence": true,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 876,
+    "output_tokens": 60,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "d9bbfb232b5740a5b39021cc0f600661",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:03:53.549921Z",
+      "question": "What can you tell me about my lunge from this evidence?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "From the evidence, your right knee angle during the lunge is quite high at 161 degrees. This suggests you might be leaning too far forward. Try to deepen your lunge slightly to bring your right knee closer to the ground. This will help maintain balance and improve your stance.",
+        "observations": [
+          {
+            "claim": "Session measurements consulted for this answer.",
+            "evidence": [
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-01",
+                "note": "left knee angle median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-02",
+                "note": "right knee angle median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-03",
+                "note": "torso tilt median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-04",
+                "note": "left elbow angle median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-05",
+                "note": "right elbow angle median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-06",
+                "note": "left wrist height median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-07",
+                "note": "right wrist height median"
+              }
+            ]
+          }
+        ],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "get_session_metrics",
+          "detail": "Read evidence for the requested assessment.",
+          "elapsed_ms": 7.63
+        },
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 9134.09
+        }
+      ],
+      "latency_ms": 9171.73,
+      "input_tokens": 876,
+      "output_tokens": 60,
+      "citation_count": 7,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000:6",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000",
+    "question": "Which measurements can help me understand my arm extension?",
+    "answer": "From the measurements we have, the key ones for understanding your arm extension are the median values of the left and right elbow angles. The left elbow is at 85.95 degrees, and the right elbow is at 134.6 degrees. \n\nThe left elbow angle is measured at the start of the clip, while the right elbow angle is measured at the end. This suggests that the right elbow might be moving earlier or more than the left elbow. \n\nTo understand if your arm extension is too shallow, too deep, or technically correct, we need to look at the timing and the specific movements. Since we don't have a clear indication of when the arm extension starts or ends, we can't definitively say if your arm extension is correct. \n\nA practical experiment you could try is to focus on extending your right arm earlier in your lunge. This might help you understand if you're extending your arm too late or if you need to start extending your arm earlier to match your knee movement. \n\nLet's keep an eye on these measurements and see if we can gather more data to make a more informed assessment.",
+    "latency_ms": 28301.9,
+    "first_text_ms": 28301.808899996104,
+    "citation_ids_valid": true,
+    "has_evidence": true,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 2177,
+    "output_tokens": 230,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "ed32e3975ef54715ae4dceaa1969ab28",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:04:21.853232Z",
+      "question": "Which measurements can help me understand my arm extension?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "From the measurements we have, the key ones for understanding your arm extension are the median values of the left and right elbow angles. The left elbow is at 85.95 degrees, and the right elbow is at 134.6 degrees. \n\nThe left elbow angle is measured at the start of the clip, while the right elbow angle is measured at the end. This suggests that the right elbow might be moving earlier or more than the left elbow. \n\nTo understand if your arm extension is too shallow, too deep, or technically correct, we need to look at the timing and the specific movements. Since we don't have a clear indication of when the arm extension starts or ends, we can't definitively say if your arm extension is correct. \n\nA practical experiment you could try is to focus on extending your right arm earlier in your lunge. This might help you understand if you're extending your arm too late or if you need to start extending your arm earlier to match your knee movement. \n\nLet's keep an eye on these measurements and see if we can gather more data to make a more informed assessment.",
+        "observations": [
+          {
+            "claim": "Session measurements consulted for this answer.",
+            "evidence": [
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-01",
+                "note": "left knee angle median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-02",
+                "note": "right knee angle median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-03",
+                "note": "torso tilt median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-04",
+                "note": "left elbow angle median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-05",
+                "note": "right elbow angle median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-06",
+                "note": "left wrist height median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-07",
+                "note": "right wrist height median"
+              }
+            ]
+          }
+        ],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "get_session_metrics",
+          "detail": "Read evidence for the requested assessment.",
+          "elapsed_ms": 0.8
+        },
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 28272.63
+        }
+      ],
+      "latency_ms": 28301.9,
+      "input_tokens": 2177,
+      "output_tokens": 230,
+      "citation_count": 7,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000:7",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000",
+    "question": "How consistent are the measured recovery intervals?",
+    "answer": "I don't have usable movement evidence for that assessment yet. Tell me what you're trying to improve and what feels difficult, and we can work through it together.",
+    "latency_ms": 1756.58,
+    "first_text_ms": 1078.7429000047268,
+    "citation_ids_valid": true,
+    "has_evidence": false,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": false,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "07c6cd55e45149a1911e972b6f14f0e6",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:04:23.611542Z",
+      "question": "How consistent are the measured recovery intervals?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "I don't have usable movement evidence for that assessment yet. Tell me what you're trying to improve and what feels difficult, and we can work through it together.",
+        "observations": [],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 1726.2
+        }
+      ],
+      "latency_ms": 1756.58,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "citation_count": 0,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000:8",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000",
+    "question": "Give me one supported observation, one practice cue, and one drill. Explain why.",
+    "answer": "I don't have usable movement evidence for that assessment yet. Tell me what you're trying to improve and what feels difficult, and we can work through it together.",
+    "latency_ms": 21001.55,
+    "first_text_ms": 21001.50329999451,
+    "citation_ids_valid": true,
+    "has_evidence": false,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 3116,
+    "output_tokens": 309,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "8846b9fcff1d4a01a12dc90c7675cdd8",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:04:44.614529Z",
+      "question": "Give me one supported observation, one practice cue, and one drill. Explain why.",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "I don't have usable movement evidence for that assessment yet. Tell me what you're trying to improve and what feels difficult, and we can work through it together.",
+        "observations": [],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "conversation",
+          "detail": "Requested coaching evidence.",
+          "elapsed_ms": 4335.94
+        },
+        {
+          "step": "get_session_metrics",
+          "detail": "Returned tool result.",
+          "elapsed_ms": 1.29
+        },
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 16630.07
+        },
+        {
+          "step": "grounding",
+          "detail": "Replaced unsupported advice without another model call: Do not instruct inward knee movement. A constant knee angle is not a supported goal for a lunge.",
+          "elapsed_ms": 0.05
+        }
+      ],
+      "latency_ms": 21001.55,
+      "input_tokens": 3116,
+      "output_tokens": 309,
+      "citation_count": 0,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000:9",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000",
+    "question": "What does this video not establish about my technique?",
+    "answer": "At 00:15, your right knee is straight. Try bending it slightly more to keep your hips in line with your shoulders. Practice: Stand with feet shoulder-width apart, bend right knee, then extend. Why? Maintaining hip alignment helps with balance and control.",
+    "latency_ms": 3213.21,
+    "first_text_ms": 968.8087999966228,
+    "citation_ids_valid": true,
+    "has_evidence": false,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 327,
+    "output_tokens": 58,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "b1cb4a387eed460aa569acfb457c4a3f",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:04:47.829138Z",
+      "question": "What does this video not establish about my technique?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "At 00:15, your right knee is straight. Try bending it slightly more to keep your hips in line with your shoulders. Practice: Stand with feet shoulder-width apart, bend right knee, then extend. Why? Maintaining hip alignment helps with balance and control.",
+        "observations": [],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 3181.92
+        }
+      ],
+      "latency_ms": 3213.21,
+      "input_tokens": 327,
+      "output_tokens": 58,
+      "citation_count": 0,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000:10",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000",
+    "question": "What can you tell me about my lunge from this evidence?",
+    "answer": "From the evidence, your right knee angle is quite high at 158.1 degrees, which is above the neutral range. This suggests you might be lunging too deep. Try to deepen your lunge while keeping your right knee closer to the line of your feet. Why not practice maintaining a more balanced lunge to see if you can lower your right knee angle?",
+    "latency_ms": 9768.42,
+    "first_text_ms": 6535.913799991249,
+    "citation_ids_valid": true,
+    "has_evidence": true,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 861,
+    "output_tokens": 77,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "d85b7264a4fc44c9a6703a7b02a21882",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:04:57.599678Z",
+      "question": "What can you tell me about my lunge from this evidence?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "From the evidence, your right knee angle is quite high at 158.1 degrees, which is above the neutral range. This suggests you might be lunging too deep. Try to deepen your lunge while keeping your right knee closer to the line of your feet. Why not practice maintaining a more balanced lunge to see if you can lower your right knee angle?",
+        "observations": [
+          {
+            "claim": "Session measurements consulted for this answer.",
+            "evidence": [
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-01",
+                "note": "left knee angle median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-02",
+                "note": "right knee angle median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-03",
+                "note": "torso tilt median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-04",
+                "note": "left elbow angle median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-05",
+                "note": "right elbow angle median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-06",
+                "note": "left wrist height median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-07",
+                "note": "right wrist height median"
+              }
+            ]
+          }
+        ],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "get_session_metrics",
+          "detail": "Read evidence for the requested assessment.",
+          "elapsed_ms": 1.0
+        },
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 9733.66
+        }
+      ],
+      "latency_ms": 9768.42,
+      "input_tokens": 861,
+      "output_tokens": 77,
+      "citation_count": 7,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000:11",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000",
+    "question": "Which measurements can help me understand my arm extension?",
+    "answer": "I can't give your movement a reliable pass or fail from these measurements. They describe the tracked movement, but don't establish that you need to bend more or change your arm timing. I don't want to give you a correction the clip doesn't support. What felt hardest when you performed the movement?",
+    "latency_ms": 24140.67,
+    "first_text_ms": 24140.58439999644,
+    "citation_ids_valid": true,
+    "has_evidence": true,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 2162,
+    "output_tokens": 240,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "a18f065471ca462dba344f08aadc675f",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:05:21.742628Z",
+      "question": "Which measurements can help me understand my arm extension?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "I can't give your movement a reliable pass or fail from these measurements. They describe the tracked movement, but don't establish that you need to bend more or change your arm timing. I don't want to give you a correction the clip doesn't support. What felt hardest when you performed the movement?",
+        "observations": [
+          {
+            "claim": "Session measurements consulted for this answer.",
+            "evidence": [
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-01",
+                "note": "left knee angle median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-02",
+                "note": "right knee angle median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-03",
+                "note": "torso tilt median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-04",
+                "note": "left elbow angle median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-05",
+                "note": "right elbow angle median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-06",
+                "note": "left wrist height median"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-clip-07",
+                "note": "right wrist height median"
+              }
+            ]
+          }
+        ],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "get_session_metrics",
+          "detail": "Read evidence for the requested assessment.",
+          "elapsed_ms": 1.26
+        },
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 24102.71
+        }
+      ],
+      "latency_ms": 24140.67,
+      "input_tokens": 2162,
+      "output_tokens": 240,
+      "citation_count": 7,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000:12",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000",
+    "question": "How consistent are the measured recovery intervals?",
+    "answer": "I don't have usable movement evidence for that assessment yet. Tell me what you're trying to improve and what feels difficult, and we can work through it together.",
+    "latency_ms": 1907.36,
+    "first_text_ms": 1185.3298000060022,
+    "citation_ids_valid": true,
+    "has_evidence": false,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": false,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "1a58f3eba2364de88b47bdf44b987906",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:05:23.651765Z",
+      "question": "How consistent are the measured recovery intervals?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "I don't have usable movement evidence for that assessment yet. Tell me what you're trying to improve and what feels difficult, and we can work through it together.",
+        "observations": [],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 1874.22
+        }
+      ],
+      "latency_ms": 1907.36,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "citation_count": 0,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000:13",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000",
+    "question": "Give me one supported observation, one practice cue, and one drill. Explain why.",
+    "answer": "I don't have usable movement evidence for that assessment yet. Tell me what you're trying to improve and what feels difficult, and we can work through it together.",
+    "latency_ms": 21946.85,
+    "first_text_ms": 21946.817600008217,
+    "citation_ids_valid": true,
+    "has_evidence": false,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 3116,
+    "output_tokens": 309,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "fc55846992ba4c73ac551325e99c63d6",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:05:45.601680Z",
+      "question": "Give me one supported observation, one practice cue, and one drill. Explain why.",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "I don't have usable movement evidence for that assessment yet. Tell me what you're trying to improve and what feels difficult, and we can work through it together.",
+        "observations": [],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "conversation",
+          "detail": "Requested coaching evidence.",
+          "elapsed_ms": 4710.8
+        },
+        {
+          "step": "get_session_metrics",
+          "detail": "Returned tool result.",
+          "elapsed_ms": 0.91
+        },
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 17190.82
+        },
+        {
+          "step": "grounding",
+          "detail": "Replaced unsupported advice without another model call: Do not instruct inward knee movement. A constant knee angle is not a supported goal for a lunge.",
+          "elapsed_ms": 0.08
+        }
+      ],
+      "latency_ms": 21946.85,
+      "input_tokens": 3116,
+      "output_tokens": 309,
+      "citation_count": 0,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000:14",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000",
+    "question": "What does this video not establish about my technique?",
+    "answer": "At 00:15, your right knee is straight. Try bending it slightly more to keep your hips in line with your shoulders. Practice: Stand with feet shoulder-width apart, bend right knee, then extend. Why? Maintaining hip alignment helps with balance and control.",
+    "latency_ms": 3203.92,
+    "first_text_ms": 960.7729999988806,
+    "citation_ids_valid": true,
+    "has_evidence": false,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 327,
+    "output_tokens": 58,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "629ec6cb09864814b21de1df3699b785",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:05:48.807869Z",
+      "question": "What does this video not establish about my technique?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "At 00:15, your right knee is straight. Try bending it slightly more to keep your hips in line with your shoulders. Practice: Stand with feet shoulder-width apart, bend right knee, then extend. Why? Maintaining hip alignment helps with balance and control.",
+        "observations": [],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 3167.82
+        }
+      ],
+      "latency_ms": 3203.92,
+      "input_tokens": 327,
+      "output_tokens": 58,
+      "citation_count": 0,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "mit-ocw/jumpe_lunge:15",
+    "clip": "mit-ocw/jumpe_lunge",
+    "question": "What can you tell me about my lunge from this evidence?",
+    "answer": "Your right knee angle at peak is unusually high at 168.7 degrees. This suggests you might be overextending your right leg. To improve, try focusing on keeping your right knee closer to your body and ensuring your right foot is more aligned with your right hip. Practice this by imagining you're stepping into a lunge with your right leg. Why it matters: Proper alignment helps maintain balance and control during the lunge.",
+    "latency_ms": 16541.95,
+    "first_text_ms": 12049.578699996346,
+    "citation_ids_valid": true,
+    "has_evidence": true,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 1275,
+    "output_tokens": 90,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "c13f896d6bc848b1bac527c19efc0fc1",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:06:05.351556Z",
+      "question": "What can you tell me about my lunge from this evidence?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "Your right knee angle at peak is unusually high at 168.7 degrees. This suggests you might be overextending your right leg. To improve, try focusing on keeping your right knee closer to your body and ensuring your right foot is more aligned with your right hip. Practice this by imagining you're stepping into a lunge with your right leg. Why it matters: Proper alignment helps maintain balance and control during the lunge.",
+        "observations": [
+          {
+            "claim": "Session measurements consulted for this answer.",
+            "evidence": [
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-01",
+                "note": "left knee angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-02",
+                "note": "right knee angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-03",
+                "note": "torso tilt at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-04",
+                "note": "left elbow angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-05",
+                "note": "right elbow angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-07",
+                "note": "left knee flexion from onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-08",
+                "note": "left arm extension at onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-09",
+                "note": "left arm extension at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-10",
+                "note": "left arm extension change to peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-11",
+                "note": "right knee flexion from onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-12",
+                "note": "right arm extension at onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-13",
+                "note": "right arm extension at peak"
+              }
+            ]
+          }
+        ],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "get_session_metrics",
+          "detail": "Read evidence for the requested assessment.",
+          "elapsed_ms": 5.86
+        },
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 16503.19
+        }
+      ],
+      "latency_ms": 16541.95,
+      "input_tokens": 1275,
+      "output_tokens": 90,
+      "citation_count": 12,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "mit-ocw/jumpe_lunge:16",
+    "clip": "mit-ocw/jumpe_lunge",
+    "question": "Which measurements can help me understand my arm extension?",
+    "answer": "I can't give your movement a reliable pass or fail from these measurements. They describe the tracked movement, but don't establish that you need to bend more or change your arm timing. I don't want to give you a correction the clip doesn't support. What felt hardest when you performed the movement?",
+    "latency_ms": 54844.72,
+    "first_text_ms": 54844.563599996036,
+    "citation_ids_valid": true,
+    "has_evidence": true,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 3446,
+    "output_tokens": 240,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "107a37878c884a2c8ca2385d8597e6ba",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:07:00.198389Z",
+      "question": "Which measurements can help me understand my arm extension?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "I can't give your movement a reliable pass or fail from these measurements. They describe the tracked movement, but don't establish that you need to bend more or change your arm timing. I don't want to give you a correction the clip doesn't support. What felt hardest when you performed the movement?",
+        "observations": [
+          {
+            "claim": "Session measurements consulted for this answer.",
+            "evidence": [
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-01",
+                "note": "left knee angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-02",
+                "note": "right knee angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-03",
+                "note": "torso tilt at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-04",
+                "note": "left elbow angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-05",
+                "note": "right elbow angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-06",
+                "note": "recovery image hip speed"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-07",
+                "note": "left knee flexion from onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-08",
+                "note": "left arm extension at onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-09",
+                "note": "left arm extension at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-10",
+                "note": "left arm extension change to peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-11",
+                "note": "right knee flexion from onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-12",
+                "note": "right arm extension at onset"
+              }
+            ]
+          }
+        ],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "get_session_metrics",
+          "detail": "Read evidence for the requested assessment.",
+          "elapsed_ms": 1.25
+        },
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 54807.07
+        }
+      ],
+      "latency_ms": 54844.72,
+      "input_tokens": 3446,
+      "output_tokens": 240,
+      "citation_count": 12,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "mit-ocw/jumpe_lunge:17",
+    "clip": "mit-ocw/jumpe_lunge",
+    "question": "How consistent are the measured recovery intervals?",
+    "answer": "I don't have usable movement evidence for that assessment yet. Tell me what you're trying to improve and what feels difficult, and we can work through it together.",
+    "latency_ms": 6306.67,
+    "first_text_ms": 4788.526699994691,
+    "citation_ids_valid": true,
+    "has_evidence": false,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": false,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "161f7324c0594ff0a72a7b9850c02990",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:07:06.507373Z",
+      "question": "How consistent are the measured recovery intervals?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "I don't have usable movement evidence for that assessment yet. Tell me what you're trying to improve and what feels difficult, and we can work through it together.",
+        "observations": [],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 6271.22
+        }
+      ],
+      "latency_ms": 6306.67,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "citation_count": 0,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "mit-ocw/jumpe_lunge:18",
+    "clip": "mit-ocw/jumpe_lunge",
+    "question": "Give me one supported observation, one practice cue, and one drill. Explain why.",
+    "answer": "Sure, let's start with a lunge observation. During the lunge, you seem to be keeping your front knee straighter than your back knee. This might be a bit too rigid, which could affect your balance and speed. \n\nA useful practice cue for this observation would be: \"Try to keep your front knee slightly bent, like you're about to sit down gently.\"\n\nFor a drill, we can use a simple progression: Start with a regular lunge, then gradually increase the depth of the lunge by bending the front knee more. This will help you feel the difference and practice the correct form.\n\nWhy it matters: Keeping the front knee slightly bent allows you to maintain better balance and control during the lunge, which is crucial for both offense and defense in fencing.",
+    "latency_ms": 11813.97,
+    "first_text_ms": 11813.931700002286,
+    "citation_ids_valid": true,
+    "has_evidence": false,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 1397,
+    "output_tokens": 159,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": true,
+    "run": {
+      "run_id": "f7a44b9409d043bcad94e11d92c791e7",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:07:18.324142Z",
+      "question": "Give me one supported observation, one practice cue, and one drill. Explain why.",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "Sure, let's start with a lunge observation. During the lunge, you seem to be keeping your front knee straighter than your back knee. This might be a bit too rigid, which could affect your balance and speed. \n\nA useful practice cue for this observation would be: \"Try to keep your front knee slightly bent, like you're about to sit down gently.\"\n\nFor a drill, we can use a simple progression: Start with a regular lunge, then gradually increase the depth of the lunge by bending the front knee more. This will help you feel the difference and practice the correct form.\n\nWhy it matters: Keeping the front knee slightly bent allows you to maintain better balance and control during the lunge, which is crucial for both offense and defense in fencing.",
+        "observations": [],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 11751.89
+        }
+      ],
+      "latency_ms": 11813.97,
+      "input_tokens": 1397,
+      "output_tokens": 159,
+      "citation_count": 0,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "mit-ocw/jumpe_lunge:19",
+    "clip": "mit-ocw/jumpe_lunge",
+    "question": "What does this video not establish about my technique?",
+    "answer": "I don't have usable movement evidence for that assessment yet. Tell me what you're trying to improve and what feels difficult, and we can work through it together.",
+    "latency_ms": 1238.41,
+    "first_text_ms": 1236.5736999927321,
+    "citation_ids_valid": true,
+    "has_evidence": false,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "aeaa9977ebbc44eca74241e8d4433e50",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:07:19.566167Z",
+      "question": "What does this video not establish about my technique?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "I don't have usable movement evidence for that assessment yet. Tell me what you're trying to improve and what feels difficult, and we can work through it together.",
+        "observations": [],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 1197.07
+        }
+      ],
+      "latency_ms": 1238.41,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "citation_count": 0,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "mit-ocw/jump_forward_jump_back:20",
+    "clip": "mit-ocw/jump_forward_jump_back",
+    "question": "What can you tell me about my lunge from this evidence?",
+    "answer": "The peak left knee angle at 3917ms is 172.2\u00b0, and the right knee at 175.0\u00b0. This suggests the right knee is more bent at the peak of the lunge. The right elbow is at 103.1\u00b0 at peak, indicating a relatively straight arm. The right arm extension changed by -0.01 from onset to peak, suggesting a slight inward movement. This inward movement could be a cue to focus on maintaining a more outward arm position to ensure the right arm is not too close to the body. Practice keeping the arm slightly extended and the body more upright to improve balance and control.",
+    "latency_ms": 22034.31,
+    "first_text_ms": 13164.197999998578,
+    "citation_ids_valid": true,
+    "has_evidence": true,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [
+      "3917"
+    ],
+    "input_tokens": 1133,
+    "output_tokens": 140,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "75a7afeee72f4a89b66eac74705e8431",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:07:41.603133Z",
+      "question": "What can you tell me about my lunge from this evidence?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "The peak left knee angle at 3917ms is 172.2\u00b0, and the right knee at 175.0\u00b0. This suggests the right knee is more bent at the peak of the lunge. The right elbow is at 103.1\u00b0 at peak, indicating a relatively straight arm. The right arm extension changed by -0.01 from onset to peak, suggesting a slight inward movement. This inward movement could be a cue to focus on maintaining a more outward arm position to ensure the right arm is not too close to the body. Practice keeping the arm slightly extended and the body more upright to improve balance and control.",
+        "observations": [
+          {
+            "claim": "Session measurements consulted for this answer.",
+            "evidence": [
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-01",
+                "note": "left knee angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-02",
+                "note": "right knee angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-03",
+                "note": "torso tilt at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-04",
+                "note": "right elbow angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-06",
+                "note": "left knee flexion from onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-07",
+                "note": "right knee flexion from onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-08",
+                "note": "right arm extension at onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-09",
+                "note": "right arm extension at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-10",
+                "note": "right arm extension change to peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-11",
+                "note": "movement to peak time"
+              }
+            ]
+          }
+        ],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "get_session_metrics",
+          "detail": "Read evidence for the requested assessment.",
+          "elapsed_ms": 1.56
+        },
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 21992.34
+        }
+      ],
+      "latency_ms": 22034.31,
+      "input_tokens": 1133,
+      "output_tokens": 140,
+      "citation_count": 10,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "mit-ocw/jump_forward_jump_back:21",
+    "clip": "mit-ocw/jump_forward_jump_back",
+    "question": "Which measurements can help me understand my arm extension?",
+    "answer": "From the measurements we have, the right arm extension at peak is at 0.784, and at the onset of the lunge it's at 0.795. The difference is very small, at -0.01. This suggests that the arm extension is not significantly different between the start and the peak of the lunge.\n\nThe key observation here is that the arm extension at the onset is slightly higher than at the peak. This could indicate that the arm might be extending earlier than the knee, which is important to understand for your technique.\n\nTo explore this further, you could try a drill where you focus on extending your arm earlier in the lunge. This could help you see if you can maintain the arm extension while bending your knee more deeply. \n\nRemember, arm extension and knee bend are two different aspects of the lunge. The arm extension at the onset is a good indicator of when you start moving your arm, but it doesn't necessarily mean the arm is moving before the knee. Let's see if you can extend your arm earlier without compromising the knee bend.",
+    "latency_ms": 51912.82,
+    "first_text_ms": 51912.56849998899,
+    "citation_ids_valid": true,
+    "has_evidence": true,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 2576,
+    "output_tokens": 224,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "356ff63a201049a594348636dd6368d7",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:08:33.519082Z",
+      "question": "Which measurements can help me understand my arm extension?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "From the measurements we have, the right arm extension at peak is at 0.784, and at the onset of the lunge it's at 0.795. The difference is very small, at -0.01. This suggests that the arm extension is not significantly different between the start and the peak of the lunge.\n\nThe key observation here is that the arm extension at the onset is slightly higher than at the peak. This could indicate that the arm might be extending earlier than the knee, which is important to understand for your technique.\n\nTo explore this further, you could try a drill where you focus on extending your arm earlier in the lunge. This could help you see if you can maintain the arm extension while bending your knee more deeply. \n\nRemember, arm extension and knee bend are two different aspects of the lunge. The arm extension at the onset is a good indicator of when you start moving your arm, but it doesn't necessarily mean the arm is moving before the knee. Let's see if you can extend your arm earlier without compromising the knee bend.",
+        "observations": [
+          {
+            "claim": "Session measurements consulted for this answer.",
+            "evidence": [
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-01",
+                "note": "left knee angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-02",
+                "note": "right knee angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-03",
+                "note": "torso tilt at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-04",
+                "note": "right elbow angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-05",
+                "note": "recovery image hip speed"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-06",
+                "note": "left knee flexion from onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-07",
+                "note": "right knee flexion from onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-08",
+                "note": "right arm extension at onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-09",
+                "note": "right arm extension at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-10",
+                "note": "right arm extension change to peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-11",
+                "note": "movement to peak time"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-recovery-01",
+                "note": "recovery time"
+              }
+            ]
+          }
+        ],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "get_session_metrics",
+          "detail": "Read evidence for the requested assessment.",
+          "elapsed_ms": 1.35
+        },
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 51858.3
+        }
+      ],
+      "latency_ms": 51912.82,
+      "input_tokens": 2576,
+      "output_tokens": 224,
+      "citation_count": 12,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "mit-ocw/jump_forward_jump_back:22",
+    "clip": "mit-ocw/jump_forward_jump_back",
+    "question": "How consistent are the measured recovery intervals?",
+    "answer": "Observation: Knee angle at 90\u00b0 for 2 seconds during recovery. Practical cue: Focus on quick, controlled transitions. Drill: Practice 5 rapid, smooth transitions between guards. Why it matters: Consistent transitions improve fluidity and readiness for defense.",
+    "latency_ms": 8656.67,
+    "first_text_ms": 6040.532899991376,
+    "citation_ids_valid": true,
+    "has_evidence": false,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [
+      "90",
+      "2"
+    ],
+    "input_tokens": 326,
+    "output_tokens": 55,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": true,
+    "run": {
+      "run_id": "d6dfb5b1aa7c419192a6331c03e2da49",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:08:42.180896Z",
+      "question": "How consistent are the measured recovery intervals?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "Observation: Knee angle at 90\u00b0 for 2 seconds during recovery. Practical cue: Focus on quick, controlled transitions. Drill: Practice 5 rapid, smooth transitions between guards. Why it matters: Consistent transitions improve fluidity and readiness for defense.",
+        "observations": [],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 8612.73
+        }
+      ],
+      "latency_ms": 8656.67,
+      "input_tokens": 326,
+      "output_tokens": 55,
+      "citation_count": 0,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "mit-ocw/jump_forward_jump_back:23",
+    "clip": "mit-ocw/jump_forward_jump_back",
+    "question": "Give me one supported observation, one practice cue, and one drill. Explain why.",
+    "answer": "I don't have usable movement evidence for that assessment yet. Tell me what you're trying to improve and what feels difficult, and we can work through it together.",
+    "latency_ms": 94796.8,
+    "first_text_ms": 94796.77470000752,
+    "citation_ids_valid": true,
+    "has_evidence": false,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 3119,
+    "output_tokens": 480,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "59e6955798194585affa6f4914d14b0f",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:10:16.980534Z",
+      "question": "Give me one supported observation, one practice cue, and one drill. Explain why.",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "I don't have usable movement evidence for that assessment yet. Tell me what you're trying to improve and what feels difficult, and we can work through it together.",
+        "observations": [],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "conversation",
+          "detail": "Requested coaching evidence.",
+          "elapsed_ms": 70207.73
+        },
+        {
+          "step": "get_session_metrics",
+          "detail": "Returned tool result.",
+          "elapsed_ms": 0.8
+        },
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 24529.88
+        },
+        {
+          "step": "grounding",
+          "detail": "Replaced unsupported advice without another model call: Knee-depth corrections are not established by these measurements.",
+          "elapsed_ms": 0.06
+        }
+      ],
+      "latency_ms": 94796.8,
+      "input_tokens": 3119,
+      "output_tokens": 480,
+      "citation_count": 0,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "qwen2.5:3b",
+    "case_id": "mit-ocw/jump_forward_jump_back:24",
+    "clip": "mit-ocw/jump_forward_jump_back",
+    "question": "What does this video not establish about my technique?",
+    "answer": "I don't have usable movement evidence for that assessment yet. Tell me what you're trying to improve and what feels difficult, and we can work through it together.",
+    "latency_ms": 1076.74,
+    "first_text_ms": 1075.409299999592,
+    "citation_ids_valid": true,
+    "has_evidence": false,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "369408cbd93a4338bd966c7b5a6bc7c9",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:10:18.059125Z",
+      "question": "What does this video not establish about my technique?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "qwen2.5:3b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "I don't have usable movement evidence for that assessment yet. Tell me what you're trying to improve and what feels difficult, and we can work through it together.",
+        "observations": [],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 1053.81
+        }
+      ],
+      "latency_ms": 1076.74,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "citation_count": 0,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "fencecoach-qwen3:4b",
+    "case_id": "commons/dourdan-04:0",
+    "clip": "commons/dourdan-04",
+    "question": "What can you tell me about my lunge from this evidence?",
+    "answer": "I can't give your lunge a reliable pass or fail from these measurements. They describe the tracked movement, but don't establish that you need to bend more or change your arm timing. I don't want to give you a correction the clip doesn't support. What felt hardest when you performed the movement?",
+    "latency_ms": 42919.95,
+    "first_text_ms": 28613.098000001628,
+    "citation_ids_valid": true,
+    "has_evidence": true,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 1304,
+    "output_tokens": 180,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "abca1c34a0ed4c6b96ffe609ed357577",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:11:01.007968Z",
+      "question": "What can you tell me about my lunge from this evidence?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "fencecoach-qwen3:4b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "I can't give your lunge a reliable pass or fail from these measurements. They describe the tracked movement, but don't establish that you need to bend more or change your arm timing. I don't want to give you a correction the clip doesn't support. What felt hardest when you performed the movement?",
+        "observations": [
+          {
+            "claim": "Session measurements consulted for this answer.",
+            "evidence": [
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-01",
+                "note": "left knee angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-02",
+                "note": "right knee angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-03",
+                "note": "torso tilt at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-04",
+                "note": "left elbow angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-05",
+                "note": "right elbow angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-07",
+                "note": "left knee flexion from onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-08",
+                "note": "left arm extension at onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-09",
+                "note": "left arm extension at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-10",
+                "note": "left arm extension change to peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-11",
+                "note": "right knee flexion from onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-12",
+                "note": "right arm extension at onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-13",
+                "note": "right arm extension at peak"
+              }
+            ]
+          }
+        ],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "get_session_metrics",
+          "detail": "Read evidence for the requested assessment.",
+          "elapsed_ms": 1.12
+        },
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 42897.66
+        }
+      ],
+      "latency_ms": 42919.95,
+      "input_tokens": 1304,
+      "output_tokens": 180,
+      "citation_count": 12,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "fencecoach-qwen3:4b",
+    "case_id": "commons/dourdan-04:1",
+    "clip": "commons/dourdan-04",
+    "question": "Which measurements can help me understand my arm extension?",
+    "answer": "I can't give your movement a reliable pass or fail from these measurements. They describe the tracked movement, but don't establish that you need to bend more or change your arm timing. I don't want to give you a correction the clip doesn't support. What felt hardest when you performed the movement?",
+    "latency_ms": 98214.36,
+    "first_text_ms": 98214.23529999447,
+    "citation_ids_valid": true,
+    "has_evidence": true,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 3503,
+    "output_tokens": 240,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": false,
+    "run": {
+      "run_id": "845d3abf393c48ce801505938fb94567",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:12:39.224539Z",
+      "question": "Which measurements can help me understand my arm extension?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "fencecoach-qwen3:4b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "I can't give your movement a reliable pass or fail from these measurements. They describe the tracked movement, but don't establish that you need to bend more or change your arm timing. I don't want to give you a correction the clip doesn't support. What felt hardest when you performed the movement?",
+        "observations": [
+          {
+            "claim": "Session measurements consulted for this answer.",
+            "evidence": [
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-01",
+                "note": "left knee angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-02",
+                "note": "right knee angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-03",
+                "note": "torso tilt at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-04",
+                "note": "left elbow angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-05",
+                "note": "right elbow angle at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-06",
+                "note": "recovery image hip speed"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-07",
+                "note": "left knee flexion from onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-08",
+                "note": "left arm extension at onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-09",
+                "note": "left arm extension at peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-10",
+                "note": "left arm extension change to peak"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-11",
+                "note": "right knee flexion from onset"
+              },
+              {
+                "source_type": "metric",
+                "source_id": "golden-rep-01-detail-12",
+                "note": "right arm extension at onset"
+              }
+            ]
+          }
+        ],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "get_session_metrics",
+          "detail": "Read evidence for the requested assessment.",
+          "elapsed_ms": 1.05
+        },
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 98184.07
+        }
+      ],
+      "latency_ms": 98214.36,
+      "input_tokens": 3503,
+      "output_tokens": 240,
+      "citation_count": 12,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "fencecoach-qwen3:4b",
+    "case_id": "commons/dourdan-04:2",
+    "clip": "commons/dourdan-04",
+    "question": "How consistent are the measured recovery intervals?",
+    "answer": "We are given a session with skill_level: beginner, weapon: sabre, and available_measurements: 24. The user asks about consistency of measured recovery intervals.\n\nAs FenceCoach, I must:\n- Start with at most 10 words: \"Recovery intervals: 24 measurements.\"\n- Then: one measured observation with timestamp, one practical cue, one brief drill, and why it matters (about 80 words total).\n- Use neutral practice experiment if no fault.\n- For this query: we don't have specific recovery interval measurements in the available_measurements (24) but we know the session is offline and initial_guard_confirmed is false.\n\nImportant: We don't have visual access, so we can't see the actual recovery intervals. We have measurements (24) but the user is asking about consistency.",
+    "latency_ms": 19669.35,
+    "first_text_ms": 7619.6409999975,
+    "citation_ids_valid": true,
+    "has_evidence": false,
+    "unsupported_claim_flags": [],
+    "unsupported_number_flags": [],
+    "input_tokens": 332,
+    "output_tokens": 180,
+    "cost_usd": 0,
+    "relevance_judge": null,
+    "question_topic_present": true,
+    "assessment_shape_present": true,
+    "run": {
+      "run_id": "9eb1242cdc71421faa934e5fc0c8cb4c",
+      "session_id": "offline-golden",
+      "created_at": "2026-10-09T07:12:58.896071Z",
+      "question": "How consistent are the measured recovery intervals?",
+      "response_kind": "conversation",
+      "focus_metric_id": null,
+      "mode": "local",
+      "model_id": "fencecoach-qwen3:4b",
+      "retrieval_method": "bm25",
+      "report": {
+        "summary": "We are given a session with skill_level: beginner, weapon: sabre, and available_measurements: 24. The user asks about consistency of measured recovery intervals.\n\nAs FenceCoach, I must:\n- Start with at most 10 words: \"Recovery intervals: 24 measurements.\"\n- Then: one measured observation with timestamp, one practical cue, one brief drill, and why it matters (about 80 words total).\n- Use neutral practice experiment if no fault.\n- For this query: we don't have specific recovery interval measurements in the available_measurements (24) but we know the session is offline and initial_guard_confirmed is false.\n\nImportant: We don't have visual access, so we can't see the actual recovery intervals. We have measurements (24) but the user is asking about consistency.",
+        "observations": [],
+        "next_drill": null,
+        "limitations": []
+      },
+      "sources": [],
+      "trace": [
+        {
+          "step": "conversation",
+          "detail": "Answered directly.",
+          "elapsed_ms": 19645.09
+        }
+      ],
+      "latency_ms": 19669.35,
+      "input_tokens": 332,
+      "output_tokens": 180,
+      "citation_count": 0,
+      "citation_ids_valid": true
+    }
+  },
+  {
+    "model": "fencecoach-qwen3:4b",
+    "case_id": "commons/dourdan-04:3",
+    "error": "The model returned no conversational answer. Please try again.",
+    "latency_ms": 23404.757400014205
+  }
+]

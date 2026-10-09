@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "purpose": "Archival QA/overlay demonstrations, not validated coaching inputs.",
+  "clips": [
+    {
+      "id": "jumpe_lunge",
+      "title": "MIT / Jump lunge \u2014 archival QA example",
+      "sha256": "f656156eda327753e7fd0dfd14c5e885ae0d4cb5dd489982627bcd2358ae27ed",
+      "bytes": 551045,
+      "license": "CC BY-NC-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc-sa/3.0/",
+      "source_page": "https://ocw.mit.edu/courses/pe-740-fencing-spring-2007/pages/video/",
+      "attribution": "MIT OpenCourseWare / PE.740 Fencing (Spring 2007) / Prof. Jaroslav Koniusz",
+      "qa": "unsupported"
+    },
+    {
+      "id": "parry_4_repost",
+      "title": "MIT / Parry and riposte \u2014 archival QA example",
+      "sha256": "49d7f614d0a75dd25457a2f7ad9694a4747d0a8bb0cfd52ec57d5cd315aaddcf",
+      "bytes": 731522,
+      "license": "CC BY-NC-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc-sa/3.0/",
+      "source_page": "https://ocw.mit.edu/courses/pe-740-fencing-spring-2007/pages/video/",
+      "attribution": "MIT OpenCourseWare / PE.740 Fencing (Spring 2007) / Prof. Jaroslav Koniusz",
+      "qa": "unsupported"
+    },
+    {
+      "id": "jump_forward_jump_back",
+      "title": "MIT / Forward and backward footwork \u2014 archival QA example",
+      "sha256": "949fdbc58e9cf3becbf60a18ff60d222be3cfb475f9eacff1bd640e56866b68b",
+      "bytes": 439416,
+      "license": "CC BY-NC-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc-sa/3.0/",
+      "source_page": "https://ocw.mit.edu/courses/pe-740-fencing-spring-2007/pages/video/",
+      "attribution": "MIT OpenCourseWare / PE.740 Fencing (Spring 2007) / Prof. Jaroslav Koniusz",
+      "qa": "unsupported"
+    }
+  ]
+}

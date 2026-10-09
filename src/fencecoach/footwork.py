@@ -19,6 +19,7 @@ LABELS = (
     "advance",
     "retreat",
     "lunge",
+    "fleche",
     "recovery",
     "bounce",
     "jump_forward",
@@ -98,6 +99,8 @@ def enrich_frames(frames, width, height, profile=None):
 
 def temporal_vector(frames, start, end):
     selected = [f for f in frames if start <= f["time_ms"] <= end]
+    if len({f.get("track_epoch", 0) for f in selected if f.get("landmarks")}) > 1:
+        return None
     valid = [f for f in selected if f.get("footwork") and f["footwork"].get("version") == VERSION]
     if len(valid) < 4 or len(valid) / max(1, len(selected)) < 0.7:
         return None

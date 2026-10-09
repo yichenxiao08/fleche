@@ -1,7 +1,7 @@
 {
   "schema": "fencecoach-source-curation-v1",
   "reviewed_on": "2026-10-04",
-  "review_method": "Assistant inspection of timestamped video frame grids and official MIT course provenance; domain review only, not expert gesture ground truth.",
+  "review_method": "Source-page metadata, licenses and selected video frame grids were reviewed for modern sport-fencing relevance; source-domain curation is not expert gesture ground truth.",
   "sources": [
     {
       "collection": "commons",
@@ -314,6 +314,134 @@
       "domain": "modern_fencing_footwork_drill",
       "eligible": true,
       "note": "Modern MIT sport fencing course. Unarmed footwork drills are relevant; gesture boundaries and actor identity still require human review."
+    },
+    {
+      "collection": "commons",
+      "clip_id": "dourdan-31",
+      "sha256": "0dcbaf20d39813f40adc55e35b71152a2e8777c096357e462637c0d58fe3e7bb",
+      "domain": "modern_electric_fencing",
+      "eligible": true,
+      "note": "Commons describes this as a continuous segment of the 2014 Dourdan junior sabre men's final, Curatoli vs. Lambert. Share the existing Dourdan event group; athlete identity and gesture boundaries need review."
+    },
+    {
+      "collection": "commons",
+      "clip_id": "dourdan-32",
+      "sha256": "65c9b0b83f3ffebb39e93be516f000503c62e7f3399886d86d3c821982325cf8",
+      "domain": "modern_electric_fencing",
+      "eligible": true,
+      "note": "Commons describes this as a continuous segment of the 2014 Dourdan junior sabre men's final, Curatoli vs. Lambert. Share the existing Dourdan event group; athlete identity and gesture boundaries need review."
+    },
+    {
+      "collection": "commons",
+      "clip_id": "dourdan-33",
+      "sha256": "be61e2ba3c2fe39fef6ef96e1a2e0b09eccebc01111df5b211a34cbed9ae54f5",
+      "domain": "modern_electric_fencing",
+      "eligible": true,
+      "note": "Commons describes this as a continuous segment of the 2014 Dourdan junior sabre men's final, Curatoli vs. Lambert. Share the existing Dourdan event group; athlete identity and gesture boundaries need review."
+    },
+    {
+      "collection": "commons",
+      "clip_id": "dourdan-34",
+      "sha256": "02d5f76f23822fdc45730fe9b3d046c85c81c30808631e44fe824a0bb64d30bf",
+      "domain": "modern_electric_fencing",
+      "eligible": true,
+      "note": "Commons describes this as a continuous segment of the 2014 Dourdan junior sabre men's final, Curatoli vs. Lambert. Share the existing Dourdan event group; athlete identity and gesture boundaries need review."
+    },
+    {
+      "collection": "commons",
+      "clip_id": "dourdan-35",
+      "sha256": "1abf7155fe05d4ef377eab7b73ac9a6040a31d936d0f1bf91d6a2a38780009f0",
+      "domain": "modern_electric_fencing",
+      "eligible": true,
+      "note": "Commons describes this as a continuous segment of the 2014 Dourdan junior sabre men's final, Curatoli vs. Lambert. Share the existing Dourdan event group; athlete identity and gesture boundaries need review."
+    },
+    {
+      "collection": "commons",
+      "clip_id": "t64-pozdniakova-sofia-aksamit-monica-29-may-moscow-sabre-2016",
+      "sha256": "6c4d67630be3e0636b027490473453578f87df51f1839fc7de86ab0cee4b9632",
+      "domain": "modern_electric_fencing",
+      "eligible": true,
+      "note": "Full continuous 2016 Moscow sabre round-of-64 bout, Pozdniakova vs. Aksamit, attributed to RUSFENCING-TV under CC BY 3.0. This is a separate bout/event group; review camera framing, athlete tracks and phase/action boundaries."
+    },
+    {
+      "collection": "commons",
+      "clip_id": "aspromonte-vs-baldini",
+      "sha256": "3693e8a24d8c56033eeb4ee6665ba1ba21bd91d98f348d65d3109462ecb53504",
+      "domain": "modern_electric_fencing",
+      "eligible": true,
+      "note": "2010 European Championships men's foil final exchange, Aspromonte vs. Baldini, CC BY-SA 3.0. Commons notes this is one score rather than the full bout; labels require visual review."
+    },
+    {
+      "collection": "commons",
+      "clip_id": "epeefence",
+      "sha256": "e6e604df8c67ecb025dade6a42a1bebab0b6d85ae4dcdd9f04713e2ce57f3c47",
+      "domain": "modern_electric_fencing",
+      "eligible": true,
+      "note": "Very short, 320x240 \u00e9p\u00e9e excerpt from the Amarillo Open tournament in 2007, CC BY-SA 2.5. Keep grouped with the Foilfence clip; low resolution and short duration limit its usefulness."
+    },
+    {
+      "collection": "commons",
+      "clip_id": "foilfence",
+      "sha256": "ee7865c1c118a438036a6ff2748410edcb864bafe409edab0a2143c045a8f2c2",
+      "domain": "modern_electric_fencing",
+      "eligible": true,
+      "note": "Very short, 320x240 foil excerpt from the Amarillo Open tournament in 2007, CC BY-SA 2.5. Keep grouped with the Epeefence clip; low resolution and short duration limit its usefulness."
+    },
+    {
+      "collection": "youtube-cc",
+      "clip_id": "rigin-meinhardt-2016-t8",
+      "sha256": "8ea21bfc8f00a38efd36dfa9b013073589e522dcd06aed8e699a40d541791cf7",
+      "domain": "modern_electric_fencing",
+      "eligible": true,
+      "note": "User-provided local copy of a modern electric foil bout. The YouTube source page displayed Creative Commons Attribution (reuse allowed) when checked 2026-10-04. Retain RUSFENCING-TV attribution. Approved only as source material for provisional review; no gesture labels are ground truth."
+    },
+    {
+      "collection": "footwork-clips",
+      "clip_id": "rigin-meinhardt-2016-t8-300000-330000",
+      "sha256": "10251d40a085607651157eac2b10f883533247819227e966bc318e05958339a8",
+      "domain": "modern_electric_fencing",
+      "eligible": true,
+      "note": "30-second 05:00\u201305:30 derived live view includes a camera reframe; first pose pass tracked 69/360 samples (19%). Retain for playback/boundary review only; pose output is low coverage. Same match split group, no reviewed labels."
+    },
+    {
+      "collection": "footwork-clips",
+      "clip_id": "rigin-meinhardt-2016-t8-300000-307500",
+      "sha256": "4c9cc40b8eb882e7b0fa79611d28d27e59abae1d8e36cb32a020d1515ba43624",
+      "domain": "modern_electric_fencing",
+      "eligible": true,
+      "note": "7.5-second 05:00\u201305:07.5 derived live exchange; 82/90 samples tracked (91%), with one ambiguous and one missing frame. Assistant visual drafts remain provisional; same match split group."
+    },
+    {
+      "collection": "footwork-clips",
+      "clip_id": "rigin-meinhardt-2016-t8-95000-103000",
+      "sha256": "e066f67a2a61423aba3f3f6e78b5c1f3ba3fc105447fa86aee59fcd6c022410e",
+      "domain": "modern_electric_fencing",
+      "eligible": true,
+      "note": "Assistant visually inspected modern electric foil foreground footage. Derived from same Rigin\u2013Meinhardt match; moving oblique camera, actor/crop review needed. All action labels provisional."
+    },
+    {
+      "collection": "footwork-clips",
+      "clip_id": "rigin-meinhardt-2016-t8-175000-185000",
+      "sha256": "10c523d6193887da1681d9b9cf79a3bb70ef35d93606b29ee2c81af07f745210",
+      "domain": "modern_electric_fencing",
+      "eligible": true,
+      "note": "Assistant visually inspected modern electric foil foreground footage. Derived from same Rigin\u2013Meinhardt match; moving oblique camera, actor/crop review needed. All action labels provisional."
+    },
+    {
+      "collection": "footwork-clips",
+      "clip_id": "rigin-meinhardt-2016-t8-416000-424000",
+      "sha256": "145031f9554a817d31d609418d5ad51131447acdd83995ec05dcfa898fea8244",
+      "domain": "modern_electric_fencing",
+      "eligible": true,
+      "note": "Assistant visually inspected modern electric foil foreground footage. Derived from same Rigin\u2013Meinhardt match; moving oblique camera, actor/crop review needed. All action labels provisional."
+    },
+    {
+      "collection": "footwork-clips",
+      "clip_id": "rigin-meinhardt-2016-t8-576000-584000",
+      "sha256": "c464eb9e564d756519e3417a7ccf1bdcb635b39bb993f7fbbce09538ded1fe19",
+      "domain": "modern_electric_fencing",
+      "eligible": true,
+      "note": "Assistant visually inspected modern electric foil foreground footage. Derived from same Rigin\u2013Meinhardt match; moving oblique camera, actor/crop review needed. All action labels provisional."
     }
   ]
 }

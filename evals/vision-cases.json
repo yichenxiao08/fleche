@@ -1,0 +1,304 @@
+[
+  {
+    "id": "commons/dourdan-04:42-11267",
+    "clip": "commons/dourdan-04",
+    "start_ms": 42,
+    "end_ms": 11267,
+    "track_id": "primary",
+    "question": "Which movement is performed by the selected fencer (primary) in this interval? Use the saved footwork taxonomy; reply with one label or unknown. Taxonomy: advance, retreat, lunge, recovery, bounce, fleche, en_garde, jump_forward, jump_backward, other.",
+    "reference": "other",
+    "reference_type": "saved_human_footwork_label",
+    "label_revision": 2
+  },
+  {
+    "id": "commons/dourdan-04:11267-12360",
+    "clip": "commons/dourdan-04",
+    "start_ms": 11267,
+    "end_ms": 12360,
+    "track_id": "primary",
+    "question": "Which movement is performed by the selected fencer (primary) in this interval? Use the saved footwork taxonomy; reply with one label or unknown. Taxonomy: advance, retreat, lunge, recovery, bounce, fleche, en_garde, jump_forward, jump_backward, other.",
+    "reference": "en_garde",
+    "reference_type": "saved_human_footwork_label",
+    "label_revision": 2
+  },
+  {
+    "id": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000:0-6500",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000",
+    "start_ms": 0,
+    "end_ms": 6500,
+    "track_id": "foreground-left-rigin",
+    "question": "Which movement is performed by the selected fencer (foreground-left-rigin) in this interval? Use the saved footwork taxonomy; reply with one label or unknown. Taxonomy: advance, retreat, lunge, recovery, bounce, fleche, en_garde, jump_forward, jump_backward, other.",
+    "reference": "other",
+    "reference_type": "saved_human_footwork_label",
+    "label_revision": 2
+  },
+  {
+    "id": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000:6829-7000",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000",
+    "start_ms": 6829,
+    "end_ms": 7000,
+    "track_id": "foreground-left-rigin",
+    "question": "Which movement is performed by the selected fencer (foreground-left-rigin) in this interval? Use the saved footwork taxonomy; reply with one label or unknown. Taxonomy: advance, retreat, lunge, recovery, bounce, fleche, en_garde, jump_forward, jump_backward, other.",
+    "reference": "en_garde",
+    "reference_type": "saved_human_footwork_label",
+    "label_revision": 2
+  },
+  {
+    "id": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000:700-1700",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000",
+    "start_ms": 700,
+    "end_ms": 1700,
+    "track_id": "foreground-left-rigin",
+    "question": "Which movement is performed by the selected fencer (foreground-left-rigin) in this interval? Use the saved footwork taxonomy; reply with one label or unknown. Taxonomy: advance, retreat, lunge, recovery, bounce, fleche, en_garde, jump_forward, jump_backward, other.",
+    "reference": "lunge",
+    "reference_type": "saved_human_footwork_label",
+    "label_revision": 3
+  },
+  {
+    "id": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000:2000-3700",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000",
+    "start_ms": 2000,
+    "end_ms": 3700,
+    "track_id": "foreground-left-rigin",
+    "question": "Which movement is performed by the selected fencer (foreground-left-rigin) in this interval? Use the saved footwork taxonomy; reply with one label or unknown. Taxonomy: advance, retreat, lunge, recovery, bounce, fleche, en_garde, jump_forward, jump_backward, other.",
+    "reference": "other",
+    "reference_type": "saved_human_footwork_label",
+    "label_revision": 3
+  },
+  {
+    "id": "mit-ocw/advance_lunge:0-5660",
+    "clip": "mit-ocw/advance_lunge",
+    "start_ms": 0,
+    "end_ms": 5660,
+    "track_id": "primary",
+    "question": "Which movement is performed by the selected fencer (primary) in this interval? Use the saved footwork taxonomy; reply with one label or unknown. Taxonomy: advance, retreat, lunge, recovery, bounce, fleche, en_garde, jump_forward, jump_backward, other.",
+    "reference": "en_garde",
+    "reference_type": "saved_human_footwork_label",
+    "label_revision": 8
+  },
+  {
+    "id": "mit-ocw/advance_lunge:5750-6250",
+    "clip": "mit-ocw/advance_lunge",
+    "start_ms": 5750,
+    "end_ms": 6250,
+    "track_id": "primary",
+    "question": "Which movement is performed by the selected fencer (primary) in this interval? Use the saved footwork taxonomy; reply with one label or unknown. Taxonomy: advance, retreat, lunge, recovery, bounce, fleche, en_garde, jump_forward, jump_backward, other.",
+    "reference": "advance",
+    "reference_type": "saved_human_footwork_label",
+    "label_revision": 8
+  },
+  {
+    "id": "mit-ocw/jumpe_lunge:0-2083",
+    "clip": "mit-ocw/jumpe_lunge",
+    "start_ms": 0,
+    "end_ms": 2083,
+    "track_id": "primary",
+    "question": "Which movement is performed by the selected fencer (primary) in this interval? Use the saved footwork taxonomy; reply with one label or unknown. Taxonomy: advance, retreat, lunge, recovery, bounce, fleche, en_garde, jump_forward, jump_backward, other.",
+    "reference": "en_garde",
+    "reference_type": "saved_human_footwork_label",
+    "label_revision": 3
+  },
+  {
+    "id": "mit-ocw/jumpe_lunge:2167-2584",
+    "clip": "mit-ocw/jumpe_lunge",
+    "start_ms": 2167,
+    "end_ms": 2584,
+    "track_id": "primary",
+    "question": "Which movement is performed by the selected fencer (primary) in this interval? Use the saved footwork taxonomy; reply with one label or unknown. Taxonomy: advance, retreat, lunge, recovery, bounce, fleche, en_garde, jump_forward, jump_backward, other.",
+    "reference": "jump_forward",
+    "reference_type": "saved_human_footwork_label",
+    "label_revision": 3
+  },
+  {
+    "id": "mit-ocw/jump_forward_jump_back:0-2250",
+    "clip": "mit-ocw/jump_forward_jump_back",
+    "start_ms": 0,
+    "end_ms": 2250,
+    "track_id": "primary",
+    "question": "Which movement is performed by the selected fencer (primary) in this interval? Use the saved footwork taxonomy; reply with one label or unknown. Taxonomy: advance, retreat, lunge, recovery, bounce, fleche, en_garde, jump_forward, jump_backward, other.",
+    "reference": "en_garde",
+    "reference_type": "saved_human_footwork_label",
+    "label_revision": 4
+  },
+  {
+    "id": "mit-ocw/jump_forward_jump_back:2333-3083",
+    "clip": "mit-ocw/jump_forward_jump_back",
+    "start_ms": 2333,
+    "end_ms": 3083,
+    "track_id": "primary",
+    "question": "Which movement is performed by the selected fencer (primary) in this interval? Use the saved footwork taxonomy; reply with one label or unknown. Taxonomy: advance, retreat, lunge, recovery, bounce, fleche, en_garde, jump_forward, jump_backward, other.",
+    "reference": "jump_forward",
+    "reference_type": "saved_human_footwork_label",
+    "label_revision": 4
+  },
+  {
+    "id": "mit-ocw/jump_lunge_group:0-2417",
+    "clip": "mit-ocw/jump_lunge_group",
+    "start_ms": 0,
+    "end_ms": 2417,
+    "track_id": "primary",
+    "question": "Which movement is performed by the selected fencer (primary) in this interval? Use the saved footwork taxonomy; reply with one label or unknown. Taxonomy: advance, retreat, lunge, recovery, bounce, fleche, en_garde, jump_forward, jump_backward, other.",
+    "reference": "en_garde",
+    "reference_type": "saved_human_footwork_label",
+    "label_revision": 2
+  },
+  {
+    "id": "mit-ocw/jump_lunge_group:2500-3083",
+    "clip": "mit-ocw/jump_lunge_group",
+    "start_ms": 2500,
+    "end_ms": 3083,
+    "track_id": "primary",
+    "question": "Which movement is performed by the selected fencer (primary) in this interval? Use the saved footwork taxonomy; reply with one label or unknown. Taxonomy: advance, retreat, lunge, recovery, bounce, fleche, en_garde, jump_forward, jump_backward, other.",
+    "reference": "jump_forward",
+    "reference_type": "saved_human_footwork_label",
+    "label_revision": 2
+  },
+  {
+    "id": "mit-ocw/parry_4_repost:0-4250",
+    "clip": "mit-ocw/parry_4_repost",
+    "start_ms": 0,
+    "end_ms": 4250,
+    "track_id": "primary",
+    "question": "Which movement is performed by the selected fencer (primary) in this interval? Use the saved footwork taxonomy; reply with one label or unknown. Taxonomy: advance, retreat, lunge, recovery, bounce, fleche, en_garde, jump_forward, jump_backward, other.",
+    "reference": "en_garde",
+    "reference_type": "saved_human_footwork_label",
+    "label_revision": 1
+  },
+  {
+    "id": "mit-ocw/parry_4_repost:4500-6083",
+    "clip": "mit-ocw/parry_4_repost",
+    "start_ms": 4500,
+    "end_ms": 6083,
+    "track_id": "primary",
+    "question": "Which movement is performed by the selected fencer (primary) in this interval? Use the saved footwork taxonomy; reply with one label or unknown. Taxonomy: advance, retreat, lunge, recovery, bounce, fleche, en_garde, jump_forward, jump_backward, other.",
+    "reference": "lunge",
+    "reference_type": "saved_human_footwork_label",
+    "label_revision": 1
+  },
+  {
+    "id": "commons/dourdan-04:technique-16",
+    "clip": "commons/dourdan-04",
+    "question": "Does the front knee pass the front toe at the lunge peak?",
+    "start_ms": 0,
+    "end_ms": null,
+    "reference": null,
+    "reference_type": "independent_review_required"
+  },
+  {
+    "id": "commons/dourdan-04:technique-17",
+    "clip": "commons/dourdan-04",
+    "question": "Which complete repetition has the slowest recovery?",
+    "start_ms": 0,
+    "end_ms": null,
+    "reference": null,
+    "reference_type": "independent_review_required"
+  },
+  {
+    "id": "commons/dourdan-04:technique-18",
+    "clip": "commons/dourdan-04",
+    "question": "Does weapon-arm extension begin before the front foot moves?",
+    "start_ms": 0,
+    "end_ms": null,
+    "reference": null,
+    "reference_type": "independent_review_required"
+  },
+  {
+    "id": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000:technique-19",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000",
+    "question": "Does the front knee pass the front toe at the lunge peak?",
+    "start_ms": 0,
+    "end_ms": null,
+    "reference": null,
+    "reference_type": "independent_review_required"
+  },
+  {
+    "id": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000:technique-20",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000",
+    "question": "Which complete repetition has the slowest recovery?",
+    "start_ms": 0,
+    "end_ms": null,
+    "reference": null,
+    "reference_type": "independent_review_required"
+  },
+  {
+    "id": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000:technique-21",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000",
+    "question": "Does weapon-arm extension begin before the front foot moves?",
+    "start_ms": 0,
+    "end_ms": null,
+    "reference": null,
+    "reference_type": "independent_review_required"
+  },
+  {
+    "id": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000:technique-22",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000",
+    "question": "Does the front knee pass the front toe at the lunge peak?",
+    "start_ms": 0,
+    "end_ms": null,
+    "reference": null,
+    "reference_type": "independent_review_required"
+  },
+  {
+    "id": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000:technique-23",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000",
+    "question": "Which complete repetition has the slowest recovery?",
+    "start_ms": 0,
+    "end_ms": null,
+    "reference": null,
+    "reference_type": "independent_review_required"
+  },
+  {
+    "id": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000:technique-24",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000",
+    "question": "Does weapon-arm extension begin before the front foot moves?",
+    "start_ms": 0,
+    "end_ms": null,
+    "reference": null,
+    "reference_type": "independent_review_required"
+  },
+  {
+    "id": "mit-ocw/advance_lunge:technique-25",
+    "clip": "mit-ocw/advance_lunge",
+    "question": "Does the front knee pass the front toe at the lunge peak?",
+    "start_ms": 0,
+    "end_ms": null,
+    "reference": null,
+    "reference_type": "independent_review_required"
+  },
+  {
+    "id": "mit-ocw/advance_lunge:technique-26",
+    "clip": "mit-ocw/advance_lunge",
+    "question": "Which complete repetition has the slowest recovery?",
+    "start_ms": 0,
+    "end_ms": null,
+    "reference": null,
+    "reference_type": "independent_review_required"
+  },
+  {
+    "id": "mit-ocw/advance_lunge:technique-27",
+    "clip": "mit-ocw/advance_lunge",
+    "question": "Does weapon-arm extension begin before the front foot moves?",
+    "start_ms": 0,
+    "end_ms": null,
+    "reference": null,
+    "reference_type": "independent_review_required"
+  },
+  {
+    "id": "mit-ocw/jumpe_lunge:technique-28",
+    "clip": "mit-ocw/jumpe_lunge",
+    "question": "Does the front knee pass the front toe at the lunge peak?",
+    "start_ms": 0,
+    "end_ms": null,
+    "reference": null,
+    "reference_type": "independent_review_required"
+  },
+  {
+    "id": "mit-ocw/jumpe_lunge:technique-29",
+    "clip": "mit-ocw/jumpe_lunge",
+    "question": "Which complete repetition has the slowest recovery?",
+    "start_ms": 0,
+    "end_ms": null,
+    "reference": null,
+    "reference_type": "independent_review_required"
+  }
+]

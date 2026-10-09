@@ -45,6 +45,12 @@ def plain(value):
     return html.unescape(re.sub(r"<[^>]+>", "", str(value))).strip()
 
 
+def clip_id_for_name(name):
+    if "Dourdan" in name:
+        return "dourdan-" + name.split(" - ")[-1].removesuffix(".webm")
+    return re.sub(r"[^a-z0-9]+", "-", Path(name).stem.lower()).strip("-")
+
+
 def collect(page, root):
     import av
 
@@ -57,11 +63,7 @@ def collect(page, root):
             f"License not in the documented collection policy: {title}: {license_name}"
         )
     name = title.removeprefix("File:")
-    clip_id = (
-        "dourdan-" + name.split(" - ")[-1].removesuffix(".webm")
-        if "Dourdan" in name
-        else Path(name).stem.lower()
-    )
+    clip_id = clip_id_for_name(name)
     folder = root / clip_id
     folder.mkdir(parents=True, exist_ok=True)
     target = folder / "source.video"
@@ -98,6 +100,10 @@ def collect(page, root):
         if "Dourdan" in name
         else "amarillo-2007-event"
         if name in {"Epeefence.ogv", "Foilfence.ogv"}
+        else "moscow-2016-event"
+        if name.startswith("T64 POZDNIAKOVA Sofia")
+        else "leipzig-2010-european-championships"
+        if name.startswith("Aspromonte vs. Baldini")
         else "evd-coldeportes-instructional-cohort"
         if name.startswith("EVD-")
         else "commons-other-event-unverified"
@@ -135,6 +141,11 @@ def main():
     parser.add_argument("--output", type=Path, default=Path("data/training/commons"))
     parser.add_argument("--max-new", type=int, default=20)
     parser.add_argument(
+        "--only",
+        nargs="+",
+        help="Collect only the selected clip IDs after refreshing Commons metadata.",
+    )
+    parser.add_argument(
         "--delay", type=float, default=15, help="Seconds between new media downloads (minimum 5)."
     )
     parser.add_argument(
@@ -155,13 +166,24 @@ def main():
     )
     with fetch("https://commons.wikimedia.org/w/api.php?" + query) as response:
         metadata = json.load(response)
-    pages = sorted(metadata["query"]["pages"].values(), key=lambda p: TITLES.index(p["title"]))
-    if len(pages) != len(TITLES) or any("imageinfo" not in page for page in pages):
+    all_pages = sorted(metadata["query"]["pages"].values(), key=lambda p: TITLES.index(p["title"]))
+    if len(all_pages) != len(TITLES) or any("imageinfo" not in page for page in all_pages):
         raise SystemExit("Wikimedia inventory changed; inspect metadata before collection.")
     (args.output / "inventory-metadata.json").write_text(
         json.dumps(metadata, indent=2), encoding="utf-8"
     )
-    records, pending, paused, downloaded = [], [], False, 0
+    if args.only:
+        requested = set(args.only)
+        title_by_id = {
+            clip_id_for_name(page["title"].removeprefix("File:")): page for page in all_pages
+        }
+        unknown = requested - set(title_by_id)
+        if unknown:
+            raise SystemExit(f"Unknown Commons clip IDs: {', '.join(sorted(unknown))}")
+        pages = [title_by_id[clip_id] for clip_id in args.only]
+    else:
+        pages = all_pages
+    pending, paused, downloaded = [], False, 0
     for page in pages:
         existing = next(
             (
@@ -173,7 +195,6 @@ def main():
             None,
         )
         if existing:
-            records.append(json.loads(existing.read_text(encoding="utf-8")))
             continue
         if args.inventory_only or downloaded >= args.max_new:
             pending.append(
@@ -190,7 +211,7 @@ def main():
         try:
             if downloaded:
                 time.sleep(max(5, args.delay))
-            records.append(collect(page, args.output))
+            collect(page, args.output)
             downloaded += 1
         except HTTPError as exc:
             pending.append(dict(title=page["title"], http_status=exc.code, reason=str(exc)))
@@ -198,6 +219,10 @@ def main():
                 paused = True
         except (ValueError, OSError) as exc:
             pending.append(dict(title=page["title"], reason=str(exc)))
+    records = [
+        json.loads(path.read_text(encoding="utf-8"))
+        for path in sorted(args.output.glob("*/source.json"))
+    ]
     (args.output / "manifest.json").write_text(
         json.dumps(
             dict(schema="fencecoach-source-manifest-v1", clips=records, pending=pending), indent=2

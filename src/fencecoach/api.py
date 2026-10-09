@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -8,6 +9,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from fencecoach.automatic_training import AutomaticTraining
 from fencecoach.coach.graph import EvidenceValidationError, run_coach
 from fencecoach.coach.providers import provider_status
 from fencecoach.coaching_jobs import CoachingJobs, CoachingWorker
@@ -31,11 +33,18 @@ logger = logging.getLogger(__name__)
 repository = Repository(settings.fencecoach_db_path)
 coaching_jobs = CoachingJobs(repository)
 video_jobs = VideoJobs(settings.fencecoach_db_path, settings.fencecoach_video_dir)
+automatic_training = AutomaticTraining(settings.fencecoach_video_dir.parent / "training")
 
 
 @asynccontextmanager
 async def lifespan(app):
     repository.list_sessions()
+    if settings.fencecoach_seed_examples:
+        from fencecoach.demo_seed import seed_examples
+
+        seed_examples(video_jobs, settings.fencecoach_examples_dir)
+    if settings.fencecoach_automatic_training:
+        automatic_training.start()
     coaching_worker = CoachingWorker(coaching_jobs)
     if settings.fencecoach_coaching_worker:
         coaching_worker.start()
@@ -43,6 +52,8 @@ async def lifespan(app):
     if settings.fencecoach_video_worker:
         worker.start()
     yield
+    if settings.fencecoach_automatic_training:
+        automatic_training.close()
     if settings.fencecoach_coaching_worker:
         coaching_worker.close()
     if settings.fencecoach_video_worker:
@@ -57,7 +68,9 @@ app = FastAPI(
 )
 app.add_middleware(UploadLimit)
 app.include_router(video_router(video_jobs, settings))
-app.include_router(dataset_router(settings.fencecoach_video_dir.parent / "training"))
+app.include_router(
+    dataset_router(settings.fencecoach_video_dir.parent / "training", automatic_training)
+)
 web = Path(__file__).parent / "web"
 app.mount("/static", StaticFiles(directory=web), name="static")
 
@@ -126,6 +139,13 @@ def list_reports(session_id: str):
     return repository.list_runs(session_id)
 
 
+@app.get("/api/sessions/{session_id}/compare/{baseline_id}")
+def compare(session_id: str, baseline_id: str):
+    from fencecoach.comparisons import compare_sessions
+
+    return compare_sessions(get_session(session_id), get_session(baseline_id))
+
+
 def _report_or_error(request: CoachRequest, mode: str):
     try:
         return run_coach(request, mode)
@@ -141,9 +161,31 @@ def _report_or_error(request: CoachRequest, mode: str):
         ) from exc
 
 
+def require_supported_session(session):
+    """Apply QA to legacy saved video sessions as well as newly accepted clips."""
+    if not session.video_job_id:
+        return
+    from fencecoach.quality import assess_quality
+
+    path = video_jobs.directory / session.video_job_id / "result.json"
+    if not path.is_file():
+        raise HTTPException(
+            409, "Video evidence is unavailable; restore or re-analyze the clip before coaching."
+        )
+    result = json.loads(path.read_text(encoding="utf-8"))
+    qa = result.get("quality_gate") or assess_quality(result)
+    if not qa["coaching_allowed"]:
+        raise HTTPException(
+            422,
+            "This video is unsupported for coaching. "
+            + " ".join(i["tip"] for i in qa["issues"] if i["severity"] == "reject"),
+        )
+
+
 @app.post("/api/sessions/{session_id}/reports", response_model=RunRecord, status_code=201)
 def create_report(session_id: str, data: ReportRequest):
     session = get_session(session_id)
+    require_supported_session(session)
     if data.focus_metric_id and not any(
         metric.metric_id == data.focus_metric_id for metric in session.metrics
     ):
@@ -210,6 +252,7 @@ def delete_training_log(log_id: str):
 @app.post("/api/sessions/{session_id}/coaching-jobs", status_code=202)
 def queue_coaching(session_id: str, data: ReportRequest):
     session = get_session(session_id)
+    require_supported_session(session)
     try:
         request = CoachRequest(
             session_id=session_id,

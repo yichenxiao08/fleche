@@ -2,6 +2,9 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .venv/
+.phoenix-venv/
+.phoenix-py312/
+tmp/
 .env
 .env.*
 !.env.example

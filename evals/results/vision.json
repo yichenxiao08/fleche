@@ -1,0 +1,258 @@
+{
+  "status": "not_run",
+  "questions": 30,
+  "independent_action_labels": 16,
+  "technique_accuracy": null,
+  "reason": "No authenticated frontier vision models configured. Joint geometry and recovery calculations are pipeline proxies, not independently reviewed technique truth.",
+  "pose_baseline": [
+    {
+      "case_id": "commons/dourdan-04:42-11267",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "No verified mapping between pipeline athlete identity and the reviewed selected track; action accuracy is not scored."
+    },
+    {
+      "case_id": "commons/dourdan-04:11267-12360",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "No verified mapping between pipeline athlete identity and the reviewed selected track; action accuracy is not scored."
+    },
+    {
+      "case_id": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000:0-6500",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "No verified mapping between pipeline athlete identity and the reviewed selected track; action accuracy is not scored."
+    },
+    {
+      "case_id": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000:6829-7000",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "No verified mapping between pipeline athlete identity and the reviewed selected track; action accuracy is not scored."
+    },
+    {
+      "case_id": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000:700-1700",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "No verified mapping between pipeline athlete identity and the reviewed selected track; action accuracy is not scored."
+    },
+    {
+      "case_id": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000:2000-3700",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "No verified mapping between pipeline athlete identity and the reviewed selected track; action accuracy is not scored."
+    },
+    {
+      "case_id": "mit-ocw/advance_lunge:0-5660",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "No verified mapping between pipeline athlete identity and the reviewed selected track; action accuracy is not scored."
+    },
+    {
+      "case_id": "mit-ocw/advance_lunge:5750-6250",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "No verified mapping between pipeline athlete identity and the reviewed selected track; action accuracy is not scored."
+    },
+    {
+      "case_id": "mit-ocw/jumpe_lunge:0-2083",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "No verified mapping between pipeline athlete identity and the reviewed selected track; action accuracy is not scored."
+    },
+    {
+      "case_id": "mit-ocw/jumpe_lunge:2167-2584",
+      "answer": "lunge",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "No verified mapping between pipeline athlete identity and the reviewed selected track; action accuracy is not scored."
+    },
+    {
+      "case_id": "mit-ocw/jump_forward_jump_back:0-2250",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "No verified mapping between pipeline athlete identity and the reviewed selected track; action accuracy is not scored."
+    },
+    {
+      "case_id": "mit-ocw/jump_forward_jump_back:2333-3083",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "No verified mapping between pipeline athlete identity and the reviewed selected track; action accuracy is not scored."
+    },
+    {
+      "case_id": "mit-ocw/jump_lunge_group:0-2417",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "No verified mapping between pipeline athlete identity and the reviewed selected track; action accuracy is not scored."
+    },
+    {
+      "case_id": "mit-ocw/jump_lunge_group:2500-3083",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "No verified mapping between pipeline athlete identity and the reviewed selected track; action accuracy is not scored."
+    },
+    {
+      "case_id": "mit-ocw/parry_4_repost:0-4250",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "No verified mapping between pipeline athlete identity and the reviewed selected track; action accuracy is not scored."
+    },
+    {
+      "case_id": "mit-ocw/parry_4_repost:4500-6083",
+      "answer": "lunge",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "No verified mapping between pipeline athlete identity and the reviewed selected track; action accuracy is not scored."
+    },
+    {
+      "case_id": "commons/dourdan-04:technique-16",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "This pipeline does not establish knee-to-toe alignment or continuous arm-versus-foot initiation from peak angles."
+    },
+    {
+      "case_id": "commons/dourdan-04:technique-17",
+      "answer": {
+        "candidate": "recovery-01",
+        "start_ms": 29196,
+        "end_ms": 29779
+      },
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "Longest proposed return interval; neither a reviewed complete repetition nor a quality verdict."
+    },
+    {
+      "case_id": "commons/dourdan-04:technique-18",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "This pipeline does not establish knee-to-toe alignment or continuous arm-versus-foot initiation from peak angles."
+    },
+    {
+      "case_id": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000:technique-19",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "This pipeline does not establish knee-to-toe alignment or continuous arm-versus-foot initiation from peak angles."
+    },
+    {
+      "case_id": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000:technique-20",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "Longest proposed return interval; neither a reviewed complete repetition nor a quality verdict."
+    },
+    {
+      "case_id": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000:technique-21",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "This pipeline does not establish knee-to-toe alignment or continuous arm-versus-foot initiation from peak angles."
+    },
+    {
+      "case_id": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000:technique-22",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "This pipeline does not establish knee-to-toe alignment or continuous arm-versus-foot initiation from peak angles."
+    },
+    {
+      "case_id": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000:technique-23",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "Longest proposed return interval; neither a reviewed complete repetition nor a quality verdict."
+    },
+    {
+      "case_id": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000:technique-24",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "This pipeline does not establish knee-to-toe alignment or continuous arm-versus-foot initiation from peak angles."
+    },
+    {
+      "case_id": "mit-ocw/advance_lunge:technique-25",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "This pipeline does not establish knee-to-toe alignment or continuous arm-versus-foot initiation from peak angles."
+    },
+    {
+      "case_id": "mit-ocw/advance_lunge:technique-26",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "Longest proposed return interval; neither a reviewed complete repetition nor a quality verdict."
+    },
+    {
+      "case_id": "mit-ocw/advance_lunge:technique-27",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "This pipeline does not establish knee-to-toe alignment or continuous arm-versus-foot initiation from peak angles."
+    },
+    {
+      "case_id": "mit-ocw/jumpe_lunge:technique-28",
+      "answer": "unknown",
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "This pipeline does not establish knee-to-toe alignment or continuous arm-versus-foot initiation from peak angles."
+    },
+    {
+      "case_id": "mit-ocw/jumpe_lunge:technique-29",
+      "answer": {
+        "candidate": "recovery-01",
+        "start_ms": 3000,
+        "end_ms": 4083
+      },
+      "quality_verdict": "unsupported",
+      "coaching_allowed": false,
+      "accuracy": null,
+      "reason": "Longest proposed return interval; neither a reviewed complete repetition nor a quality verdict."
+    }
+  ],
+  "models": []
+}

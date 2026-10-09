@@ -25,6 +25,14 @@ def main():
             time.sleep(1)
     else:
         raise RuntimeError("Container did not become healthy")
+    jobs = call("/api/videos")
+    if len([j for j in jobs if j.get("packaged_example")]) != 3:
+        raise RuntimeError("Expected three preprocessed, attributed archival examples")
+    for job in jobs:
+        if job.get("packaged_example"):
+            result = call("/api/videos/" + job["job_id"] + "/result")
+            if result["quality_gate"]["coaching_allowed"]:
+                raise RuntimeError("Low-resolution demo was incorrectly marked supported")
     session = call("/api/demo", {})
     run = call(
         "/api/sessions/" + session["session_id"] + "/reports",

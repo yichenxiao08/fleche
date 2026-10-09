@@ -12,6 +12,7 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 from fencecoach.coach.graph import EvidenceValidationError, run_coach
+from fencecoach.coach.providers import warm_local_model
 from fencecoach.schemas import CoachRequest
 from fencecoach.settings import settings
 
@@ -35,6 +36,7 @@ class CoachingJobs:
             mode=mode,
             error=None,
             run_id=None,
+            partial_reply="",
         )
         with closing(self.repository._connect()) as db, db:
             db.execute("BEGIN IMMEDIATE")
@@ -119,6 +121,7 @@ class CoachingWorker:
         )
 
     def start(self):
+        threading.Thread(target=warm_local_model, daemon=True, name="coach-warmup").start()
         self.thread.start()
 
     def close(self):
@@ -127,10 +130,17 @@ class CoachingWorker:
 
     def execute(self, job, owner):
         try:
+
+            def publish(text):
+                self.jobs.update(
+                    job["job_id"], owner, partial_reply=text, stage="Coach is replying"
+                )
+
             stages = {
                 "gather_metrics": "Reading session evidence",
                 "retrieve": "Finding relevant practice notes",
-                "agent": "Planning your next practice",
+                "agent": "Coach is replying",
+                "grounding": "Checking that the advice matches your evidence",
                 "tools": "Checking measurements and training history",
                 "format_report": "Writing your coaching review",
                 "validate": "Checking evidence references",
@@ -141,6 +151,7 @@ class CoachingWorker:
                 on_step=lambda step: self.jobs.update(
                     job["job_id"], owner, stage=stages.get(step, "Reviewing evidence")
                 ),
+                on_text=publish,
             )
             # Save run and complete job in one transaction, only while this worker owns the lease.
             with closing(self.jobs.repository._connect()) as db, db:
@@ -178,7 +189,7 @@ class CoachingWorker:
         active = {}
         concurrency = max(1, min(8, settings.fencecoach_coaching_concurrency))
         with ThreadPoolExecutor(max_workers=concurrency, thread_name_prefix="coach") as pool:
-            while not self.stop.wait(1):
+            while not self.stop.wait(0.2):
                 try:
                     for job_id, future in list(active.items()):
                         if future.done():

@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "researched_on": "2026-10-04",
+  "scope": "Modern competitive fencing: en garde, footwork, lunge, advance-lunge and fleche.",
+  "status": "Literature reference catalog; not labeled training examples or validated automatic technique thresholds.",
+  "interpretation": {
+    "numeric_references_are_population_norms": false,
+    "automatic_pass_fail_enabled": false,
+    "sd_is_tolerance_band": false,
+    "angle_convention": "FenceCoach measures the 2D included joint angle: a straight leg is approximately 180 degrees. Papers often report anatomical flexion from approximately zero. Subtracting from 180 does not correct 2D projection, joint-model, or movement-phase differences.",
+    "speed_convention": "Blade velocity, whole-body center-of-mass velocity, hip-proxy velocity and normalized torso/s are different quantities.",
+    "comparison_requirements": ["same movement and weapon", "same phase and event definitions", "compatible angle convention and camera geometry", "matched target distance and intended action", "compatible population and effort", "matching measured landmark or body model and units"]
+  },
+  "sources": [
+    {"id":"nwfc-guide","title":"Northwest Fencing Center Beginner Guide","url":"https://www.nwfencing.org/wp-content/uploads/2024/09/Beginner-Guide.pdf","kind":"club_coaching_guide","locator":"page 3","access":"Original PDF text and diagram inspected","evidence_level":"Teaching convention, not a validation study"},
+    {"id":"fie-2026","title":"FIE Technical Rules, August 2026","url":"https://static.fie.org/uploads/40/204126-Technical%20rules%20August%202026%20ang.pdf","kind":"official_rules","locator":"t.83.2(a), t.101.5","access":"Official PDF inspected","evidence_level":"Weapon-specific rules, not a biomechanical norm"},
+    {"id":"akbas-2023","title":"Influence of Target Width and Distance on Postural Adjustments in a Fencing Lunge","url":"https://pmc.ncbi.nlm.nih.gov/articles/PMC10203838/","doi":"10.5114/jhk/161572","kind":"primary_research","population":"8 elite female Polish national-team epee fencers","locator":"Methods; Table 1","access":"Full text and table inspected"},
+    {"id":"chida-2026","title":"Interaction of target distance and movement type on lower limb kinematics in fencing","url":"https://pmc.ncbi.nlm.nih.gov/articles/PMC13050851/","kind":"primary_research","population":"12 skilled right-handed male university foil fencers; mean age 19.5 years","locator":"Methods 2.2-2.5; Table 1","access":"Full text and table inspected","quality_note":"Discussion contains inconsistent descriptions of the direction of some interactions. Catalog uses Table 1 values and explicit methods, not those conflicting descriptions."},
+    {"id":"mulloy-2018","title":"An applied paradigm for simple analysis of the lower limb kinematic chain in explosive movements: an example using the fencing foil attacking lunge","url":"https://pure.cardiffmet.ac.uk/en/publications/an-applied-paradigm-for-simple-analysis-of-the-lower-limb-kinemat/","doi":"10.1080/23335432.2018.1454342","kind":"primary_research","population":"7 skilled and 8 novice fencers","locator":"Author institution's abstract","access":"Primary institutional abstract; full-text PMC access unavailable"},
+    {"id":"guan-2018","title":"Biomechanical insights into the determinants of speed in the fencing lunge","url":"https://pubmed.ncbi.nlm.nih.gov/29249174/","doi":"10.1080/17461391.2017.1414886","kind":"primary_research","population":"7 elite and 12 intermediate-level fencers","locator":"Abstract","access":"Indexed author abstract"},
+    {"id":"bober-2016","title":"Kinematic Characterisation of the Lunge and the Fleche in Epee Fencing: Two Case Studies","url":"https://reference-global.com/2/v2/download/article/10.1515/pjst-2016-0023.pdf","doi":"10.1515/pjst-2016-0023","kind":"primary_research_case_study","population":"2 male Polish national-team epee fencers, heights 174 and 193 cm","locator":"Abstract; Methods; Figures 2 and 5","access":"Original PDF text and figures inspected"},
+    {"id":"borysiuk-2019","title":"Fleche versus Lunge as the Optimal Footwork Technique in Fencing","url":"https://pmc.ncbi.nlm.nih.gov/articles/PMC6652143/","doi":"10.3390/ijerph16132315","kind":"primary_research","population":"6 world-leading female epee fencers","locator":"Methods; Table 1; Discussion","access":"Indexed primary article extracts and publisher abstract","quality_note":"Table labels time as ms but gives decimal seconds. Means below use the explicit discussion values in milliseconds; no SD conversion stored."}
+  ],
+  "references": [
+    {
+      "id":"introductory-stance-and-lunge","source_id":"nwfc-guide","movement":["en_garde","lunge","advance","retreat"],"type":"coaching_convention",
+      "guidance":"Introductory en garde aligns the feet approximately perpendicular with knees over their toes. A simple lunge combines weapon-arm extension and rear-leg push; the illustrated finish has a bent front leg and extended rear leg. Advance initiates with the front foot; retreat with the rear foot.",
+      "numeric_teaching_cue":{"front_knee_at_lunge_finish_deg":90},
+      "application":"Explain the conventional beginner drill. A 90-degree illustration is not a validated tolerance band or a requirement for every bout action. Do not infer frontal alignment from a side camera alone."
+    },
+    {
+      "id":"foil-simple-attack-order","source_id":"fie-2026","movement":["lunge","fleche"],"weapon":"foil","type":"rule_based_sequence",
+      "guidance":"In the simple foil attack, arm straightening while threatening valid target precedes initiation of the lunge or fleche.",
+      "application":"Compare arm-motion onset with front-foot launch for an identified simple foil drill. An elbow angle at peak alone cannot establish this ordering or award priority."
+    },
+    {
+      "id":"sabre-crossing-restriction","source_id":"fie-2026","movement":["fleche"],"weapon":"sabre","type":"rule",
+      "guidance":"The fleche and forward movement with the rear foot completely passing the front foot are forbidden in sabre.",
+      "application":"Do not transfer epee fleche benchmarks or crossing-foot drills to sabre."
+    },
+    {
+      "id":"preferred-en-garde-width","source_id":"akbas-2023","movement":["en_garde"],"type":"descriptive_cohort",
+      "metric":"front-heel to rear-foot inner-edge distance","unit":"cm","mean":40.91,"sd":5.92,"n":8,
+      "protocol":"Natural stance averaged over three measurements; mean athlete height 176.2 cm.",
+      "application":"Useful evidence of a measurable individual starting stance, not a prescribed 41 cm stance for every athlete. FenceCoach ankle-center stance/torso ratio is not the same measurement."
+    },
+    {
+      "id":"lunge-body-speed-target-distance","source_id":"akbas-2023","movement":["lunge"],"weapon":"epee","type":"descriptive_cohort",
+      "metric":"maximum horizontal center-of-mass velocity","unit":"m/s","n":8,
+      "values":[{"target":"short, narrow","mean":1.466,"sd":0.253},{"target":"long, narrow","mean":1.702,"sd":0.222}],
+      "protocol":"Short/long target distances 145%/155% of athlete height; force-derived CoM velocity; front foot-off defines t0.",
+      "application":"Match distance and task. This is neither sword-tip speed nor FenceCoach recovery hip speed."
+    },
+    {
+      "id":"normal-distance-foil-joint-and-speed","source_id":"chida-2026","movement":["lunge","advance_lunge"],"weapon":"foil","type":"descriptive_cohort","n":12,
+      "protocol":"Target at 1.5 times height from rear toes; 30 x 30 cm chest-height target; fastest of three successful trials per condition; 500 Hz 3D motion capture; front toe-off to front heel contact.",
+      "values":[
+        {"metric":"front knee peak flexion","unit":"deg_anatomical_flexion","lunge":{"mean":74.00,"sd":13.13},"advance_lunge":{"mean":92.00,"sd":12.27}},
+        {"metric":"rear knee peak flexion","unit":"deg_anatomical_flexion","lunge":{"mean":57.25,"sd":5.86},"advance_lunge":{"mean":61.40,"sd":5.67}},
+        {"metric":"peak horizontal CoM velocity","unit":"m/s","lunge":{"mean":1.81,"sd":0.22},"advance_lunge":{"mean":2.42,"sd":0.21}}
+      ],
+      "application":"Protocol-specific reference means, not ideal knee targets. Current 2D included peak-frame angles do not directly match anatomical peak flexion over a 3D phase."
+    },
+    {
+      "id":"foil-skilled-novice-sword-speed","source_id":"mulloy-2018","movement":["lunge"],"weapon":"foil","type":"group_comparison",
+      "metric":"sword velocity","unit":"m/s","values":[{"group":"skilled","n":7,"mean":3.24,"sd":0.24},{"group":"novice","n":8,"mean":2.69,"sd":0.29}],
+      "protocol":"Propulsive lunge; rear-leg 3D kinematics, sword kinematics and kinetics.",
+      "application":"Motivates coordinated rear hip-knee-ankle propulsion. Do not compare with hip-proxy speed or classify an individual as novice from one velocity."
+    },
+    {
+      "id":"rear-leg-propulsion","source_id":"guan-2018","movement":["lunge"],"type":"group_comparison",
+      "guidance":"In maximum-effort lunges, elite participants had higher horizontal body velocity and rear-leg ground force; rear-knee power, moment and range of motion were associated with these outputs.",
+      "application":"Prioritize rear-leg propulsion and sequencing when investigating slow lunges. A video joint angle does not measure force or prove a strength deficit."
+    },
+    {
+      "id":"epee-lunge-fleche-body-speed","source_id":"bober-2016","movement":["lunge","fleche"],"weapon":"epee","type":"two_case_observations",
+      "metric":"resultant center-of-gravity velocity","unit":"m/s","n":2,
+      "values":{"lunge":[1.94,2.21],"fleche":[2.64,2.89]},
+      "protocol":"120 Hz 3D kinematics and force measurements; movements from en garde.",
+      "application":"Movement-specific examples only. Two athletes cannot define normal speed or a good/bad threshold. Resultant velocity is not horizontal hip velocity."
+    },
+    {
+      "id":"epee-lunge-fleche-movement-time","source_id":"borysiuk-2019","movement":["lunge","fleche"],"weapon":"epee","type":"descriptive_cohort",
+      "metric":"attack movement time excluding reaction time","unit":"ms","n":6,"means":{"fleche":510,"lunge":568},
+      "protocol":"Coach-triggered visual-response attacks ending with successful touch on coach's trunk.",
+      "application":"Do not compare to onset-to-stance-peak or recovery intervals. Touch detection and compatible movement-onset events are required."
+    }
+  ],
+  "data_leads": [
+    {"name":"Fencing Footwork Dataset used by FenceNet","primary_paper":"https://openaccess.thecvf.com/content/CVPR2022W/CVSports/papers/Zhu_FenceNet_Fine-Grained_Footwork_Recognition_in_Fencing_CVPRW_2022_paper.pdf","reported_videos":652,"reported_fencers":10,"reported_action_classes":6,"use":"Action recognition research lead; intermediate to expert practice footage is not automatically labeled good/bad technique.","downloaded_this_pass":false,"license_and_access_verified":false}
+  ]
+}

@@ -91,7 +91,10 @@ class Repository:
                 run
                 for row in rows
                 if (run := RunRecord.model_validate_json(row[0])).mode == "demo"
-                or (run.report.observations and run.citation_ids_valid)
+                or (
+                    run.citation_ids_valid
+                    and (run.response_kind == "conversation" or run.report.observations)
+                )
             ]
 
     def get_run(self, run_id: str) -> RunRecord | None:
@@ -163,7 +166,25 @@ class Repository:
             for session in self.list_sessions()
             if session.session_id != session_id and not session.is_demo
         ][:10]
-        return {"training_history": logs, "previous_reviews": reviews, "session_history": history}
+        chat_runs = [
+            run
+            for run in self.list_runs(session_id)
+            if run.mode != "demo" and run.response_kind == "conversation"
+        ][:6]
+        conversation = [
+            message
+            for run in reversed(chat_runs)
+            for message in (
+                {"role": "user", "content": run.question},
+                {"role": "assistant", "content": run.report.summary[:6000]},
+            )
+        ]
+        return {
+            "training_history": logs,
+            "previous_reviews": reviews,
+            "session_history": history,
+            "conversation_history": conversation,
+        }
 
     def list_plans(self):
         import json

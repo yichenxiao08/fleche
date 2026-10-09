@@ -64,32 +64,78 @@ def frame_features(landmarks, width, height):
     return features
 
 
-def enrich_candidates(frames, candidates, baseline):
+def enrich_candidates(frames, candidates, baseline, profile=None):
     for candidate in candidates:
         peak = min(
             (f for f in frames if f.get("features")),
             key=lambda f: abs(f["time_ms"] - candidate["start_ms"]),
         )
+        proposed_onset = candidate.get("movement_onset_ms")
         preceding = [
             f
             for f in frames
             if f.get("features")
             and candidate["start_ms"] - 4000 <= f["time_ms"] <= candidate["start_ms"]
         ]
-        # Last low-stance sample before expansion; a movement onset proposal, not attack intent.
-        guarded = [f for f in preceding if f["features"]["stance_ratio"] <= baseline + 0.20]
-        onset = guarded[-1] if guarded else preceding[0]
+        if proposed_onset is not None:
+            onset = min(preceding, key=lambda f: abs(f["time_ms"] - proposed_onset))
+        else:
+            # Last low-stance sample before expansion; a movement onset proposal, not attack intent.
+            guarded = [f for f in preceding if f["features"]["stance_ratio"] <= baseline + 0.20]
+            onset = guarded[-1] if guarded else preceding[0]
         candidate["onset_ms"] = onset["time_ms"]
         candidate["peak_features"] = peak["features"]
         candidate["onset_features"] = onset["features"]
-        candidate["classification"] = "stance_expansion_and_return"
+        action_frames = [
+            f
+            for f in frames
+            if onset["time_ms"] <= f["time_ms"] <= candidate["end_ms"] and f.get("features")
+        ]
+        knee_pairs = [
+            (f["features"].get("left_knee_angle"), f["features"].get("right_knee_angle"))
+            for f in action_frames
+        ]
+        knee_pairs = [
+            (left, right) for left, right in knee_pairs if left is not None and right is not None
+        ]
+        onset_left = onset["features"].get("left_knee_angle")
+        onset_right = onset["features"].get("right_knee_angle")
+        if knee_pairs and onset_left is not None and onset_right is not None:
+            min_left = min(pair[0] for pair in knee_pairs)
+            min_right = min(pair[1] for pair in knee_pairs)
+            peak_left = peak["features"].get("left_knee_angle")
+            peak_right = peak["features"].get("right_knee_angle")
+            peak_angles = [value for value in (peak_left, peak_right) if value is not None]
+            asymmetry = abs(peak_left - peak_right) if len(peak_angles) == 2 else 0
+            flexion_change = max(onset_left - min_left, onset_right - min_right)
+            cues = {
+                "knee_asymmetry_at_peak": round(asymmetry, 1),
+                "knee_flexion_from_onset": round(flexion_change, 1),
+                "bent_knee_at_peak": round(min(peak_angles), 1) if peak_angles else None,
+            }
+            cue_count = sum(
+                (
+                    asymmetry >= 18,
+                    flexion_change >= 10,
+                    bool(peak_angles and 55 <= min(peak_angles) <= 145),
+                )
+            )
+        else:
+            cues, cue_count = {}, 0
+        candidate["lunge_cues"] = cues
+        candidate["lunge_cue_count"] = cue_count
+        candidate["movement_label"] = "lunge" if cue_count >= 2 else "stance_expansion"
+        candidate["classification"] = (
+            "lunge_like_stance_expansion" if cue_count >= 2 else "stance_expansion_and_return"
+        )
         candidate["classification_source"] = "heuristic"
+        candidate["camera_motion"] = (profile or {}).get("camera_motion", "unknown")
         candidate["measurements"] = window_measurements(
             frames, candidate["start_ms"], candidate["end_ms"], candidate
         )
 
 
-def window_measurements(frames, start_ms, end_ms, candidate=None):
+def window_measurements(frames, start_ms, end_ms, candidate=None, profile=None):
     selected = [f for f in frames if start_ms <= f["time_ms"] <= end_ms and f.get("features")]
     if not selected:
         return []
@@ -139,21 +185,66 @@ def window_measurements(frames, start_ms, end_ms, candidate=None):
             )
             # hip_x_torso is only used to recover the image width / fixed torso scale.
             hipx = (peak["landmarks"][23][0] + peak["landmarks"][24][0]) / 2
-            scale = peak["features"]["hip_x_torso"] / hipx if hipx else 0
-            speeds.append(dx * scale / dt)
+            hip_scale = peak["features"].get("hip_x_torso")
+            if hipx and hip_scale is not None:
+                speeds.append(dx * hip_scale / hipx / dt)
     if speeds:
-        add("recovery_hip_speed", median(speeds), "torso/s", min(f["quality"] for f in selected))
+        camera = (profile or {}).get("camera_motion", (candidate or {}).get("camera_motion"))
+        add(
+            "recovery_hip_speed" if camera == "fixed" else "recovery_image_hip_speed",
+            median(speeds),
+            "torso/s",
+            min(f["quality"] for f in selected),
+        )
     if candidate and candidate.get("onset_features"):
         onset = candidate["onset_features"]
         for side in ("left", "right"):
+            knee_key = f"{side}_knee_angle"
+            onset_knee = onset.get(knee_key)
+            peak_knee = peak["features"].get(knee_key)
+            if onset_knee is not None and peak_knee is not None:
+                onset_quality = onset.get("quality_by_feature", {}).get(knee_key, 0)
+                peak_quality = (
+                    peak["features"]
+                    .get("quality_by_feature", {})
+                    .get(knee_key, peak.get("quality", 0))
+                )
+                add(
+                    f"{side}_knee_flexion_from_onset",
+                    onset_knee - peak_knee,
+                    "deg",
+                    min(onset_quality, peak_quality),
+                    candidate["onset_ms"],
+                )
             key = f"{side}_arm_extension"
+            onset_extension = onset.get(key)
+            peak_extension = peak["features"].get(key)
+            onset_quality = onset.get("quality_by_feature", {}).get(key, 0)
+            peak_quality = (
+                peak["features"].get("quality_by_feature", {}).get(key, peak.get("quality", 0))
+            )
             add(
                 key + "_at_onset",
-                onset.get(key),
+                onset_extension,
                 "ratio",
-                onset.get("quality_by_feature", {}).get(key, 0),
+                onset_quality,
                 candidate["onset_ms"],
             )
+            add(
+                key + "_at_peak",
+                peak_extension,
+                "ratio",
+                peak_quality,
+                peak["time_ms"],
+            )
+            if onset_extension is not None and peak_extension is not None:
+                add(
+                    key + "_change_to_peak",
+                    peak_extension - onset_extension,
+                    "ratio",
+                    min(onset_quality, peak_quality),
+                    candidate["onset_ms"],
+                )
         add("movement_to_peak_time", start_ms - candidate["onset_ms"], "ms", candidate["quality"])
     return output
 

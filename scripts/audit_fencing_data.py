@@ -9,6 +9,7 @@ from pathlib import Path
 
 from fencecoach.data_policy import eligible_source
 from fencecoach.dataset_api import DatasetAnnotations
+from fencecoach.dataset_labels import usable_review
 from fencecoach.footwork import VERSION, enrich_frames, movement_summary
 from fencecoach.gestures import LABELS, temporal_features
 
@@ -105,7 +106,7 @@ def main():
                 for start in range(label.start_ms, label.end_ms - 749, 375):
                     if temporal_features(result["frames"], start, start + 750) is not None:
                         previews.update([label.label])
-                        if label.status == "reviewed":
+                        if usable_review(label) and label.track_id == labels.primary_track_id:
                             approved.update([label.label])
                             approved_groups[label.label].add(source["split_group"])
         records.append(record)

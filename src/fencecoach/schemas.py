@@ -69,9 +69,14 @@ class MetricSet(BaseModel):
         return self
 
 
+class ConversationMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=6000)
+
+
 class CoachRequest(MetricSet):
     session_id: str = Field(min_length=1, max_length=100)
-    question: str = Field(min_length=3, max_length=1500)
+    question: str = Field(min_length=1, max_length=1500)
     skill_level: Literal["beginner", "intermediate"] = "beginner"
     focus_metric_id: str | None = Field(default=None, min_length=1, max_length=120)
     training_history: list[dict] = Field(default_factory=list, max_length=30)
@@ -79,6 +84,7 @@ class CoachRequest(MetricSet):
     session_notes: str = Field(default="", max_length=2000)
     session_history: list[dict] = Field(default_factory=list, max_length=10)
     capture_profile: dict = Field(default_factory=dict)
+    conversation_history: list[ConversationMessage] = Field(default_factory=list, max_length=12)
 
     @model_validator(mode="after")
     def focus_is_in_session(self):
@@ -105,7 +111,7 @@ class SessionRecord(SessionCreate):
 
 
 class ReportRequest(BaseModel):
-    question: str = Field(min_length=3, max_length=1500)
+    question: str = Field(min_length=1, max_length=1500)
     mode: Literal["demo", "bedrock", "local"] = "local"
     focus_metric_id: str | None = Field(default=None, min_length=1, max_length=120)
 
@@ -124,10 +130,14 @@ class TraceEvent(BaseModel):
 
 
 class RunRecord(BaseModel):
+    trace_id: str | None = None
+    cost_usd: float | None = None
+    token_usage_available: bool = False
     run_id: str
     session_id: str
     created_at: datetime
     question: str
+    response_kind: Literal["report", "conversation"] = "report"
     focus_metric_id: str | None = None
     mode: Literal["demo", "bedrock", "local"]
     model_id: str | None = None

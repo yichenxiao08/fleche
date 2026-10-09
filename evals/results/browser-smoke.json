@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "clips": 2,
+  "recording": "fake browser camera exercised",
+  "upload_job_review_coach_log_reload": true,
+  "unsupported_save_disabled": true,
+  "mobile_width": 390,
+  "page_errors": [],
+  "analysis_and_llm": "Synthetic test fixtures; real HTTP, queue, persistence, and UI. Does not validate pose inference or coaching correctness."
+}

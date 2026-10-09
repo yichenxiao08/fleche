@@ -1,0 +1,4672 @@
+[
+  {
+    "case_id": "commons/dourdan-04:0",
+    "clip": "commons/dourdan-04",
+    "question": "What can you tell me about my lunge from this evidence?",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-rep-01-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 175.5,
+          "unit": "deg",
+          "confidence": 0.989,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 171.2,
+          "unit": "deg",
+          "confidence": 0.997,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 13.8,
+          "unit": "deg",
+          "confidence": 1.0,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-04",
+          "name": "left_elbow_angle_at_peak",
+          "value": 153.4,
+          "unit": "deg",
+          "confidence": 0.866,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-05",
+          "name": "right_elbow_angle_at_peak",
+          "value": 175.4,
+          "unit": "deg",
+          "confidence": 0.968,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-06",
+          "name": "recovery_image_hip_speed",
+          "value": 2.017,
+          "unit": "torso/s",
+          "confidence": 0.782,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29779,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-07",
+          "name": "left_knee_flexion_from_onset",
+          "value": -29.0,
+          "unit": "deg",
+          "confidence": 0.967,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-08",
+          "name": "left_arm_extension_at_onset",
+          "value": 0.989,
+          "unit": "ratio",
+          "confidence": 0.937,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-09",
+          "name": "left_arm_extension_at_peak",
+          "value": 0.975,
+          "unit": "ratio",
+          "confidence": 0.866,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-10",
+          "name": "left_arm_extension_change_to_peak",
+          "value": -0.015,
+          "unit": "ratio",
+          "confidence": 0.866,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-11",
+          "name": "right_knee_flexion_from_onset",
+          "value": 8.1,
+          "unit": "deg",
+          "confidence": 0.997,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-12",
+          "name": "right_arm_extension_at_onset",
+          "value": 0.965,
+          "unit": "ratio",
+          "confidence": 0.993,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-13",
+          "name": "right_arm_extension_at_peak",
+          "value": 0.999,
+          "unit": "ratio",
+          "confidence": 0.968,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-14",
+          "name": "right_arm_extension_change_to_peak",
+          "value": 0.034,
+          "unit": "ratio",
+          "confidence": 0.968,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-15",
+          "name": "movement_to_peak_time",
+          "value": 1419.0,
+          "unit": "ms",
+          "confidence": 0.877,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29779,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-recovery-01",
+          "name": "recovery_time",
+          "value": 583.0,
+          "unit": "ms",
+          "confidence": 0.877,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29779,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 170.7,
+          "unit": "deg",
+          "confidence": 0.677,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 172.0,
+          "unit": "deg",
+          "confidence": 0.994,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 3.1,
+          "unit": "deg",
+          "confidence": 1.0,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-04",
+          "name": "left_elbow_angle_at_peak",
+          "value": 175.6,
+          "unit": "deg",
+          "confidence": 0.659,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-05",
+          "name": "right_elbow_angle_at_peak",
+          "value": 169.1,
+          "unit": "deg",
+          "confidence": 0.874,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-06",
+          "name": "recovery_image_hip_speed",
+          "value": 1.538,
+          "unit": "torso/s",
+          "confidence": 0.518,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30530,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-07",
+          "name": "left_knee_flexion_from_onset",
+          "value": -21.1,
+          "unit": "deg",
+          "confidence": 0.677,
+          "baseline_value": null,
+          "start_ms": 30197,
+          "end_ms": 30197,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-08",
+          "name": "left_arm_extension_at_peak",
+          "value": 0.999,
+          "unit": "ratio",
+          "confidence": 0.659,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "What can you tell me about my lunge from this evidence?",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "unknown",
+        "weapon": "sabre",
+        "camera_motion": "unknown",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "commons/dourdan-04:1",
+    "clip": "commons/dourdan-04",
+    "question": "Which measurements can help me understand my arm extension?",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-rep-01-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 175.5,
+          "unit": "deg",
+          "confidence": 0.989,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 171.2,
+          "unit": "deg",
+          "confidence": 0.997,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 13.8,
+          "unit": "deg",
+          "confidence": 1.0,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-04",
+          "name": "left_elbow_angle_at_peak",
+          "value": 153.4,
+          "unit": "deg",
+          "confidence": 0.866,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-05",
+          "name": "right_elbow_angle_at_peak",
+          "value": 175.4,
+          "unit": "deg",
+          "confidence": 0.968,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-06",
+          "name": "recovery_image_hip_speed",
+          "value": 2.017,
+          "unit": "torso/s",
+          "confidence": 0.782,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29779,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-07",
+          "name": "left_knee_flexion_from_onset",
+          "value": -29.0,
+          "unit": "deg",
+          "confidence": 0.967,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-08",
+          "name": "left_arm_extension_at_onset",
+          "value": 0.989,
+          "unit": "ratio",
+          "confidence": 0.937,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-09",
+          "name": "left_arm_extension_at_peak",
+          "value": 0.975,
+          "unit": "ratio",
+          "confidence": 0.866,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-10",
+          "name": "left_arm_extension_change_to_peak",
+          "value": -0.015,
+          "unit": "ratio",
+          "confidence": 0.866,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-11",
+          "name": "right_knee_flexion_from_onset",
+          "value": 8.1,
+          "unit": "deg",
+          "confidence": 0.997,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-12",
+          "name": "right_arm_extension_at_onset",
+          "value": 0.965,
+          "unit": "ratio",
+          "confidence": 0.993,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-13",
+          "name": "right_arm_extension_at_peak",
+          "value": 0.999,
+          "unit": "ratio",
+          "confidence": 0.968,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-14",
+          "name": "right_arm_extension_change_to_peak",
+          "value": 0.034,
+          "unit": "ratio",
+          "confidence": 0.968,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-15",
+          "name": "movement_to_peak_time",
+          "value": 1419.0,
+          "unit": "ms",
+          "confidence": 0.877,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29779,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-recovery-01",
+          "name": "recovery_time",
+          "value": 583.0,
+          "unit": "ms",
+          "confidence": 0.877,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29779,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 170.7,
+          "unit": "deg",
+          "confidence": 0.677,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 172.0,
+          "unit": "deg",
+          "confidence": 0.994,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 3.1,
+          "unit": "deg",
+          "confidence": 1.0,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-04",
+          "name": "left_elbow_angle_at_peak",
+          "value": 175.6,
+          "unit": "deg",
+          "confidence": 0.659,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-05",
+          "name": "right_elbow_angle_at_peak",
+          "value": 169.1,
+          "unit": "deg",
+          "confidence": 0.874,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-06",
+          "name": "recovery_image_hip_speed",
+          "value": 1.538,
+          "unit": "torso/s",
+          "confidence": 0.518,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30530,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-07",
+          "name": "left_knee_flexion_from_onset",
+          "value": -21.1,
+          "unit": "deg",
+          "confidence": 0.677,
+          "baseline_value": null,
+          "start_ms": 30197,
+          "end_ms": 30197,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-08",
+          "name": "left_arm_extension_at_peak",
+          "value": 0.999,
+          "unit": "ratio",
+          "confidence": 0.659,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "Which measurements can help me understand my arm extension?",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "unknown",
+        "weapon": "sabre",
+        "camera_motion": "unknown",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "commons/dourdan-04:2",
+    "clip": "commons/dourdan-04",
+    "question": "How consistent are the measured recovery intervals?",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-rep-01-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 175.5,
+          "unit": "deg",
+          "confidence": 0.989,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 171.2,
+          "unit": "deg",
+          "confidence": 0.997,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 13.8,
+          "unit": "deg",
+          "confidence": 1.0,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-04",
+          "name": "left_elbow_angle_at_peak",
+          "value": 153.4,
+          "unit": "deg",
+          "confidence": 0.866,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-05",
+          "name": "right_elbow_angle_at_peak",
+          "value": 175.4,
+          "unit": "deg",
+          "confidence": 0.968,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-06",
+          "name": "recovery_image_hip_speed",
+          "value": 2.017,
+          "unit": "torso/s",
+          "confidence": 0.782,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29779,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-07",
+          "name": "left_knee_flexion_from_onset",
+          "value": -29.0,
+          "unit": "deg",
+          "confidence": 0.967,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-08",
+          "name": "left_arm_extension_at_onset",
+          "value": 0.989,
+          "unit": "ratio",
+          "confidence": 0.937,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-09",
+          "name": "left_arm_extension_at_peak",
+          "value": 0.975,
+          "unit": "ratio",
+          "confidence": 0.866,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-10",
+          "name": "left_arm_extension_change_to_peak",
+          "value": -0.015,
+          "unit": "ratio",
+          "confidence": 0.866,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-11",
+          "name": "right_knee_flexion_from_onset",
+          "value": 8.1,
+          "unit": "deg",
+          "confidence": 0.997,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-12",
+          "name": "right_arm_extension_at_onset",
+          "value": 0.965,
+          "unit": "ratio",
+          "confidence": 0.993,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-13",
+          "name": "right_arm_extension_at_peak",
+          "value": 0.999,
+          "unit": "ratio",
+          "confidence": 0.968,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-14",
+          "name": "right_arm_extension_change_to_peak",
+          "value": 0.034,
+          "unit": "ratio",
+          "confidence": 0.968,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-15",
+          "name": "movement_to_peak_time",
+          "value": 1419.0,
+          "unit": "ms",
+          "confidence": 0.877,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29779,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-recovery-01",
+          "name": "recovery_time",
+          "value": 583.0,
+          "unit": "ms",
+          "confidence": 0.877,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29779,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 170.7,
+          "unit": "deg",
+          "confidence": 0.677,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 172.0,
+          "unit": "deg",
+          "confidence": 0.994,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 3.1,
+          "unit": "deg",
+          "confidence": 1.0,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-04",
+          "name": "left_elbow_angle_at_peak",
+          "value": 175.6,
+          "unit": "deg",
+          "confidence": 0.659,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-05",
+          "name": "right_elbow_angle_at_peak",
+          "value": 169.1,
+          "unit": "deg",
+          "confidence": 0.874,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-06",
+          "name": "recovery_image_hip_speed",
+          "value": 1.538,
+          "unit": "torso/s",
+          "confidence": 0.518,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30530,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-07",
+          "name": "left_knee_flexion_from_onset",
+          "value": -21.1,
+          "unit": "deg",
+          "confidence": 0.677,
+          "baseline_value": null,
+          "start_ms": 30197,
+          "end_ms": 30197,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-08",
+          "name": "left_arm_extension_at_peak",
+          "value": 0.999,
+          "unit": "ratio",
+          "confidence": 0.659,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "How consistent are the measured recovery intervals?",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "unknown",
+        "weapon": "sabre",
+        "camera_motion": "unknown",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "commons/dourdan-04:3",
+    "clip": "commons/dourdan-04",
+    "question": "Give me one supported observation, one practice cue, and one drill. Explain why.",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-rep-01-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 175.5,
+          "unit": "deg",
+          "confidence": 0.989,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 171.2,
+          "unit": "deg",
+          "confidence": 0.997,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 13.8,
+          "unit": "deg",
+          "confidence": 1.0,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-04",
+          "name": "left_elbow_angle_at_peak",
+          "value": 153.4,
+          "unit": "deg",
+          "confidence": 0.866,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-05",
+          "name": "right_elbow_angle_at_peak",
+          "value": 175.4,
+          "unit": "deg",
+          "confidence": 0.968,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-06",
+          "name": "recovery_image_hip_speed",
+          "value": 2.017,
+          "unit": "torso/s",
+          "confidence": 0.782,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29779,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-07",
+          "name": "left_knee_flexion_from_onset",
+          "value": -29.0,
+          "unit": "deg",
+          "confidence": 0.967,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-08",
+          "name": "left_arm_extension_at_onset",
+          "value": 0.989,
+          "unit": "ratio",
+          "confidence": 0.937,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-09",
+          "name": "left_arm_extension_at_peak",
+          "value": 0.975,
+          "unit": "ratio",
+          "confidence": 0.866,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-10",
+          "name": "left_arm_extension_change_to_peak",
+          "value": -0.015,
+          "unit": "ratio",
+          "confidence": 0.866,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-11",
+          "name": "right_knee_flexion_from_onset",
+          "value": 8.1,
+          "unit": "deg",
+          "confidence": 0.997,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-12",
+          "name": "right_arm_extension_at_onset",
+          "value": 0.965,
+          "unit": "ratio",
+          "confidence": 0.993,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-13",
+          "name": "right_arm_extension_at_peak",
+          "value": 0.999,
+          "unit": "ratio",
+          "confidence": 0.968,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-14",
+          "name": "right_arm_extension_change_to_peak",
+          "value": 0.034,
+          "unit": "ratio",
+          "confidence": 0.968,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-15",
+          "name": "movement_to_peak_time",
+          "value": 1419.0,
+          "unit": "ms",
+          "confidence": 0.877,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29779,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-recovery-01",
+          "name": "recovery_time",
+          "value": 583.0,
+          "unit": "ms",
+          "confidence": 0.877,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29779,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 170.7,
+          "unit": "deg",
+          "confidence": 0.677,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 172.0,
+          "unit": "deg",
+          "confidence": 0.994,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 3.1,
+          "unit": "deg",
+          "confidence": 1.0,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-04",
+          "name": "left_elbow_angle_at_peak",
+          "value": 175.6,
+          "unit": "deg",
+          "confidence": 0.659,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-05",
+          "name": "right_elbow_angle_at_peak",
+          "value": 169.1,
+          "unit": "deg",
+          "confidence": 0.874,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-06",
+          "name": "recovery_image_hip_speed",
+          "value": 1.538,
+          "unit": "torso/s",
+          "confidence": 0.518,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30530,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-07",
+          "name": "left_knee_flexion_from_onset",
+          "value": -21.1,
+          "unit": "deg",
+          "confidence": 0.677,
+          "baseline_value": null,
+          "start_ms": 30197,
+          "end_ms": 30197,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-08",
+          "name": "left_arm_extension_at_peak",
+          "value": 0.999,
+          "unit": "ratio",
+          "confidence": 0.659,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "Give me one supported observation, one practice cue, and one drill. Explain why.",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "unknown",
+        "weapon": "sabre",
+        "camera_motion": "unknown",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "commons/dourdan-04:4",
+    "clip": "commons/dourdan-04",
+    "question": "What does this video not establish about my technique?",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-rep-01-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 175.5,
+          "unit": "deg",
+          "confidence": 0.989,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 171.2,
+          "unit": "deg",
+          "confidence": 0.997,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 13.8,
+          "unit": "deg",
+          "confidence": 1.0,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-04",
+          "name": "left_elbow_angle_at_peak",
+          "value": 153.4,
+          "unit": "deg",
+          "confidence": 0.866,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-05",
+          "name": "right_elbow_angle_at_peak",
+          "value": 175.4,
+          "unit": "deg",
+          "confidence": 0.968,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-06",
+          "name": "recovery_image_hip_speed",
+          "value": 2.017,
+          "unit": "torso/s",
+          "confidence": 0.782,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29779,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-07",
+          "name": "left_knee_flexion_from_onset",
+          "value": -29.0,
+          "unit": "deg",
+          "confidence": 0.967,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-08",
+          "name": "left_arm_extension_at_onset",
+          "value": 0.989,
+          "unit": "ratio",
+          "confidence": 0.937,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-09",
+          "name": "left_arm_extension_at_peak",
+          "value": 0.975,
+          "unit": "ratio",
+          "confidence": 0.866,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-10",
+          "name": "left_arm_extension_change_to_peak",
+          "value": -0.015,
+          "unit": "ratio",
+          "confidence": 0.866,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-11",
+          "name": "right_knee_flexion_from_onset",
+          "value": 8.1,
+          "unit": "deg",
+          "confidence": 0.997,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-12",
+          "name": "right_arm_extension_at_onset",
+          "value": 0.965,
+          "unit": "ratio",
+          "confidence": 0.993,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-13",
+          "name": "right_arm_extension_at_peak",
+          "value": 0.999,
+          "unit": "ratio",
+          "confidence": 0.968,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29196,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-14",
+          "name": "right_arm_extension_change_to_peak",
+          "value": 0.034,
+          "unit": "ratio",
+          "confidence": 0.968,
+          "baseline_value": null,
+          "start_ms": 27777,
+          "end_ms": 27777,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-15",
+          "name": "movement_to_peak_time",
+          "value": 1419.0,
+          "unit": "ms",
+          "confidence": 0.877,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29779,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-recovery-01",
+          "name": "recovery_time",
+          "value": 583.0,
+          "unit": "ms",
+          "confidence": 0.877,
+          "baseline_value": null,
+          "start_ms": 29196,
+          "end_ms": 29779,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 170.7,
+          "unit": "deg",
+          "confidence": 0.677,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 172.0,
+          "unit": "deg",
+          "confidence": 0.994,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 3.1,
+          "unit": "deg",
+          "confidence": 1.0,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-04",
+          "name": "left_elbow_angle_at_peak",
+          "value": 175.6,
+          "unit": "deg",
+          "confidence": 0.659,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-05",
+          "name": "right_elbow_angle_at_peak",
+          "value": 169.1,
+          "unit": "deg",
+          "confidence": 0.874,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-06",
+          "name": "recovery_image_hip_speed",
+          "value": 1.538,
+          "unit": "torso/s",
+          "confidence": 0.518,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30530,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-07",
+          "name": "left_knee_flexion_from_onset",
+          "value": -21.1,
+          "unit": "deg",
+          "confidence": 0.677,
+          "baseline_value": null,
+          "start_ms": 30197,
+          "end_ms": 30197,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-08",
+          "name": "left_arm_extension_at_peak",
+          "value": 0.999,
+          "unit": "ratio",
+          "confidence": 0.659,
+          "baseline_value": null,
+          "start_ms": 30280,
+          "end_ms": 30280,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "What does this video not establish about my technique?",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "unknown",
+        "weapon": "sabre",
+        "camera_motion": "unknown",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000:5",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000",
+    "question": "What can you tell me about my lunge from this evidence?",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-clip-01",
+          "name": "left_knee_angle_median",
+          "value": 151.6,
+          "unit": "deg",
+          "confidence": 0.681,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-02",
+          "name": "right_knee_angle_median",
+          "value": 161.0,
+          "unit": "deg",
+          "confidence": 0.653,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-03",
+          "name": "torso_tilt_median",
+          "value": 15.8,
+          "unit": "deg",
+          "confidence": 0.783,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-04",
+          "name": "left_elbow_angle_median",
+          "value": 85.95,
+          "unit": "deg",
+          "confidence": 0.526,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-05",
+          "name": "right_elbow_angle_median",
+          "value": 134.6,
+          "unit": "deg",
+          "confidence": 0.783,
+          "baseline_value": null,
+          "start_ms": 2100,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-06",
+          "name": "left_wrist_height_median",
+          "value": 0.573,
+          "unit": "torso",
+          "confidence": 0.526,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-07",
+          "name": "right_wrist_height_median",
+          "value": -0.019,
+          "unit": "torso",
+          "confidence": 0.783,
+          "baseline_value": null,
+          "start_ms": 2100,
+          "end_ms": 9833,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "What can you tell me about my lunge from this evidence?",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "right",
+        "weapon": "foil",
+        "camera_motion": "moving",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000:6",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000",
+    "question": "Which measurements can help me understand my arm extension?",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-clip-01",
+          "name": "left_knee_angle_median",
+          "value": 151.6,
+          "unit": "deg",
+          "confidence": 0.681,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-02",
+          "name": "right_knee_angle_median",
+          "value": 161.0,
+          "unit": "deg",
+          "confidence": 0.653,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-03",
+          "name": "torso_tilt_median",
+          "value": 15.8,
+          "unit": "deg",
+          "confidence": 0.783,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-04",
+          "name": "left_elbow_angle_median",
+          "value": 85.95,
+          "unit": "deg",
+          "confidence": 0.526,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-05",
+          "name": "right_elbow_angle_median",
+          "value": 134.6,
+          "unit": "deg",
+          "confidence": 0.783,
+          "baseline_value": null,
+          "start_ms": 2100,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-06",
+          "name": "left_wrist_height_median",
+          "value": 0.573,
+          "unit": "torso",
+          "confidence": 0.526,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-07",
+          "name": "right_wrist_height_median",
+          "value": -0.019,
+          "unit": "torso",
+          "confidence": 0.783,
+          "baseline_value": null,
+          "start_ms": 2100,
+          "end_ms": 9833,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "Which measurements can help me understand my arm extension?",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "right",
+        "weapon": "foil",
+        "camera_motion": "moving",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000:7",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000",
+    "question": "How consistent are the measured recovery intervals?",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-clip-01",
+          "name": "left_knee_angle_median",
+          "value": 151.6,
+          "unit": "deg",
+          "confidence": 0.681,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-02",
+          "name": "right_knee_angle_median",
+          "value": 161.0,
+          "unit": "deg",
+          "confidence": 0.653,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-03",
+          "name": "torso_tilt_median",
+          "value": 15.8,
+          "unit": "deg",
+          "confidence": 0.783,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-04",
+          "name": "left_elbow_angle_median",
+          "value": 85.95,
+          "unit": "deg",
+          "confidence": 0.526,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-05",
+          "name": "right_elbow_angle_median",
+          "value": 134.6,
+          "unit": "deg",
+          "confidence": 0.783,
+          "baseline_value": null,
+          "start_ms": 2100,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-06",
+          "name": "left_wrist_height_median",
+          "value": 0.573,
+          "unit": "torso",
+          "confidence": 0.526,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-07",
+          "name": "right_wrist_height_median",
+          "value": -0.019,
+          "unit": "torso",
+          "confidence": 0.783,
+          "baseline_value": null,
+          "start_ms": 2100,
+          "end_ms": 9833,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "How consistent are the measured recovery intervals?",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "right",
+        "weapon": "foil",
+        "camera_motion": "moving",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000:8",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000",
+    "question": "Give me one supported observation, one practice cue, and one drill. Explain why.",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-clip-01",
+          "name": "left_knee_angle_median",
+          "value": 151.6,
+          "unit": "deg",
+          "confidence": 0.681,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-02",
+          "name": "right_knee_angle_median",
+          "value": 161.0,
+          "unit": "deg",
+          "confidence": 0.653,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-03",
+          "name": "torso_tilt_median",
+          "value": 15.8,
+          "unit": "deg",
+          "confidence": 0.783,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-04",
+          "name": "left_elbow_angle_median",
+          "value": 85.95,
+          "unit": "deg",
+          "confidence": 0.526,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-05",
+          "name": "right_elbow_angle_median",
+          "value": 134.6,
+          "unit": "deg",
+          "confidence": 0.783,
+          "baseline_value": null,
+          "start_ms": 2100,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-06",
+          "name": "left_wrist_height_median",
+          "value": 0.573,
+          "unit": "torso",
+          "confidence": 0.526,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-07",
+          "name": "right_wrist_height_median",
+          "value": -0.019,
+          "unit": "torso",
+          "confidence": 0.783,
+          "baseline_value": null,
+          "start_ms": 2100,
+          "end_ms": 9833,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "Give me one supported observation, one practice cue, and one drill. Explain why.",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "right",
+        "weapon": "foil",
+        "camera_motion": "moving",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000:9",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000",
+    "question": "What does this video not establish about my technique?",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-clip-01",
+          "name": "left_knee_angle_median",
+          "value": 151.6,
+          "unit": "deg",
+          "confidence": 0.681,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-02",
+          "name": "right_knee_angle_median",
+          "value": 161.0,
+          "unit": "deg",
+          "confidence": 0.653,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-03",
+          "name": "torso_tilt_median",
+          "value": 15.8,
+          "unit": "deg",
+          "confidence": 0.783,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-04",
+          "name": "left_elbow_angle_median",
+          "value": 85.95,
+          "unit": "deg",
+          "confidence": 0.526,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-05",
+          "name": "right_elbow_angle_median",
+          "value": 134.6,
+          "unit": "deg",
+          "confidence": 0.783,
+          "baseline_value": null,
+          "start_ms": 2100,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-06",
+          "name": "left_wrist_height_median",
+          "value": 0.573,
+          "unit": "torso",
+          "confidence": 0.526,
+          "baseline_value": null,
+          "start_ms": 267,
+          "end_ms": 9833,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-07",
+          "name": "right_wrist_height_median",
+          "value": -0.019,
+          "unit": "torso",
+          "confidence": 0.783,
+          "baseline_value": null,
+          "start_ms": 2100,
+          "end_ms": 9833,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "What does this video not establish about my technique?",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "right",
+        "weapon": "foil",
+        "camera_motion": "moving",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000:10",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000",
+    "question": "What can you tell me about my lunge from this evidence?",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-clip-01",
+          "name": "left_knee_angle_median",
+          "value": 139.9,
+          "unit": "deg",
+          "confidence": 0.517,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-02",
+          "name": "right_knee_angle_median",
+          "value": 158.1,
+          "unit": "deg",
+          "confidence": 0.699,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-03",
+          "name": "torso_tilt_median",
+          "value": 27.05,
+          "unit": "deg",
+          "confidence": 0.983,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-04",
+          "name": "left_elbow_angle_median",
+          "value": 81.6,
+          "unit": "deg",
+          "confidence": 0.517,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-05",
+          "name": "right_elbow_angle_median",
+          "value": 122.65,
+          "unit": "deg",
+          "confidence": 0.532,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-06",
+          "name": "left_wrist_height_median",
+          "value": 0.389,
+          "unit": "torso",
+          "confidence": 0.517,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-07",
+          "name": "right_wrist_height_median",
+          "value": 0.041,
+          "unit": "torso",
+          "confidence": 0.532,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "What can you tell me about my lunge from this evidence?",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "right",
+        "weapon": "foil",
+        "camera_motion": "moving",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000:11",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000",
+    "question": "Which measurements can help me understand my arm extension?",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-clip-01",
+          "name": "left_knee_angle_median",
+          "value": 139.9,
+          "unit": "deg",
+          "confidence": 0.517,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-02",
+          "name": "right_knee_angle_median",
+          "value": 158.1,
+          "unit": "deg",
+          "confidence": 0.699,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-03",
+          "name": "torso_tilt_median",
+          "value": 27.05,
+          "unit": "deg",
+          "confidence": 0.983,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-04",
+          "name": "left_elbow_angle_median",
+          "value": 81.6,
+          "unit": "deg",
+          "confidence": 0.517,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-05",
+          "name": "right_elbow_angle_median",
+          "value": 122.65,
+          "unit": "deg",
+          "confidence": 0.532,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-06",
+          "name": "left_wrist_height_median",
+          "value": 0.389,
+          "unit": "torso",
+          "confidence": 0.517,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-07",
+          "name": "right_wrist_height_median",
+          "value": 0.041,
+          "unit": "torso",
+          "confidence": 0.532,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "Which measurements can help me understand my arm extension?",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "right",
+        "weapon": "foil",
+        "camera_motion": "moving",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000:12",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000",
+    "question": "How consistent are the measured recovery intervals?",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-clip-01",
+          "name": "left_knee_angle_median",
+          "value": 139.9,
+          "unit": "deg",
+          "confidence": 0.517,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-02",
+          "name": "right_knee_angle_median",
+          "value": 158.1,
+          "unit": "deg",
+          "confidence": 0.699,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-03",
+          "name": "torso_tilt_median",
+          "value": 27.05,
+          "unit": "deg",
+          "confidence": 0.983,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-04",
+          "name": "left_elbow_angle_median",
+          "value": 81.6,
+          "unit": "deg",
+          "confidence": 0.517,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-05",
+          "name": "right_elbow_angle_median",
+          "value": 122.65,
+          "unit": "deg",
+          "confidence": 0.532,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-06",
+          "name": "left_wrist_height_median",
+          "value": 0.389,
+          "unit": "torso",
+          "confidence": 0.517,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-07",
+          "name": "right_wrist_height_median",
+          "value": 0.041,
+          "unit": "torso",
+          "confidence": 0.532,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "How consistent are the measured recovery intervals?",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "right",
+        "weapon": "foil",
+        "camera_motion": "moving",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000:13",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000",
+    "question": "Give me one supported observation, one practice cue, and one drill. Explain why.",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-clip-01",
+          "name": "left_knee_angle_median",
+          "value": 139.9,
+          "unit": "deg",
+          "confidence": 0.517,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-02",
+          "name": "right_knee_angle_median",
+          "value": 158.1,
+          "unit": "deg",
+          "confidence": 0.699,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-03",
+          "name": "torso_tilt_median",
+          "value": 27.05,
+          "unit": "deg",
+          "confidence": 0.983,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-04",
+          "name": "left_elbow_angle_median",
+          "value": 81.6,
+          "unit": "deg",
+          "confidence": 0.517,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-05",
+          "name": "right_elbow_angle_median",
+          "value": 122.65,
+          "unit": "deg",
+          "confidence": 0.532,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-06",
+          "name": "left_wrist_height_median",
+          "value": 0.389,
+          "unit": "torso",
+          "confidence": 0.517,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-07",
+          "name": "right_wrist_height_median",
+          "value": 0.041,
+          "unit": "torso",
+          "confidence": 0.532,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "Give me one supported observation, one practice cue, and one drill. Explain why.",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "right",
+        "weapon": "foil",
+        "camera_motion": "moving",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000:14",
+    "clip": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000",
+    "question": "What does this video not establish about my technique?",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-clip-01",
+          "name": "left_knee_angle_median",
+          "value": 139.9,
+          "unit": "deg",
+          "confidence": 0.517,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-02",
+          "name": "right_knee_angle_median",
+          "value": 158.1,
+          "unit": "deg",
+          "confidence": 0.699,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-03",
+          "name": "torso_tilt_median",
+          "value": 27.05,
+          "unit": "deg",
+          "confidence": 0.983,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-04",
+          "name": "left_elbow_angle_median",
+          "value": 81.6,
+          "unit": "deg",
+          "confidence": 0.517,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-05",
+          "name": "right_elbow_angle_median",
+          "value": 122.65,
+          "unit": "deg",
+          "confidence": 0.532,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-06",
+          "name": "left_wrist_height_median",
+          "value": 0.389,
+          "unit": "torso",
+          "confidence": 0.517,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-clip-07",
+          "name": "right_wrist_height_median",
+          "value": 0.041,
+          "unit": "torso",
+          "confidence": 0.532,
+          "baseline_value": null,
+          "start_ms": 0,
+          "end_ms": 7933,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "What does this video not establish about my technique?",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "right",
+        "weapon": "foil",
+        "camera_motion": "moving",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "mit-ocw/jumpe_lunge:15",
+    "clip": "mit-ocw/jumpe_lunge",
+    "question": "What can you tell me about my lunge from this evidence?",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-rep-01-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 108.9,
+          "unit": "deg",
+          "confidence": 0.98,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 168.7,
+          "unit": "deg",
+          "confidence": 0.991,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 7.2,
+          "unit": "deg",
+          "confidence": 1.0,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-04",
+          "name": "left_elbow_angle_at_peak",
+          "value": 155.2,
+          "unit": "deg",
+          "confidence": 0.976,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-05",
+          "name": "right_elbow_angle_at_peak",
+          "value": 177.5,
+          "unit": "deg",
+          "confidence": 0.956,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-06",
+          "name": "recovery_image_hip_speed",
+          "value": 0.293,
+          "unit": "torso/s",
+          "confidence": 0.976,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 4083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-07",
+          "name": "left_knee_flexion_from_onset",
+          "value": 16.6,
+          "unit": "deg",
+          "confidence": 0.98,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-08",
+          "name": "left_arm_extension_at_onset",
+          "value": 0.554,
+          "unit": "ratio",
+          "confidence": 0.984,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-09",
+          "name": "left_arm_extension_at_peak",
+          "value": 0.977,
+          "unit": "ratio",
+          "confidence": 0.976,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-10",
+          "name": "left_arm_extension_change_to_peak",
+          "value": 0.422,
+          "unit": "ratio",
+          "confidence": 0.976,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-11",
+          "name": "right_knee_flexion_from_onset",
+          "value": -15.5,
+          "unit": "deg",
+          "confidence": 0.991,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-12",
+          "name": "right_arm_extension_at_onset",
+          "value": 0.834,
+          "unit": "ratio",
+          "confidence": 0.985,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-13",
+          "name": "right_arm_extension_at_peak",
+          "value": 1.0,
+          "unit": "ratio",
+          "confidence": 0.956,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-14",
+          "name": "right_arm_extension_change_to_peak",
+          "value": 0.166,
+          "unit": "ratio",
+          "confidence": 0.956,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-15",
+          "name": "movement_to_peak_time",
+          "value": 917.0,
+          "unit": "ms",
+          "confidence": 0.944,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 4083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-recovery-01",
+          "name": "recovery_time",
+          "value": 1083.0,
+          "unit": "ms",
+          "confidence": 0.944,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 4083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 159.2,
+          "unit": "deg",
+          "confidence": 0.993,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 162.7,
+          "unit": "deg",
+          "confidence": 0.997,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 8.1,
+          "unit": "deg",
+          "confidence": 1.0,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-04",
+          "name": "left_elbow_angle_at_peak",
+          "value": 127.7,
+          "unit": "deg",
+          "confidence": 0.995,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-05",
+          "name": "right_elbow_angle_at_peak",
+          "value": 98.1,
+          "unit": "deg",
+          "confidence": 0.973,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-06",
+          "name": "recovery_image_hip_speed",
+          "value": 1.576,
+          "unit": "torso/s",
+          "confidence": 0.974,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5667,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-07",
+          "name": "left_knee_flexion_from_onset",
+          "value": -28.4,
+          "unit": "deg",
+          "confidence": 0.993,
+          "baseline_value": null,
+          "start_ms": 4750,
+          "end_ms": 4750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-08",
+          "name": "left_arm_extension_at_onset",
+          "value": 0.535,
+          "unit": "ratio",
+          "confidence": 0.992,
+          "baseline_value": null,
+          "start_ms": 4750,
+          "end_ms": 4750,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "What can you tell me about my lunge from this evidence?",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "right",
+        "weapon": "unknown",
+        "camera_motion": "unknown",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "mit-ocw/jumpe_lunge:16",
+    "clip": "mit-ocw/jumpe_lunge",
+    "question": "Which measurements can help me understand my arm extension?",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-rep-01-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 108.9,
+          "unit": "deg",
+          "confidence": 0.98,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 168.7,
+          "unit": "deg",
+          "confidence": 0.991,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 7.2,
+          "unit": "deg",
+          "confidence": 1.0,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-04",
+          "name": "left_elbow_angle_at_peak",
+          "value": 155.2,
+          "unit": "deg",
+          "confidence": 0.976,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-05",
+          "name": "right_elbow_angle_at_peak",
+          "value": 177.5,
+          "unit": "deg",
+          "confidence": 0.956,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-06",
+          "name": "recovery_image_hip_speed",
+          "value": 0.293,
+          "unit": "torso/s",
+          "confidence": 0.976,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 4083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-07",
+          "name": "left_knee_flexion_from_onset",
+          "value": 16.6,
+          "unit": "deg",
+          "confidence": 0.98,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-08",
+          "name": "left_arm_extension_at_onset",
+          "value": 0.554,
+          "unit": "ratio",
+          "confidence": 0.984,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-09",
+          "name": "left_arm_extension_at_peak",
+          "value": 0.977,
+          "unit": "ratio",
+          "confidence": 0.976,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-10",
+          "name": "left_arm_extension_change_to_peak",
+          "value": 0.422,
+          "unit": "ratio",
+          "confidence": 0.976,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-11",
+          "name": "right_knee_flexion_from_onset",
+          "value": -15.5,
+          "unit": "deg",
+          "confidence": 0.991,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-12",
+          "name": "right_arm_extension_at_onset",
+          "value": 0.834,
+          "unit": "ratio",
+          "confidence": 0.985,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-13",
+          "name": "right_arm_extension_at_peak",
+          "value": 1.0,
+          "unit": "ratio",
+          "confidence": 0.956,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-14",
+          "name": "right_arm_extension_change_to_peak",
+          "value": 0.166,
+          "unit": "ratio",
+          "confidence": 0.956,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-15",
+          "name": "movement_to_peak_time",
+          "value": 917.0,
+          "unit": "ms",
+          "confidence": 0.944,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 4083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-recovery-01",
+          "name": "recovery_time",
+          "value": 1083.0,
+          "unit": "ms",
+          "confidence": 0.944,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 4083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 159.2,
+          "unit": "deg",
+          "confidence": 0.993,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 162.7,
+          "unit": "deg",
+          "confidence": 0.997,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 8.1,
+          "unit": "deg",
+          "confidence": 1.0,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-04",
+          "name": "left_elbow_angle_at_peak",
+          "value": 127.7,
+          "unit": "deg",
+          "confidence": 0.995,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-05",
+          "name": "right_elbow_angle_at_peak",
+          "value": 98.1,
+          "unit": "deg",
+          "confidence": 0.973,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-06",
+          "name": "recovery_image_hip_speed",
+          "value": 1.576,
+          "unit": "torso/s",
+          "confidence": 0.974,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5667,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-07",
+          "name": "left_knee_flexion_from_onset",
+          "value": -28.4,
+          "unit": "deg",
+          "confidence": 0.993,
+          "baseline_value": null,
+          "start_ms": 4750,
+          "end_ms": 4750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-08",
+          "name": "left_arm_extension_at_onset",
+          "value": 0.535,
+          "unit": "ratio",
+          "confidence": 0.992,
+          "baseline_value": null,
+          "start_ms": 4750,
+          "end_ms": 4750,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "Which measurements can help me understand my arm extension?",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "right",
+        "weapon": "unknown",
+        "camera_motion": "unknown",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "mit-ocw/jumpe_lunge:17",
+    "clip": "mit-ocw/jumpe_lunge",
+    "question": "How consistent are the measured recovery intervals?",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-rep-01-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 108.9,
+          "unit": "deg",
+          "confidence": 0.98,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 168.7,
+          "unit": "deg",
+          "confidence": 0.991,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 7.2,
+          "unit": "deg",
+          "confidence": 1.0,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-04",
+          "name": "left_elbow_angle_at_peak",
+          "value": 155.2,
+          "unit": "deg",
+          "confidence": 0.976,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-05",
+          "name": "right_elbow_angle_at_peak",
+          "value": 177.5,
+          "unit": "deg",
+          "confidence": 0.956,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-06",
+          "name": "recovery_image_hip_speed",
+          "value": 0.293,
+          "unit": "torso/s",
+          "confidence": 0.976,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 4083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-07",
+          "name": "left_knee_flexion_from_onset",
+          "value": 16.6,
+          "unit": "deg",
+          "confidence": 0.98,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-08",
+          "name": "left_arm_extension_at_onset",
+          "value": 0.554,
+          "unit": "ratio",
+          "confidence": 0.984,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-09",
+          "name": "left_arm_extension_at_peak",
+          "value": 0.977,
+          "unit": "ratio",
+          "confidence": 0.976,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-10",
+          "name": "left_arm_extension_change_to_peak",
+          "value": 0.422,
+          "unit": "ratio",
+          "confidence": 0.976,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-11",
+          "name": "right_knee_flexion_from_onset",
+          "value": -15.5,
+          "unit": "deg",
+          "confidence": 0.991,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-12",
+          "name": "right_arm_extension_at_onset",
+          "value": 0.834,
+          "unit": "ratio",
+          "confidence": 0.985,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-13",
+          "name": "right_arm_extension_at_peak",
+          "value": 1.0,
+          "unit": "ratio",
+          "confidence": 0.956,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-14",
+          "name": "right_arm_extension_change_to_peak",
+          "value": 0.166,
+          "unit": "ratio",
+          "confidence": 0.956,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-15",
+          "name": "movement_to_peak_time",
+          "value": 917.0,
+          "unit": "ms",
+          "confidence": 0.944,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 4083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-recovery-01",
+          "name": "recovery_time",
+          "value": 1083.0,
+          "unit": "ms",
+          "confidence": 0.944,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 4083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 159.2,
+          "unit": "deg",
+          "confidence": 0.993,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 162.7,
+          "unit": "deg",
+          "confidence": 0.997,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 8.1,
+          "unit": "deg",
+          "confidence": 1.0,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-04",
+          "name": "left_elbow_angle_at_peak",
+          "value": 127.7,
+          "unit": "deg",
+          "confidence": 0.995,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-05",
+          "name": "right_elbow_angle_at_peak",
+          "value": 98.1,
+          "unit": "deg",
+          "confidence": 0.973,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-06",
+          "name": "recovery_image_hip_speed",
+          "value": 1.576,
+          "unit": "torso/s",
+          "confidence": 0.974,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5667,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-07",
+          "name": "left_knee_flexion_from_onset",
+          "value": -28.4,
+          "unit": "deg",
+          "confidence": 0.993,
+          "baseline_value": null,
+          "start_ms": 4750,
+          "end_ms": 4750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-08",
+          "name": "left_arm_extension_at_onset",
+          "value": 0.535,
+          "unit": "ratio",
+          "confidence": 0.992,
+          "baseline_value": null,
+          "start_ms": 4750,
+          "end_ms": 4750,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "How consistent are the measured recovery intervals?",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "right",
+        "weapon": "unknown",
+        "camera_motion": "unknown",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "mit-ocw/jumpe_lunge:18",
+    "clip": "mit-ocw/jumpe_lunge",
+    "question": "Give me one supported observation, one practice cue, and one drill. Explain why.",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-rep-01-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 108.9,
+          "unit": "deg",
+          "confidence": 0.98,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 168.7,
+          "unit": "deg",
+          "confidence": 0.991,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 7.2,
+          "unit": "deg",
+          "confidence": 1.0,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-04",
+          "name": "left_elbow_angle_at_peak",
+          "value": 155.2,
+          "unit": "deg",
+          "confidence": 0.976,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-05",
+          "name": "right_elbow_angle_at_peak",
+          "value": 177.5,
+          "unit": "deg",
+          "confidence": 0.956,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-06",
+          "name": "recovery_image_hip_speed",
+          "value": 0.293,
+          "unit": "torso/s",
+          "confidence": 0.976,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 4083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-07",
+          "name": "left_knee_flexion_from_onset",
+          "value": 16.6,
+          "unit": "deg",
+          "confidence": 0.98,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-08",
+          "name": "left_arm_extension_at_onset",
+          "value": 0.554,
+          "unit": "ratio",
+          "confidence": 0.984,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-09",
+          "name": "left_arm_extension_at_peak",
+          "value": 0.977,
+          "unit": "ratio",
+          "confidence": 0.976,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-10",
+          "name": "left_arm_extension_change_to_peak",
+          "value": 0.422,
+          "unit": "ratio",
+          "confidence": 0.976,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-11",
+          "name": "right_knee_flexion_from_onset",
+          "value": -15.5,
+          "unit": "deg",
+          "confidence": 0.991,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-12",
+          "name": "right_arm_extension_at_onset",
+          "value": 0.834,
+          "unit": "ratio",
+          "confidence": 0.985,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-13",
+          "name": "right_arm_extension_at_peak",
+          "value": 1.0,
+          "unit": "ratio",
+          "confidence": 0.956,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-14",
+          "name": "right_arm_extension_change_to_peak",
+          "value": 0.166,
+          "unit": "ratio",
+          "confidence": 0.956,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-15",
+          "name": "movement_to_peak_time",
+          "value": 917.0,
+          "unit": "ms",
+          "confidence": 0.944,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 4083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-recovery-01",
+          "name": "recovery_time",
+          "value": 1083.0,
+          "unit": "ms",
+          "confidence": 0.944,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 4083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 159.2,
+          "unit": "deg",
+          "confidence": 0.993,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 162.7,
+          "unit": "deg",
+          "confidence": 0.997,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 8.1,
+          "unit": "deg",
+          "confidence": 1.0,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-04",
+          "name": "left_elbow_angle_at_peak",
+          "value": 127.7,
+          "unit": "deg",
+          "confidence": 0.995,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-05",
+          "name": "right_elbow_angle_at_peak",
+          "value": 98.1,
+          "unit": "deg",
+          "confidence": 0.973,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-06",
+          "name": "recovery_image_hip_speed",
+          "value": 1.576,
+          "unit": "torso/s",
+          "confidence": 0.974,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5667,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-07",
+          "name": "left_knee_flexion_from_onset",
+          "value": -28.4,
+          "unit": "deg",
+          "confidence": 0.993,
+          "baseline_value": null,
+          "start_ms": 4750,
+          "end_ms": 4750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-08",
+          "name": "left_arm_extension_at_onset",
+          "value": 0.535,
+          "unit": "ratio",
+          "confidence": 0.992,
+          "baseline_value": null,
+          "start_ms": 4750,
+          "end_ms": 4750,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "Give me one supported observation, one practice cue, and one drill. Explain why.",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "right",
+        "weapon": "unknown",
+        "camera_motion": "unknown",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "mit-ocw/jumpe_lunge:19",
+    "clip": "mit-ocw/jumpe_lunge",
+    "question": "What does this video not establish about my technique?",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-rep-01-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 108.9,
+          "unit": "deg",
+          "confidence": 0.98,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 168.7,
+          "unit": "deg",
+          "confidence": 0.991,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 7.2,
+          "unit": "deg",
+          "confidence": 1.0,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-04",
+          "name": "left_elbow_angle_at_peak",
+          "value": 155.2,
+          "unit": "deg",
+          "confidence": 0.976,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-05",
+          "name": "right_elbow_angle_at_peak",
+          "value": 177.5,
+          "unit": "deg",
+          "confidence": 0.956,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-06",
+          "name": "recovery_image_hip_speed",
+          "value": 0.293,
+          "unit": "torso/s",
+          "confidence": 0.976,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 4083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-07",
+          "name": "left_knee_flexion_from_onset",
+          "value": 16.6,
+          "unit": "deg",
+          "confidence": 0.98,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-08",
+          "name": "left_arm_extension_at_onset",
+          "value": 0.554,
+          "unit": "ratio",
+          "confidence": 0.984,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-09",
+          "name": "left_arm_extension_at_peak",
+          "value": 0.977,
+          "unit": "ratio",
+          "confidence": 0.976,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-10",
+          "name": "left_arm_extension_change_to_peak",
+          "value": 0.422,
+          "unit": "ratio",
+          "confidence": 0.976,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-11",
+          "name": "right_knee_flexion_from_onset",
+          "value": -15.5,
+          "unit": "deg",
+          "confidence": 0.991,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-12",
+          "name": "right_arm_extension_at_onset",
+          "value": 0.834,
+          "unit": "ratio",
+          "confidence": 0.985,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-13",
+          "name": "right_arm_extension_at_peak",
+          "value": 1.0,
+          "unit": "ratio",
+          "confidence": 0.956,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 3000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-14",
+          "name": "right_arm_extension_change_to_peak",
+          "value": 0.166,
+          "unit": "ratio",
+          "confidence": 0.956,
+          "baseline_value": null,
+          "start_ms": 2083,
+          "end_ms": 2083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-15",
+          "name": "movement_to_peak_time",
+          "value": 917.0,
+          "unit": "ms",
+          "confidence": 0.944,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 4083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-recovery-01",
+          "name": "recovery_time",
+          "value": 1083.0,
+          "unit": "ms",
+          "confidence": 0.944,
+          "baseline_value": null,
+          "start_ms": 3000,
+          "end_ms": 4083,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 159.2,
+          "unit": "deg",
+          "confidence": 0.993,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 162.7,
+          "unit": "deg",
+          "confidence": 0.997,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 8.1,
+          "unit": "deg",
+          "confidence": 1.0,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-04",
+          "name": "left_elbow_angle_at_peak",
+          "value": 127.7,
+          "unit": "deg",
+          "confidence": 0.995,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-05",
+          "name": "right_elbow_angle_at_peak",
+          "value": 98.1,
+          "unit": "deg",
+          "confidence": 0.973,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5000,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-06",
+          "name": "recovery_image_hip_speed",
+          "value": 1.576,
+          "unit": "torso/s",
+          "confidence": 0.974,
+          "baseline_value": null,
+          "start_ms": 5000,
+          "end_ms": 5667,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-07",
+          "name": "left_knee_flexion_from_onset",
+          "value": -28.4,
+          "unit": "deg",
+          "confidence": 0.993,
+          "baseline_value": null,
+          "start_ms": 4750,
+          "end_ms": 4750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-02-detail-08",
+          "name": "left_arm_extension_at_onset",
+          "value": 0.535,
+          "unit": "ratio",
+          "confidence": 0.992,
+          "baseline_value": null,
+          "start_ms": 4750,
+          "end_ms": 4750,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "What does this video not establish about my technique?",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "right",
+        "weapon": "unknown",
+        "camera_motion": "unknown",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "mit-ocw/jump_forward_jump_back:20",
+    "clip": "mit-ocw/jump_forward_jump_back",
+    "question": "What can you tell me about my lunge from this evidence?",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-rep-01-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 172.2,
+          "unit": "deg",
+          "confidence": 0.625,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 175.0,
+          "unit": "deg",
+          "confidence": 0.993,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 8.2,
+          "unit": "deg",
+          "confidence": 0.999,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-04",
+          "name": "right_elbow_angle_at_peak",
+          "value": 103.1,
+          "unit": "deg",
+          "confidence": 0.952,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-05",
+          "name": "recovery_image_hip_speed",
+          "value": 3.042,
+          "unit": "torso/s",
+          "confidence": 0.625,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 4167,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-06",
+          "name": "left_knee_flexion_from_onset",
+          "value": -44.4,
+          "unit": "deg",
+          "confidence": 0.625,
+          "baseline_value": null,
+          "start_ms": 3750,
+          "end_ms": 3750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-07",
+          "name": "right_knee_flexion_from_onset",
+          "value": -50.2,
+          "unit": "deg",
+          "confidence": 0.971,
+          "baseline_value": null,
+          "start_ms": 3750,
+          "end_ms": 3750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-08",
+          "name": "right_arm_extension_at_onset",
+          "value": 0.795,
+          "unit": "ratio",
+          "confidence": 0.965,
+          "baseline_value": null,
+          "start_ms": 3750,
+          "end_ms": 3750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-09",
+          "name": "right_arm_extension_at_peak",
+          "value": 0.784,
+          "unit": "ratio",
+          "confidence": 0.952,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-10",
+          "name": "right_arm_extension_change_to_peak",
+          "value": -0.01,
+          "unit": "ratio",
+          "confidence": 0.952,
+          "baseline_value": null,
+          "start_ms": 3750,
+          "end_ms": 3750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-11",
+          "name": "movement_to_peak_time",
+          "value": 167.0,
+          "unit": "ms",
+          "confidence": 0.726,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 4167,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-recovery-01",
+          "name": "recovery_time",
+          "value": 250.0,
+          "unit": "ms",
+          "confidence": 0.726,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 4167,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "What can you tell me about my lunge from this evidence?",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "right",
+        "weapon": "unknown",
+        "camera_motion": "unknown",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "mit-ocw/jump_forward_jump_back:21",
+    "clip": "mit-ocw/jump_forward_jump_back",
+    "question": "Which measurements can help me understand my arm extension?",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-rep-01-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 172.2,
+          "unit": "deg",
+          "confidence": 0.625,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 175.0,
+          "unit": "deg",
+          "confidence": 0.993,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 8.2,
+          "unit": "deg",
+          "confidence": 0.999,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-04",
+          "name": "right_elbow_angle_at_peak",
+          "value": 103.1,
+          "unit": "deg",
+          "confidence": 0.952,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-05",
+          "name": "recovery_image_hip_speed",
+          "value": 3.042,
+          "unit": "torso/s",
+          "confidence": 0.625,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 4167,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-06",
+          "name": "left_knee_flexion_from_onset",
+          "value": -44.4,
+          "unit": "deg",
+          "confidence": 0.625,
+          "baseline_value": null,
+          "start_ms": 3750,
+          "end_ms": 3750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-07",
+          "name": "right_knee_flexion_from_onset",
+          "value": -50.2,
+          "unit": "deg",
+          "confidence": 0.971,
+          "baseline_value": null,
+          "start_ms": 3750,
+          "end_ms": 3750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-08",
+          "name": "right_arm_extension_at_onset",
+          "value": 0.795,
+          "unit": "ratio",
+          "confidence": 0.965,
+          "baseline_value": null,
+          "start_ms": 3750,
+          "end_ms": 3750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-09",
+          "name": "right_arm_extension_at_peak",
+          "value": 0.784,
+          "unit": "ratio",
+          "confidence": 0.952,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-10",
+          "name": "right_arm_extension_change_to_peak",
+          "value": -0.01,
+          "unit": "ratio",
+          "confidence": 0.952,
+          "baseline_value": null,
+          "start_ms": 3750,
+          "end_ms": 3750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-11",
+          "name": "movement_to_peak_time",
+          "value": 167.0,
+          "unit": "ms",
+          "confidence": 0.726,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 4167,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-recovery-01",
+          "name": "recovery_time",
+          "value": 250.0,
+          "unit": "ms",
+          "confidence": 0.726,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 4167,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "Which measurements can help me understand my arm extension?",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "right",
+        "weapon": "unknown",
+        "camera_motion": "unknown",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "mit-ocw/jump_forward_jump_back:22",
+    "clip": "mit-ocw/jump_forward_jump_back",
+    "question": "How consistent are the measured recovery intervals?",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-rep-01-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 172.2,
+          "unit": "deg",
+          "confidence": 0.625,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 175.0,
+          "unit": "deg",
+          "confidence": 0.993,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 8.2,
+          "unit": "deg",
+          "confidence": 0.999,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-04",
+          "name": "right_elbow_angle_at_peak",
+          "value": 103.1,
+          "unit": "deg",
+          "confidence": 0.952,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-05",
+          "name": "recovery_image_hip_speed",
+          "value": 3.042,
+          "unit": "torso/s",
+          "confidence": 0.625,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 4167,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-06",
+          "name": "left_knee_flexion_from_onset",
+          "value": -44.4,
+          "unit": "deg",
+          "confidence": 0.625,
+          "baseline_value": null,
+          "start_ms": 3750,
+          "end_ms": 3750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-07",
+          "name": "right_knee_flexion_from_onset",
+          "value": -50.2,
+          "unit": "deg",
+          "confidence": 0.971,
+          "baseline_value": null,
+          "start_ms": 3750,
+          "end_ms": 3750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-08",
+          "name": "right_arm_extension_at_onset",
+          "value": 0.795,
+          "unit": "ratio",
+          "confidence": 0.965,
+          "baseline_value": null,
+          "start_ms": 3750,
+          "end_ms": 3750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-09",
+          "name": "right_arm_extension_at_peak",
+          "value": 0.784,
+          "unit": "ratio",
+          "confidence": 0.952,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-10",
+          "name": "right_arm_extension_change_to_peak",
+          "value": -0.01,
+          "unit": "ratio",
+          "confidence": 0.952,
+          "baseline_value": null,
+          "start_ms": 3750,
+          "end_ms": 3750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-11",
+          "name": "movement_to_peak_time",
+          "value": 167.0,
+          "unit": "ms",
+          "confidence": 0.726,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 4167,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-recovery-01",
+          "name": "recovery_time",
+          "value": 250.0,
+          "unit": "ms",
+          "confidence": 0.726,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 4167,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "How consistent are the measured recovery intervals?",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "right",
+        "weapon": "unknown",
+        "camera_motion": "unknown",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "mit-ocw/jump_forward_jump_back:23",
+    "clip": "mit-ocw/jump_forward_jump_back",
+    "question": "Give me one supported observation, one practice cue, and one drill. Explain why.",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-rep-01-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 172.2,
+          "unit": "deg",
+          "confidence": 0.625,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 175.0,
+          "unit": "deg",
+          "confidence": 0.993,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 8.2,
+          "unit": "deg",
+          "confidence": 0.999,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-04",
+          "name": "right_elbow_angle_at_peak",
+          "value": 103.1,
+          "unit": "deg",
+          "confidence": 0.952,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-05",
+          "name": "recovery_image_hip_speed",
+          "value": 3.042,
+          "unit": "torso/s",
+          "confidence": 0.625,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 4167,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-06",
+          "name": "left_knee_flexion_from_onset",
+          "value": -44.4,
+          "unit": "deg",
+          "confidence": 0.625,
+          "baseline_value": null,
+          "start_ms": 3750,
+          "end_ms": 3750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-07",
+          "name": "right_knee_flexion_from_onset",
+          "value": -50.2,
+          "unit": "deg",
+          "confidence": 0.971,
+          "baseline_value": null,
+          "start_ms": 3750,
+          "end_ms": 3750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-08",
+          "name": "right_arm_extension_at_onset",
+          "value": 0.795,
+          "unit": "ratio",
+          "confidence": 0.965,
+          "baseline_value": null,
+          "start_ms": 3750,
+          "end_ms": 3750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-09",
+          "name": "right_arm_extension_at_peak",
+          "value": 0.784,
+          "unit": "ratio",
+          "confidence": 0.952,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-10",
+          "name": "right_arm_extension_change_to_peak",
+          "value": -0.01,
+          "unit": "ratio",
+          "confidence": 0.952,
+          "baseline_value": null,
+          "start_ms": 3750,
+          "end_ms": 3750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-11",
+          "name": "movement_to_peak_time",
+          "value": 167.0,
+          "unit": "ms",
+          "confidence": 0.726,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 4167,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-recovery-01",
+          "name": "recovery_time",
+          "value": 250.0,
+          "unit": "ms",
+          "confidence": 0.726,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 4167,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "Give me one supported observation, one practice cue, and one drill. Explain why.",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "right",
+        "weapon": "unknown",
+        "camera_motion": "unknown",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  },
+  {
+    "case_id": "mit-ocw/jump_forward_jump_back:24",
+    "clip": "mit-ocw/jump_forward_jump_back",
+    "question": "What does this video not establish about my technique?",
+    "request": {
+      "metrics": [
+        {
+          "metric_id": "golden-rep-01-detail-01",
+          "name": "left_knee_angle_at_peak",
+          "value": 172.2,
+          "unit": "deg",
+          "confidence": 0.625,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-02",
+          "name": "right_knee_angle_at_peak",
+          "value": 175.0,
+          "unit": "deg",
+          "confidence": 0.993,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-03",
+          "name": "torso_tilt_at_peak",
+          "value": 8.2,
+          "unit": "deg",
+          "confidence": 0.999,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-04",
+          "name": "right_elbow_angle_at_peak",
+          "value": 103.1,
+          "unit": "deg",
+          "confidence": 0.952,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-05",
+          "name": "recovery_image_hip_speed",
+          "value": 3.042,
+          "unit": "torso/s",
+          "confidence": 0.625,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 4167,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-06",
+          "name": "left_knee_flexion_from_onset",
+          "value": -44.4,
+          "unit": "deg",
+          "confidence": 0.625,
+          "baseline_value": null,
+          "start_ms": 3750,
+          "end_ms": 3750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-07",
+          "name": "right_knee_flexion_from_onset",
+          "value": -50.2,
+          "unit": "deg",
+          "confidence": 0.971,
+          "baseline_value": null,
+          "start_ms": 3750,
+          "end_ms": 3750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-08",
+          "name": "right_arm_extension_at_onset",
+          "value": 0.795,
+          "unit": "ratio",
+          "confidence": 0.965,
+          "baseline_value": null,
+          "start_ms": 3750,
+          "end_ms": 3750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-09",
+          "name": "right_arm_extension_at_peak",
+          "value": 0.784,
+          "unit": "ratio",
+          "confidence": 0.952,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 3917,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-10",
+          "name": "right_arm_extension_change_to_peak",
+          "value": -0.01,
+          "unit": "ratio",
+          "confidence": 0.952,
+          "baseline_value": null,
+          "start_ms": 3750,
+          "end_ms": 3750,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-rep-01-detail-11",
+          "name": "movement_to_peak_time",
+          "value": 167.0,
+          "unit": "ms",
+          "confidence": 0.726,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 4167,
+          "provenance": null
+        },
+        {
+          "metric_id": "golden-recovery-01",
+          "name": "recovery_time",
+          "value": 250.0,
+          "unit": "ms",
+          "confidence": 0.726,
+          "baseline_value": null,
+          "start_ms": 3917,
+          "end_ms": 4167,
+          "provenance": null
+        }
+      ],
+      "session_id": "offline-golden",
+      "question": "What does this video not establish about my technique?",
+      "skill_level": "beginner",
+      "focus_metric_id": null,
+      "training_history": [],
+      "previous_reviews": [],
+      "session_notes": "",
+      "session_history": [],
+      "capture_profile": {
+        "facing": "right",
+        "weapon": "unknown",
+        "camera_motion": "unknown",
+        "initial_guard_confirmed": false
+      },
+      "conversation_history": []
+    }
+  }
+]

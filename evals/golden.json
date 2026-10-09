@@ -1,0 +1,54 @@
+{
+  "schema": "golden-v1",
+  "clips": [
+    {
+      "path": "commons/dourdan-04",
+      "source_sha256": "b68b0757bfd5efda935ee4948e403a41f0282801156f6f06c22977be97144609",
+      "label_revision": 2,
+      "source_page": "https://commons.wikimedia.org/wiki/File%3ACoupe_du_Monde_juniors_Dourdan_-_04.webm"
+    },
+    {
+      "path": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000",
+      "source_sha256": "10c523d6193887da1681d9b9cf79a3bb70ef35d93606b29ee2c81af07f745210",
+      "label_revision": 2,
+      "source_page": "https://www.youtube.com/watch?v=oifnxIJA8vA"
+    },
+    {
+      "path": "footwork-clips/rigin-meinhardt-2016-t8-416000-424000",
+      "source_sha256": "145031f9554a817d31d609418d5ad51131447acdd83995ec05dcfa898fea8244",
+      "label_revision": 3,
+      "source_page": "https://www.youtube.com/watch?v=oifnxIJA8vA"
+    },
+    {
+      "path": "mit-ocw/advance_lunge",
+      "source_sha256": "6da934342a5513556cc92d04bcd04eefcbcf62a6a76666b8662ac4e38d315ff1",
+      "label_revision": 8,
+      "source_page": "https://ocw.mit.edu/courses/pe-740-fencing-spring-2007/pages/video/"
+    },
+    {
+      "path": "mit-ocw/jumpe_lunge",
+      "source_sha256": "f656156eda327753e7fd0dfd14c5e885ae0d4cb5dd489982627bcd2358ae27ed",
+      "label_revision": 3,
+      "source_page": "https://ocw.mit.edu/courses/pe-740-fencing-spring-2007/pages/video/"
+    },
+    {
+      "path": "mit-ocw/jump_forward_jump_back",
+      "source_sha256": "949fdbc58e9cf3becbf60a18ff60d222be3cfb475f9eacff1bd640e56866b68b",
+      "label_revision": 4,
+      "source_page": "https://ocw.mit.edu/courses/pe-740-fencing-spring-2007/pages/video/"
+    },
+    {
+      "path": "mit-ocw/jump_lunge_group",
+      "source_sha256": "b22179c1437ded3017f6d92ae4a813bf83796fc9b7fdaab94b3bd998686ca03a",
+      "label_revision": 2,
+      "source_page": "https://ocw.mit.edu/courses/pe-740-fencing-spring-2007/pages/video/"
+    },
+    {
+      "path": "mit-ocw/parry_4_repost",
+      "source_sha256": "49d7f614d0a75dd25457a2f7ad9694a4747d0a8bb0cfd52ec57d5cd315aaddcf",
+      "label_revision": 1,
+      "source_page": "https://ocw.mit.edu/courses/pe-740-fencing-spring-2007/pages/video/"
+    }
+  ],
+  "limitations": "Existing labels are partial human reviews, not expert technique judgments."
+}

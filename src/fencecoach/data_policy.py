@@ -13,3 +13,8 @@ def eligible_source(source):
         and source.get("training_domain") in MODERN_DOMAINS
         and source.get("curation_sha256") == digest
     )
+
+
+def eligible_training_source(source):
+    """Modern provenance plus the current MVP footage scope."""
+    return eligible_source(source) and source.get("mvp_training_eligible", True)

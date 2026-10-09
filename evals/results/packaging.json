@@ -1,0 +1,15 @@
+{
+  "status": "definition_and_local_seed_checked",
+  "docker_runtime": "not_run: Docker is not installed",
+  "compose_services": [
+    "ollama",
+    "model-init",
+    "phoenix",
+    "fencecoach"
+  ],
+  "public_image_tags": "ollama 0.35.1 and Phoenix version-15.0.0 verified HTTP 200 on official Docker Hub API",
+  "seeded_examples": 3,
+  "seed_idempotency": "unit test passed; unsupported coaching gate preserved",
+  "fresh_machine_under_ten_minutes": null,
+  "ci": "workflow configured, not executed for this revision"
+}

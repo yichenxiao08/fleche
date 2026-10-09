@@ -17,7 +17,9 @@ jobs:
           cache: pip
           cache-dependency-path: requirements.lock
       - run: pip install -r requirements.lock
-      - run: pip install -e '.[dev]'
+      - run: pip install -r requirements-video.lock
+      - run: pip install -e '.[dev,video]'
+      - run: python -m playwright install --with-deps chromium
       - run: python -m ruff check src tests scripts
       - run: python -m ruff format --check src tests scripts
       - name: Check browser module syntax
@@ -27,9 +29,19 @@ jobs:
           done
       - run: python -m unittest discover -s tests -v
       - run: python -m fencecoach.evaluation
+      - name: Exercise MCP tool protocol
+        run: python scripts/mcp_smoke.py
+      - name: Exercise desktop and mobile product flow
+        run: python scripts/browser_smoke.py
       - run: docker build -t fencecoach:ci .
       - name: Exercise the container
         run: |
           docker run -d --name fencecoach-ci -p 127.0.0.1:8001:8000 fencecoach:ci
           trap 'docker logs fencecoach-ci; docker rm -f fencecoach-ci' EXIT
           python scripts/container_smoke.py
+      - name: Upload evaluation artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fencecoach-checks
+          path: data/evals

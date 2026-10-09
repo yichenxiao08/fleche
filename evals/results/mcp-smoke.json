@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "transport": "real stdio subprocess",
+  "tools": [
+    "get_session_measurements",
+    "list_reps",
+    "compare_to_baseline",
+    "get_practice_history",
+    "search_coaching_library"
+  ],
+  "read_only_annotations": true,
+  "unknown_session_error": true,
+  "client": "official Python MCP SDK",
+  "claude_desktop_code": "Not exercised: Claude is not installed/authenticated on this machine."
+}

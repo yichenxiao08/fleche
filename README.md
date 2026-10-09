@@ -1,77 +1,125 @@
 # FenceCoach
 
-Gesture data collection and the local annotation workspace are documented in [docs/gesture-data.md](docs/gesture-data.md). Training sources require checksum-bound approval for modern sport fencing; historical and unreviewed footage are excluded. The lower-body footwork feature extractor is implemented; the gesture classifier still needs human-reviewed labels.
+A local fencing practice app with a LangGraph conversational coach, evidence tools, retrieval, persistent session memory, and video measurements. Phase 1 targets **one fencer, a fixed side camera, full-body footage**. Flèche rules are beta. Bout analysis, learned classifiers, and automatic label drafts are experimental.
 
-A fencing training app with an evidence-grounded LLM coaching workflow. The interface combines Piste's athletic training screens, Replay Studio's immersive review, and a deliberate practice journal. The primary color is fencing-strip red, with green reserved for completed practice. The API and browser interface are separate so a mobile client can reuse the coaching backend later.
+**Readiness:** the engineering flow works, but coaching correctness is not independently validated. None of the eight existing golden clips passes the stricter solo QA gate. The app blocks personalized video coaching on those clips. See [the validation path](docs/coaching-validation.md) and [measured benchmarks](BENCHMARKS.md).
 
-## Try it locally
+## Run with Docker
 
-Requires Python 3.12 or later. From the repository folder in PowerShell:
+Requires Docker Engine/Desktop with Compose, internet for initial downloads, and enough memory for the local model and app. From this repository:
 
-```powershell
-py -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.lock
-.\.venv\Scripts\python.exe -m pip install -e '.[dev,video]'
-.\.venv\Scripts\python.exe scripts/setup_video.py --demo
-.\.venv\Scripts\python.exe -m uvicorn fencecoach.api:app --host 127.0.0.1 --port 8000
-```
-
-Open http://127.0.0.1:8000. **Start training** opens a guided drill and camera setup. **Explore sample review** opens a synthetic session. In **Coach**, submit a question to generate a saved review. Local AI uses the configured Ollama model (default `qwen3:4b`) and the same evidence tools. On this computer, `scripts/start_local.ps1` can start the portable runtime and app. Demo mode runs the actual LangGraph workflow with a deterministic report formatter: it makes no LLM calls, requires no accounts, and does not interpret open-ended questions. That synthetic sample's imagery and landmarks are illustrative. The separate public video demo uses actual pose extraction.
-
-Import your own measurements using **Import a session**. The import dialog accepts a measurement array or complete session JSON; download its synthetic format example if needed. Each measurement needs a unique source ID, name, value, unit and confidence. Timestamps and a same-unit baseline are optional. Sessions and reports survive restarts in local SQLite at `data/fencecoach.sqlite3`. Export them from the review's measurement details or the coach's report details.
-
-**Record** supports real, silent camera capture in browsers with `getUserMedia` and `MediaRecorder`, or an existing video upload. Camera access starts on an explicit click. Drafts persist in browser IndexedDB until you choose **Analyze this clip**, import measurements or clear them. Analysis uploads the clip to the local server, tracks pose landmarks, and produces knee/elbow angles, torso tilt, arm extension, normalized recovery speed and recovery intervals for your review. Recording and analysis are limited to two minutes and 200 MB. Unprocessed attached clips still use browser IndexedDB. Download a copy before clearing browser data.
-
-**Record → Analyze public fencing demo** processes an attributed MIT OpenCourseWare clip with real MediaPipe pose tracking. The new movement review screen supports landmark overlays, editable proposals, manual intervals and saved measurement provenance. Demo footage does not count toward practice goals. See [video setup and limitations](docs/video-pipeline.md).
-
-**Review** groups actual measurements by name and unit, preserves their source IDs and confidence, and seeks attached footage to supplied time windows. **Coach** passes the selected measurement ID into the existing graph while retaining the whole session as context. Saved reviews retain that focus. **Progress** computes saved practice session counts, weekly practice days and means for matching measurement names and units. Built-in sample sessions do not count toward goals. Dates are session creation dates; matching units do not establish comparable recording conditions. History currently uses the most recent 200 stored sessions.
-
-## Design prototypes
-
-Open http://127.0.0.1:8000/static/prototypes-compare.html to compare three clickable mobile design directions, or http://127.0.0.1:8000/static/prototypes.html for the guided gallery. Walk through training, camera setup, replay, progress and a sample coaching conversation. These prototypes use generated imagery and synthetic measurements; camera capture, playback and coach replies are simulated. See [the design study](docs/design-study.md) for references and the recommended direction.
-
-## Live AI
-
-Copy `.env.example` to `.env`. Set `BEDROCK_CHAT_MODEL_ID` to a Bedrock Converse model that supports tool calls and structured outputs in your AWS region. Set up AWS credentials through the normal AWS SDK credential chain, then restart the server and select **Live AI**. A configured model ID enables the option; it does not verify credentials or provider access. Provider charges apply.
-
-Set `BEDROCK_EMBEDDING_MODEL_ID` to enable vector retrieval. Without it, live AI uses the local BM25 retriever. Demo always uses BM25. The vector index is currently rebuilt in memory after a server restart. No LangChain, LangGraph or LangSmith signup is needed, and cloud tracing is not configured.
-
-The live workflow uses the [LangGraph graph API](https://docs.langchain.com/oss/python/langgraph/graph-api) and [LangChain Bedrock integration](https://docs.langchain.com/oss/python/integrations/chat/bedrock):
-
-```text
-session metrics -> retrieve notes -> agent -> optional tool loop -> typed report -> source ID validation
-                                      ^           |
-                                      +-----------+
-```
-
-Tools read exact measurements, compute same-unit baseline deltas, and retrieve coaching knowledge. Model calls are limited to three agent rounds and eight additional tool calls. A structured formatter produces the report; a deterministic validator rejects evidence IDs that are not in the session or retrieved notes. Skill level is included in the model context. Report runs expose source text, retrieval method, tool events, model ID, latency and available token usage. They do not expose model reasoning.
-
-**Validation scope:** valid source IDs do not establish semantic correctness. Summary assertions, unsupported numeric claims, instruction injection resistance and coaching quality still require independent evaluation. A confidence threshold of 0.65 is a prototype engineering choice, not a validated sports standard. The authored coaching notes are a small development corpus, not expert-certified guidance.
-
-## Docker
-
-```powershell
+```sh
 docker compose up --build
 ```
 
-The Compose service binds to localhost and keeps SQLite in a named volume. The container runs as a non-root user and includes a health check. AWS access is not included in the image: supply credentials outside the image for local live calls, and use a runtime IAM role for a later AWS deployment. Do not put credentials in Git or build arguments.
+Open [FenceCoach](http://127.0.0.1:8000) and [Phoenix traces](http://127.0.0.1:6006). The stack downloads `qwen2.5:1.5b`, installs checksum-verified pose weights, starts SQLite-backed workers, and seeds three preprocessed archival examples. No account or API key is required. First-start time depends on network and hardware; the under-ten-minute target has **not** been verified on a fresh machine. Docker is unavailable on the development machine; CI contains image-build and container API checks, which have not yet been run for this revision.
 
-## Checks and measurement
+The three MIT examples demonstrate QA, overlays, and rep proposals. They are low resolution and **unsupported for personal coaching**. They are not quietly upgraded or assigned synthetic measurements. The separate **Try synthetic sample review** demonstrates the evidence/report workflow without claiming video accuracy. Select **Local AI** there for a real model conversation; **Sample report** is deterministic and makes no LLM calls.
+
+All services bind to localhost. Sessions, clips, model downloads, and Phoenix data persist in named volumes. `docker compose down` stops the stack without deleting those volumes. Authentication and cloud deployment are deferred.
+
+## Run with Python
+
+Python 3.12+, Ollama, and the model are needed for local video and live coaching. On Windows:
 
 ```powershell
-.\.venv\Scripts\python.exe -m unittest discover -s tests -v
-.\.venv\Scripts\python.exe -m ruff check src tests scripts
-.\.venv\Scripts\python.exe -m fencecoach.evaluation
+py -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.lock -r requirements-video.lock
+.\.venv\Scripts\python.exe -m pip install -e '.[dev,video]'
+.\.venv\Scripts\python.exe scripts/setup_video.py
+ollama pull qwen2.5:1.5b
+$env:FENCECOACH_SEED_EXAMPLES='true'
+.\.venv\Scripts\python.exe -m uvicorn fencecoach.api:app --host 127.0.0.1 --port 8000
 ```
 
-The ten-question authored retrieval set produces document recall@5, mean reciprocal rank, per-question retrieved IDs and retrieval latency in `data/evals/retrieval-baseline.json`. The dataset is deliberately small and useful for regression work; these results are not a held-out performance benchmark or coaching accuracy score. Add independently labeled questions and distractor documents before claiming résumé metrics. `--embeddings` compares the configured Bedrock retrieval path and incurs provider charges.
+Start Ollama first if its desktop service is not running. On this development computer `scripts/start_local.ps1` also supports the existing portable runtime. Copy `.env.example` to `.env` for optional settings. Saved sessions/reviews and logs live in SQLite; unsent camera drafts live in browser IndexedDB. Clearing browser storage deletes unsent drafts, not saved server sessions.
 
-Tests cover persistence, malformed measurements, invalid citations, low-confidence demo behavior, bounded model tool calls, and provider failure handling using fake models. GitHub Actions also builds the container and exercises its demo API without AWS secrets. Real Bedrock inference has not been validated locally.
+## Product flow
 
-## Current scope and next steps
+1. **Record/upload:** silent camera recording or a video under two minutes / 200 MB. Confirm the weapon/lead side, camera motion, and reusable camera setup name.
+2. **QA:** supported, supported with warnings, or unsupported with filming tips. Resolution, full-body visibility, multiple poses, usable-frame coverage, camera-motion evidence, and track reacquisitions are checked. These are engineering heuristics, not calibrated accuracy guarantees.
+3. **Review:** timestamped proposed reps, exercise regions, landmark overlays, and a 12-frame contact sheet. Proposals require review. Saving unsupported clips as personal coaching evidence is blocked, including older saved sessions.
+4. **Coach:** a natural conversation over saved measurements and retrieved notes. Assessments aim for a timestamped observation, one cue, one drill, and its purpose. Ordinary follow-ups retain conversational history. Measurements are not correctness scores.
+5. **Practice/progress:** persistent journal entries and drills. Comparisons require the same declared, named camera setup and capture details; different setups show **Not comparable**. Shorter return time alone is not an improvement claim.
 
-Implemented: the core training app now includes live local Ollama or optional Bedrock coaching, queued coaching with progress, cited structured reports with bounded repair, journal/history tools, saved coaching drills, persistent daily practice logs, persistent camera drafts, detailed 2D video measurements and charts, onset/peak/return review, gesture-label exports and a guarded temporal-model training workflow. Video and coaching workers can run separately; PostgreSQL and optional private S3 storage support deployment across processes or machines. See [core app implementation and scaling](docs/core-app.md).
+## Architecture
 
-Remaining: collecting expert gesture labels and independent footage, training/promoting a reliable classifier, cloud deployment and throughput evaluation, production retention/quotas, per-user authorization and login. Pose tracking is pretrained; fencing gesture proposals are still unvalidated heuristics until a trained model is promoted. Spinal straightness, blade contact and tactical attack intent are not measured by the current 2D pose model. The app remains on localhost while sign-in is deferred.
+```mermaid
+flowchart LR
+  Browser[Record / upload / review] --> API[FastAPI + durable queues]
+  API --> Worker[Supervised video worker]
+  Worker --> QA[Pose continuity + QA gate]
+  QA --> Evidence[Cached evidence + timestamps]
+  Evidence --> DB[SQLite / optional PostgreSQL]
+  DB --> Graph[Bounded LangGraph coach]
+  Library[Coaching library / BM25 or optional embeddings] --> Graph
+  Graph --> LLM[Ollama / optional Bedrock]
+  Graph --> Checks[Known-claim and evidence checks]
+  Checks --> Browser
+  Graph --> Phoenix[OpenTelemetry / Phoenix + local trace log]
+  DB --> MCP[Five read-only MCP tools]
+```
 
-See [the project plan](docs/project-plan.md) and [architecture notes](docs/architecture.md).
+The pipeline performs pose extraction once per clip and caches evidence; chat does not rerun video analysis. Direct questions use a compact generation path. History/comparison requests retain a bounded tool loop. Local models are warmed and responses are streamed through sentence checks. Those checks catch known failures; they do not prove all language is grounded.
+
+The research catalog preserves study conditions, units, and references. It does not turn a reported elite athlete average into a universal “good lunge” threshold. Knee angles are 2D estimates; physical force, spinal curvature, blade contact, tactical intent, and end balance are not measured.
+
+## AI engineering and evidence
+
+- LangGraph workflows, LangChain providers, bounded tool calls, retrieval, persisted conversational context, and evidence-backed practice drafts.
+- Fixed evaluation questions, source hashes, label revisions, code hashes, model comparisons, independent-group split guards, and explicit abstention.
+- OpenInference-compatible tool/model/turn spans, trace IDs, available token counts, latency, and API fee estimates. Phoenix runs locally; question text, notes, credentials, and video content are omitted from exported spans. JSONL traces remain in `data/traces/coach.jsonl`.
+- Read-only MCP tools for measurements, reps, comparison, practice history, and library retrieval. [Configuration and verification](docs/mcp.md).
+
+![Actual Phoenix trace dashboard](docs/phoenix-traces.png)
+
+The dashboard includes development and test runs; its aggregate latency is not the model-comparison benchmark. Use [BENCHMARKS.md](BENCHMARKS.md) for the fixed-case results and disclosed evaluation limits.
+
+## Checks and benchmarks
+
+```sh
+python -m unittest discover -s tests -v
+python -m ruff check src tests scripts
+python -m ruff format --check src tests scripts
+python -m playwright install chromium
+python scripts/browser_smoke.py
+python scripts/mcp_smoke.py
+python -m fencecoach.evaluation
+python scripts/benchmark.py
+```
+
+The browser smoke uses synthetic inference/model fixtures in a temporary database, while exercising real HTTP, workers, recording, persistence, and UI. It checks two uploads, rep seeking, chat, logs, reload, unsupported state, and 390px mobile layout. It proves wiring, not pose inference or expert coaching quality. Unit tests and protocol checks run in GitHub Actions.
+
+The full golden videos remain local, with hashes/review revisions committed; `benchmark.py` needs those original training folders. Packaged examples are portable. Recorded evaluation artifacts are provided under `evals/results`; benchmark generation consumes current local runs rather than silently scoring archived answers as new executions.
+
+```sh
+python scripts/evaluate_coach.py --models qwen2.5:1.5b qwen2.5:3b
+python scripts/evaluate_vision.py
+python scripts/coach_review.py
+```
+
+`evaluate_vision.py` prepares 30 cases and pose proxies, and explicitly reports **not run** without authenticated vision models. Add `--execute --models MODEL_ID MODEL_ID` to execute Bedrock Converse calls; charges apply. Existing reviewed action labels are independent of predictions, but selected-athlete identity still needs verification. Technique questions have no accuracy score until independently answered. The authored ten-question retrieval set is a regression set, not a held-out coaching benchmark.
+
+## Optional cloud and scaling paths
+
+The separate `compose.scale.yaml` retains PostgreSQL and independent workers. It requires explicit password configuration, model setup, and shared storage; it is experimental and not the default demo. Private S3 adapters and Bedrock providers are implemented, but cloud deployment and throughput claims are unverified. Bedrock model IDs and normal AWS credentials are required; configured IDs alone do not prove access. Never place credentials in the repository or image. No LangGraph/LangChain account is required.
+
+## What failed and what changed
+
+- Background people and ambiguous frames could produce convincing wrong-athlete measurements. Tracking now abstains and QA restricts supported input to solo footage.
+- Low-resolution public drills are useful regression fixtures but fail the product filming requirements. The three packaged demos expose that failure explicitly.
+- Generic coaching substituted recovery advice for lunge questions and repeated raw data. Topic-specific evidence, shorter prompts, assessment checks, and concrete evidence-based fallbacks now address known cases; expert usefulness is still unmeasured.
+- Local latency misses the requested 3–5 second target. The smaller model is the default, cached evidence and warming reduce overhead, and the benchmark reports actual timings. A hosted fast path needs authenticated access before it can be compared.
+- Two connected recording groups cannot demonstrate generalized recognition. Automatic drafts remain separate from human review and automatic training is off by default.
+
+## Demo and licensing
+
+[Watch the 89-second rehearsal](docs/demo.mp4). It labels synthetic sample coaching and shows actual Phoenix traces plus the recorded official-SDK MCP check. It does not imply a Claude client integration was exercised.
+
+The three packaged sources and derived previews/contact sheets are attributed MIT OpenCourseWare PE.740 Fencing (Spring 2007), Prof. Jaroslav Koniusz, under **CC BY-NC-SA 3.0**. Per-file source links, checksums, and attribution are in [the example manifest](examples/video/manifest.json) and each `source.json`. These assets are noncommercial and share-alike; they are not covered by an assumed code license. No uploaded personal videos or unlicensed bout MP4s are committed.
+
+## Next acceptance work
+
+See [five-stage status](docs/finish-status.md) and [reliable coaching validation](docs/coaching-validation.md). Missing external acceptance items are clean supported solo/flèche clips, independent coaching references/usefulness ratings, authenticated hosted model comparisons, Claude-client integration, and a fresh-machine Docker run. Accounts, native mobile, and crowded-bout tactics remain outside this release.
+
+Implementation references: [LangGraph](https://docs.langchain.com/oss/python/langgraph/graph-api), [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk/tree/v1.x), [Phoenix](https://github.com/Arize-ai/phoenix), [Bedrock Converse](https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_Converse.html), [Ollama Docker](https://docs.ollama.com/docker), [Compose startup order](https://docs.docker.com/compose/how-tos/startup-order/).

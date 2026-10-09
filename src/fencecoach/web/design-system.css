@@ -1437,6 +1437,12 @@ td .text-action {
   margin-bottom: 21px;
   overflow-wrap: anywhere;
 }
+.report-evidence {
+  margin: 0 0 18px;
+}
+.report-evidence > summary {
+  font-size: 11px;
+}
 .observation {
   padding: 15px 0;
   border-bottom: 1px solid var(--line);
@@ -2639,3 +2645,6 @@ dialog h3 {
     height: 11px;
   }
 }
+
+.conversation-answer { white-space: pre-wrap; }
+.chat-message[hidden] { display: none; }

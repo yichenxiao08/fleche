@@ -23,6 +23,7 @@ LEGACY_FEATURES = (
     "right_arm_extension",
 )
 FEATURES = FEATURE_NAMES
+ACTIVITY_LABELS = ("setup", "exercise", "between_reps", "rest", "exit")
 
 
 class GestureLabel(BaseModel):
@@ -33,6 +34,7 @@ class GestureLabel(BaseModel):
         "advance",
         "retreat",
         "lunge",
+        "fleche",
         "recovery",
         "bounce",
         "jump_forward",
@@ -49,8 +51,22 @@ class GestureLabel(BaseModel):
         return self
 
 
+class ActivityLabel(BaseModel):
+    start_ms: int = Field(ge=0)
+    end_ms: int = Field(gt=0)
+    label: Literal["setup", "exercise", "between_reps", "rest", "exit"]
+    note: str = Field(default="", max_length=300)
+
+    @model_validator(mode="after")
+    def ordered(self):
+        if self.end_ms <= self.start_ms:
+            raise ValueError("Label end must follow start.")
+        return self
+
+
 class Annotations(BaseModel):
     labels: list[GestureLabel] = Field(default_factory=list, max_length=250)
+    activity_labels: list[ActivityLabel] = Field(default_factory=list, max_length=250)
     reviewer: str = Field(default="athlete", min_length=1, max_length=100)
     domain_verified: bool = False
 
@@ -79,9 +95,14 @@ def temporal_features(frames, start, end, version=VERSION):
     return vector
 
 
-def classify_windows(frames, path: Path):
+def classify_windows(frames, path: Path, task="gesture", *, allow_development=False):
+    allowed_labels = LABELS if task == "gesture" else ACTIVITY_LABELS
+    task_name = "activity phase" if task == "activity" else "gesture"
     if not path.is_file():
-        return [], {"ready": False, "reason": "No gesture model has been trained and promoted."}
+        return [], {
+            "ready": False,
+            "reason": f"No {task_name} model has been trained and promoted.",
+        }
     try:
         model = json.loads(path.read_text(encoding="utf-8"))
         legacy = model.get("schema") == "fencecoach-linear-v1"
@@ -102,7 +123,7 @@ def classify_windows(frames, path: Path):
             and 100 <= model.get("stride_ms", 500) <= 1500
             and len(model["weights"]) in {1, len(model["classes"])}
             and (len(model["weights"]) != 1 or len(model["classes"]) == 2)
-            and all(label in LABELS for label in model["classes"])
+            and all(label in allowed_labels for label in model["classes"])
             and all(
                 len(row) == expected and all(math.isfinite(v) for v in row)
                 for row in model["weights"]
@@ -115,8 +136,10 @@ def classify_windows(frames, path: Path):
             "ready": False,
             "reason": "The gesture model file is invalid. Pose analysis is still available.",
         }
-    if model.get("schema") not in {"fencecoach-linear-v1", "fencecoach-linear-v2"} or not model.get(
-        "promoted"
+    if (
+        model.get("schema") not in {"fencecoach-linear-v1", "fencecoach-linear-v2"}
+        or model.get("task", "gesture") != task
+        or not (model.get("promoted") or (allow_development and model.get("development_only")))
     ):
         return [], {"ready": False, "reason": "Model has not passed promotion checks."}
     output = []
@@ -161,6 +184,7 @@ def classify_windows(frames, path: Path):
         )
     return output, {
         "ready": True,
+        "development_only": not model.get("promoted"),
         "version": model["version"],
         "held_out": model["evaluation"],
         "note": "Model scores are uncalibrated; review classifications.",

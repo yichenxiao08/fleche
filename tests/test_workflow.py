@@ -119,6 +119,11 @@ class DataAndEvidenceTests(unittest.TestCase):
 
             def invoke(self, messages):
                 self.calls += 1
+                if self.calls == 4:
+                    return AIMessage(
+                        content="The available evidence only supports interval comparisons.",
+                        usage_metadata={"input_tokens": 5, "output_tokens": 2, "total_tokens": 7},
+                    )
                 return AIMessage(
                     content="",
                     tool_calls=[
@@ -134,49 +139,28 @@ class DataAndEvidenceTests(unittest.TestCase):
         model = LoopModel()
         with patch.object(settings, "bedrock_embedding_model_id", ""):
             run = run_coach(request(), mode="bedrock", model=model)
-        self.assertEqual(model.calls, 3)
+        self.assertEqual(model.calls, 4)
         self.assertEqual(run.input_tokens, 35)
         self.assertEqual(run.output_tokens, 11)
 
-    def test_provider_report_with_invented_source_is_rejected(self):
-        class InvalidModel:
+    def test_live_reply_does_not_require_report_formatter(self):
+        class PlainModel:
             def bind_tools(self, tools):
                 return self
 
             def invoke(self, messages):
-                return AIMessage(content="Done")
+                return AIMessage(content="Start with a comfortable guard. What feels difficult?")
 
-            def with_structured_output(self, schema, include_raw):
-                class Formatter:
-                    def invoke(self, messages):
-                        return {
-                            "raw": AIMessage(content=""),
-                            "parsed": CoachingReport.model_validate(
-                                {
-                                    "summary": "Bad",
-                                    "observations": [
-                                        {
-                                            "claim": "Invented",
-                                            "evidence": [
-                                                {
-                                                    "source_type": "knowledge",
-                                                    "source_id": "made-up",
-                                                    "note": "Bad",
-                                                }
-                                            ],
-                                        }
-                                    ],
-                                }
-                            ),
-                        }
+            def with_structured_output(self, *args, **kwargs):
+                raise AssertionError("Conversation must not call a report formatter")
 
-                return Formatter()
-
-        with (
-            patch.object(settings, "bedrock_embedding_model_id", ""),
-            self.assertRaises(EvidenceValidationError),
-        ):
-            run_coach(request(), mode="bedrock", model=InvalidModel())
+        data = request()
+        data.question = "What does recovery mean?"
+        run = run_coach(data, mode="local", model=PlainModel())
+        self.assertEqual(run.response_kind, "conversation")
+        self.assertEqual(run.report.observations, [])
+        self.assertIsNone(run.report.next_drill)
+        self.assertIn("What feels difficult?", run.report.summary)
 
 
 class ApiPersistenceTests(unittest.TestCase):

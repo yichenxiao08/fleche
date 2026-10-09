@@ -1,5 +1,9 @@
 .git
 .venv
+.phoenix-venv
+.phoenix-py312
+tmp
+docs/demo.webm
 .env
 .env.*
 __pycache__

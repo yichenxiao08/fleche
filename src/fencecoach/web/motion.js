@@ -54,7 +54,11 @@ function chart(result, view = "knees") {
 }
 function gesturePredictions(result) {
   if (!result.gestures?.length) return "";
-  return `<details class="disclosure"><summary>Model movement labels</summary><p class="helper">${e(result.gesture_model.version)} · Predictions need review. Model scores are not accuracy probabilities.</p>${result.gestures.map((gesture) => `<div class="annotation-row"><span>${e(label(gesture.label))} · ${(gesture.start_ms / 1000).toFixed(2)}–${(gesture.end_ms / 1000).toFixed(2)} s · Model score ${Math.round(gesture.model_score * 100)}%</span><button class="text-action" data-gesture-seek="${gesture.start_ms}">Watch ${icon("play")}</button></div>`).join("")}</details>`;
+  return `<details class="disclosure"><summary>Experimental movement classifier</summary><p class="helper">${e(result.gesture_model.version)} · Predictions need review. Model scores are not accuracy probabilities.</p>${result.gestures.map((gesture) => `<div class="annotation-row"><span>${e(label(gesture.label))} · ${(gesture.start_ms / 1000).toFixed(2)}–${(gesture.end_ms / 1000).toFixed(2)} s · Model score ${Math.round(gesture.model_score * 100)}%</span><button class="text-action" data-gesture-seek="${gesture.start_ms}">Watch ${icon("play")}</button></div>`).join("")}</details>`;
+}
+function activityPredictions(result) {
+  if (!result.activity_predictions?.length) return "";
+  return `<details class="disclosure"><summary>Experimental activity classifier</summary><p class="helper">${e(result.activity_model.version)} · phase scores need review and are not accuracy probabilities.</p>${result.activity_predictions.map((phase) => `<div class="annotation-row"><span>${e(label(phase.label))} · ${(phase.start_ms / 1000).toFixed(2)}–${(phase.end_ms / 1000).toFixed(2)} s · Model score ${Math.round(phase.model_score * 100)}%</span><button class="text-action" data-gesture-seek="${phase.start_ms}">Watch ${icon("play")}</button></div>`).join("")}</details>`;
 }
 export function footworkPanel(result) {
   const summary = result.footwork_summary;
@@ -63,7 +67,7 @@ export function footworkPanel(result) {
 }
 export function motionPanel(result) {
   if (!result.clip_measurements) return "";
-  return `<section class="motion-panel"><div class="section-heading"><h2>Your movement, measured.</h2></div><div class="range-control"><button data-motion-view="knees" class="active">Knees</button><button data-motion-view="arms">Arm extension</button><button data-motion-view="torso">Torso</button></div><div id="motion-chart">${chart(result)}</div><details class="disclosure"><summary>Whole-clip measurements ${icon("chevron")}</summary>${measurementCards(result.clip_measurements)}${result.initial_guard_measurements?.length ? `<h3>Initial guard / first 1.5 seconds</h3>${measurementCards(result.initial_guard_measurements)}` : ""}<p class="helper">These summaries include all visible phases. They are not en-garde-specific or technique scores. Arm sides refer to anatomical left/right, not screen position. Torso tilt cannot measure spinal straightness.</p></details>${result.footwork_events?.length ? `<details class="disclosure"><summary>Footwork movement proposals</summary>${result.footwork_events.map((event) => `<p>${e(label(event.label))} · ${(event.start_ms / 1000).toFixed(2)}–${(event.end_ms / 1000).toFixed(2)} s</p>`).join("")}<p class="helper">Based on hip translation near the initial stance. Review each interval; these are heuristic proposals.</p></details>` : ""}${footworkPanel(result)}${gesturePredictions(result)}<details class="disclosure"><summary>Gesture labels & training data ${icon("chevron")}</summary><p class="helper">${result.gesture_model?.ready ? "A trained classifier is available. Review its labels; model scores are uncalibrated." : "Pose tracking uses a pretrained model. The fencing gesture classifier is not trained yet. Label movement intervals here to build the dataset."}</p><div id="gesture-labels"></div><form id="gesture-form"><label class="field"><span><input type="checkbox" name="domain_verified" id="gesture-domain" /> This clip shows modern sport fencing or a fencing footwork drill</span></label><div class="form-row"><label class="field"><span>Start / seconds</span><input name="start" type="number" min="0" max="${result.duration_ms / 1000}" step="0.001" value="0" required></label><label class="field"><span>End / seconds</span><input name="end" type="number" min="0.001" max="${result.duration_ms / 1000}" step="0.001" value="1" required></label></div><label class="field"><span>Movement you see</span><select name="label">${["en_garde", "advance", "retreat", "lunge", "recovery", "bounce", "jump_forward", "jump_back", "shuffle", "other"].map((v) => `<option value="${v}">${e(label(v))}</option>`).join("")}</select></label><button type="submit" class="secondary-action">Save gesture label ${icon("arrow")}</button></form><button class="text-action" data-dataset-export>Export labeled poses ${icon("arrow")}</button><p class="helper">Training splits by original video, so duplicate uploads cannot inflate the held-out score. More labeled clips and independent evaluation are needed before model promotion.</p></details></section>`;
+  return `<section class="motion-panel"><div class="section-heading"><h2>Your movement, measured.</h2></div><div class="range-control"><button data-motion-view="knees" class="active">Knees</button><button data-motion-view="arms">Arm extension</button><button data-motion-view="torso">Torso</button></div><div id="motion-chart">${chart(result)}</div><details class="disclosure"><summary>Whole-clip measurements ${icon("chevron")}</summary>${measurementCards(result.clip_measurements)}${result.initial_guard_measurements?.length ? `<h3>Initial guard / first 1.5 seconds</h3>${measurementCards(result.initial_guard_measurements)}` : ""}<p class="helper">These summaries include all visible phases. They are not en-garde-specific or technique scores. Arm sides refer to anatomical left/right, not screen position. Torso tilt cannot measure spinal straightness.</p></details>${result.footwork_events?.length ? `<details class="disclosure"><summary>Footwork movement proposals</summary>${result.footwork_events.map((event) => `<p>${e(label(event.label))} · ${(event.start_ms / 1000).toFixed(2)}–${(event.end_ms / 1000).toFixed(2)} s</p>`).join("")}<p class="helper">Based on hip translation near the initial stance. Review each interval; these are heuristic proposals.</p></details>` : ""}${footworkPanel(result)}${gesturePredictions(result)}${activityPredictions(result)}<details class="disclosure"><summary>Review labels & build training data ${icon("chevron")}</summary><p class="helper">The app can suggest reps and phases, but a suggestion is not a training label. Confirm each interval by watching the footage, then save it. Activity-phase models need reviewed examples across multiple clips before training.</p><div id="activity-suggestions">${(result.activity_segments || []).map((phase, i) => `<div class="annotation-row"><span>${e(label(phase.label))} · ${(phase.start_ms / 1000).toFixed(2)}–${(phase.end_ms / 1000).toFixed(2)} s</span><button class="text-action" data-activity-fill="${i}">Review these times</button></div>`).join("") || '<p class="empty-note">No phase suggestions yet.</p>'}</div><div id="activity-labels"></div><form id="activity-form"><label class="field"><span><input type="checkbox" name="domain_verified" id="activity-domain" /> This clip shows modern sport fencing or a fencing footwork drill</span></label><div class="form-row"><label class="field"><span>Start / seconds</span><input id="activity-start" name="start" type="number" min="0" max="${result.duration_ms / 1000}" step="0.001" value="0" required></label><label class="field"><span>End / seconds</span><input id="activity-end" name="end" type="number" min="0.001" max="${result.duration_ms / 1000}" step="0.001" value="1" required></label></div><label class="field"><span>What is happening?</span><select id="activity-phase" name="label">${["setup", "exercise", "between_reps", "rest", "exit"].map((v) => `<option value="${v}">${e(label(v))}</option>`).join("")}</select></label><button type="submit" class="secondary-action">Save reviewed phase ${icon("arrow")}</button></form><details class="disclosure"><summary>Gesture labels</summary><p class="helper">Label the movement itself to build the lunge, recovery and footwork classifier.</p><div id="gesture-labels"></div><form id="gesture-form"><label class="field"><span><input type="checkbox" name="domain_verified" id="gesture-domain" /> This clip shows modern sport fencing or a fencing footwork drill</span></label><div class="form-row"><label class="field"><span>Start / seconds</span><input name="start" type="number" min="0" max="${result.duration_ms / 1000}" step="0.001" value="0" required></label><label class="field"><span>End / seconds</span><input name="end" type="number" min="0.001" max="${result.duration_ms / 1000}" step="0.001" value="1" required></label></div><label class="field"><span>Movement you see</span><select name="label">${["en_garde", "advance", "retreat", "lunge", "recovery", "bounce", "jump_forward", "jump_back", "shuffle", "other"].map((v) => `<option value="${v}">${e(label(v))}</option>`).join("")}</select></label><button type="submit" class="secondary-action">Save gesture label ${icon("arrow")}</button></form><button class="text-action" data-dataset-export>Export labeled poses ${icon("arrow")}</button><p class="helper">Training splits by original video, so duplicate uploads cannot inflate the held-out score. More reviewed clips and independent evaluation are needed before model promotion.</p></details></details></section>`;
 }
 export function repDetails(window, result) {
   const proposal = result.candidates.find(
@@ -78,14 +82,14 @@ export function repDetails(window, result) {
     return "";
   return `<details class="disclosure"><summary>Rep measurements ${icon("chevron")}</summary><p class="helper">Proposed movement onset ${(proposal.onset_ms / 1000).toFixed(3)} s. Review it against the footage.</p>${measurementCards(proposal.measurements)}</details>`;
 }
-function labelRows(labels) {
+function labelRows(labels, removeAttribute, emptyMessage) {
   return (
     labels
       .map(
         (l, i) =>
-          `<div class="annotation-row"><span>${e(label(l.label))} · ${(l.start_ms / 1000).toFixed(2)}–${(l.end_ms / 1000).toFixed(2)} s</span><button class="text-action" data-label-remove="${i}">Remove</button></div>`,
+          `<div class="annotation-row"><span>${e(label(l.label))} · ${(l.start_ms / 1000).toFixed(2)}–${(l.end_ms / 1000).toFixed(2)} s</span><button class="text-action" ${removeAttribute}="${i}">Remove</button></div>`,
       )
-      .join("") || '<p class="empty-note">No human gesture labels saved.</p>'
+      .join("") || `<p class="empty-note">${e(emptyMessage)}</p>`
   );
 }
 export function setupMotion({ state, notice }) {
@@ -95,13 +99,31 @@ export function setupMotion({ state, notice }) {
     state.annotations = await api(
       `/api/videos/${state.videoJob.job_id}/annotations`,
     );
-    root.innerHTML = labelRows(state.annotations.labels);
+    root.innerHTML = labelRows(state.annotations.labels || [], "data-label-remove", "No human gesture labels saved.");
+    const phases = document.getElementById("activity-labels");
+    if (phases)
+      phases.innerHTML = labelRows(
+        state.annotations.activity_labels || [],
+        "data-activity-label-remove",
+        "No reviewed phase labels saved.",
+      );
     const domain = document.getElementById("gesture-domain");
     if (domain) domain.checked = Boolean(state.annotations.domain_verified);
+    const activityDomain = document.getElementById("activity-domain");
+    if (activityDomain)
+      activityDomain.checked = Boolean(state.annotations.domain_verified);
   }
   return {
     mount: () => refresh().catch((error) => notice(error.message)),
     setup() {
+      document.addEventListener("change", (event) => {
+        if (!["gesture-domain", "activity-domain"].includes(event.target.id))
+          return;
+        const otherId =
+          event.target.id === "gesture-domain" ? "activity-domain" : "gesture-domain";
+        const other = document.getElementById(otherId);
+        if (other) other.checked = event.target.checked;
+      });
       document.addEventListener("click", async (event) => {
         const b = event.target.closest("button");
         if (!b || b.disabled) return;
@@ -110,6 +132,12 @@ export function setupMotion({ state, notice }) {
             const video = document.getElementById("analysis-video");
             video.currentTime = Number(b.dataset.gestureSeek) / 1000;
             video.play().catch(() => {});
+          } else if (b.hasAttribute("data-activity-fill")) {
+            const phase = state.videoResult.activity_segments[Number(b.dataset.activityFill)];
+            document.getElementById("activity-start").value = (phase.start_ms / 1000).toFixed(3);
+            document.getElementById("activity-end").value = (phase.end_ms / 1000).toFixed(3);
+            document.getElementById("activity-phase").value = phase.label;
+            document.getElementById("activity-phase").focus();
           } else if (b.dataset.motionView) {
             document.getElementById("motion-chart").innerHTML = chart(
               state.videoResult,
@@ -127,12 +155,27 @@ export function setupMotion({ state, notice }) {
             );
           } else if (b.hasAttribute("data-label-remove")) {
             b.disabled = true;
-            const labels = state.annotations.labels.filter(
+            const labels = (state.annotations.labels || []).filter(
               (_, i) => i !== Number(b.dataset.labelRemove),
             );
             await api(`/api/videos/${state.videoJob.job_id}/annotations`, {
               method: "PUT",
               body: JSON.stringify({ ...state.annotations, labels }),
+            });
+            await refresh();
+          } else if (b.hasAttribute("data-activity-label-remove")) {
+            b.disabled = true;
+            const activity_labels = (state.annotations.activity_labels || []).filter(
+              (_, i) => i !== Number(b.dataset.activityLabelRemove),
+            );
+            await api(`/api/videos/${state.videoJob.job_id}/annotations`, {
+              method: "PUT",
+              body: JSON.stringify({
+                ...state.annotations,
+                activity_labels,
+                reviewer: "athlete",
+                domain_verified: data.get("domain_verified") === "on",
+              }),
             });
             await refresh();
           }
@@ -142,6 +185,33 @@ export function setupMotion({ state, notice }) {
         }
       });
       document.addEventListener("submit", async (event) => {
+        if (event.target.id === "activity-form") {
+          event.preventDefault();
+          const form = event.target,
+            data = new FormData(form),
+            button = form.querySelector("button");
+          button.disabled = true;
+          try {
+            const activity_labels = [
+              ...(state.annotations?.activity_labels || []),
+              {
+                start_ms: Math.round(Number(data.get("start")) * 1000),
+                end_ms: Math.round(Number(data.get("end")) * 1000),
+                label: data.get("label"),
+              },
+            ].sort((a, b) => a.start_ms - b.start_ms);
+            await api(`/api/videos/${state.videoJob.job_id}/annotations`, {
+              method: "PUT",
+              body: JSON.stringify({ ...state.annotations, activity_labels }),
+            });
+            await refresh();
+          } catch (error) {
+            notice(error.message);
+          } finally {
+            button.disabled = false;
+          }
+          return;
+        }
         if (event.target.id !== "gesture-form") return;
         event.preventDefault();
         const form = event.target,
@@ -162,6 +232,7 @@ export function setupMotion({ state, notice }) {
             body: JSON.stringify({
               ...state.annotations,
               labels,
+              activity_labels: state.annotations.activity_labels || [],
               reviewer: "athlete",
               domain_verified: data.get("domain_verified") === "on",
             }),

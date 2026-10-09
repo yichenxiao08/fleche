@@ -4,9 +4,33 @@ from __future__ import annotations
 
 import json
 from urllib.error import URLError
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 from fencecoach.settings import settings
+
+
+def warm_local_model():
+    """Load the configured model without generating a reply; callers run this in the background."""
+    if settings.fencecoach_chat_provider != "local":
+        return
+    request = Request(
+        settings.ollama_base_url.rstrip("/") + "/api/generate",
+        data=json.dumps(
+            {
+                "model": settings.ollama_chat_model,
+                "prompt": "",
+                "stream": False,
+                "keep_alive": -1,
+                "options": {"num_ctx": 4096},
+            }
+        ).encode(),
+        headers={"Content-Type": "application/json"},
+    )
+    try:
+        with urlopen(request, timeout=60) as response:
+            response.read()
+    except (URLError, TimeoutError, ValueError, OSError):
+        pass  # Readiness is reported by provider_status; startup must not block.
 
 
 def provider_status():
@@ -47,8 +71,11 @@ def chat_model(mode):
             base_url=settings.ollama_base_url,
             temperature=0,
             reasoning=False,
-            num_ctx=8192,
-            num_predict=1200,
+            num_ctx=4096,
+            # Structured coaching reports are short; avoid slow oversized local
+            # generations on modest hardware.
+            num_predict=240,
+            keep_alive=-1,
             client_kwargs={"timeout": 180},
         )
     if mode == "bedrock":

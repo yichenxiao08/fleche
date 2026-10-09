@@ -12,18 +12,22 @@ import json
 import shutil
 from pathlib import Path
 
+from fencecoach.athlete_tracking import selection_hint
 from fencecoach.data_policy import eligible_source
 from fencecoach.dataset_api import DatasetAnnotations
+from fencecoach.dataset_labels import SCHEMA_VERSION, training_track, usable_review
 from fencecoach.footwork import enrich_frames, movement_summary
 from fencecoach.gestures import LABELS
 from fencecoach.settings import settings
-from fencecoach.video_pipeline import analyze
+from fencecoach.video_pipeline import PIPELINE_VERSION, analyze
 
 
 class OfflineJob:
-    def __init__(self, folder, crop, profile):
+    def __init__(self, folder, crop, profile, hint=None, foreground=False):
         self.directory = folder
         self.payload = dict(source="training_corpus", crop=crop, capture_profile=profile)
+        self.payload["athlete_selection_hint"] = hint
+        self.payload["athlete_foreground"] = foreground
         self.progress = -1
 
     def get(self, _):
@@ -56,7 +60,10 @@ def prepare(folder, refresh=False):
         cached_digest = hashlib.file_digest(handle, "sha256").hexdigest()
     if not cached_source.exists() or cached_digest != digest:
         shutil.copyfile(source_path, target / "source.video")
+    hint = selection_hint(annotations.track_description)
     fingerprint = dict(source_sha256=source["sha256"], crop=annotations.crop.model_dump())
+    if hint:
+        fingerprint["athlete_selection_hint"] = hint
     provenance_file = target / "preparation.json"
     previous = (
         json.loads(provenance_file.read_text(encoding="utf-8"))
@@ -69,9 +76,21 @@ def prepare(folder, refresh=False):
         camera_motion=annotations.camera_motion,
         initial_guard_confirmed=False,
     )
-    if refresh or not (target / "result.json").exists() or previous != fingerprint:
+    cached_result = (
+        json.loads((target / "result.json").read_text(encoding="utf-8"))
+        if (target / "result.json").exists()
+        else {}
+    )
+    outdated_pipeline = cached_result.get("pipeline_version") not in {None, PIPELINE_VERSION}
+    if refresh or not cached_result or previous != fingerprint or outdated_pipeline:
         analyze(
-            OfflineJob(folder, fingerprint["crop"], profile),
+            OfflineJob(
+                folder,
+                fingerprint["crop"],
+                profile,
+                hint,
+                "foreground" in annotations.track_description.lower(),
+            ),
             "prepared",
             settings.fencecoach_pose_model,
         )
@@ -90,22 +109,73 @@ def prepare(folder, refresh=False):
     reviewed = [
         s
         for s in annotations.segments
-        if s.status == "reviewed"
+        if usable_review(s)
         and s.layer == "footwork"
+        and s.track_id == training_track(annotations)
         and s.label in LABELS
         and eligible_source(source)
     ]
     training = dict(
+        label_schema_version=SCHEMA_VERSION,
         reviewer=annotations.reviewer,
-        review_status="human_reviewed" if reviewed else "provisional",
+        review_status="human_reviewed"
+        if any(
+            usable_review(s)
+            and s.track_id == training_track(annotations)
+            and s.layer in {"footwork", "activity"}
+            for s in annotations.segments
+        )
+        and eligible_source(source)
+        else "provisional",
         reviewer_role=annotations.reviewer_role,
         license=source["license"],
         source_credit=source["attribution"],
         source_sha256=source["sha256"],
         split_group=source["split_group"],
+        athlete_id=annotations.athlete_id,
+        primary_track_id=training_track(annotations),
+        original_primary_track_id=annotations.primary_track_id,
+        recording_session_id=annotations.recording_session_id,
+        camera_setup_id=annotations.camera_setup_id,
         original_source_id=source["clip_id"],
         labels=[
-            dict(start_ms=s.start_ms, end_ms=s.end_ms, label=s.label, note=s.note) for s in reviewed
+            dict(
+                start_ms=s.start_ms,
+                end_ms=s.end_ms,
+                label=s.label,
+                note=s.note,
+                annotation_id=s.id,
+                reviewed_by=s.reviewed_by,
+                certainty=s.certainty,
+                exclusion_flags=s.exclusion_flags,
+                track_id=s.track_id,
+            )
+            for s in reviewed
+        ],
+        activity_labels=[
+            dict(
+                start_ms=s.start_ms,
+                end_ms=s.end_ms,
+                label=s.label,
+                note=s.note,
+                annotation_id=s.id,
+                reviewed_by=s.reviewed_by,
+                certainty=s.certainty,
+                exclusion_flags=s.exclusion_flags,
+                track_id=s.track_id,
+            )
+            for s in annotations.segments
+            if s.layer == "activity"
+            and usable_review(s)
+            and s.track_id == training_track(annotations)
+            and eligible_source(source)
+        ],
+        event_markers=[
+            e.model_dump()
+            for e in annotations.events
+            if usable_review(e)
+            and e.track_id == training_track(annotations)
+            and eligible_source(source)
         ],
         annotation_revision=annotations.revision,
         source_collection=folder.parent.name,

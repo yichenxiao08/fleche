@@ -31,5 +31,9 @@ catch {
     if (-not $ready) { throw "Ollama did not start. Check its server log." }
 }
 $env:OLLAMA_HOST = "127.0.0.1:11434"
-if ($OllamaBinary) { & $OllamaBinary pull qwen3:4b }
+if ($OllamaBinary) {
+    & $OllamaBinary pull qwen2.5:1.5b
+    if ($LASTEXITCODE -ne 0) { throw "Local chat model download did not complete." }
+}
+$env:OLLAMA_CHAT_MODEL = 'qwen2.5:1.5b'
 & (Join-Path $projectDirectory ".venv\Scripts\python.exe") -m uvicorn fencecoach.api:app --host 127.0.0.1 --port 8000
