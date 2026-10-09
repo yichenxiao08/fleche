@@ -1556,6 +1556,17 @@ td .text-action {
   position: relative;
   margin-top: 28px;
 }
+.coach-composer {
+  margin-bottom: 28px;
+}
+.coach-composer #coach-form {
+  margin-top: 0;
+}
+.coach-turn + .coach-turn {
+  border-top: 1px solid var(--line);
+  margin-top: 26px;
+  padding-top: 22px;
+}
 #coach-form textarea {
   display: block;
   width: 100%;
