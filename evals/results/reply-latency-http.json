@@ -1,0 +1,41 @@
+{
+  "scope": "Warmed same-machine queued HTTP requests, polled every 100ms, synthetic demo measurements with accumulating conversation history; not real-video or expert-quality validation.",
+  "cases": 4,
+  "p50_ms": 2293.995,
+  "p95_ms": 2932.609,
+  "first_text_p50_ms": 1196.17,
+  "answers": [
+    {
+      "question": "What can you tell me about my lunge from this evidence?",
+      "completion_ms": 2474.17,
+      "first_text_ms": 1184.78,
+      "model_latency_ms": 2209.93,
+      "grounding_replacement": true,
+      "answer": "At 0.00s, the tracked stance width is 0.37 frame width. That is a tracked estimate, rather than a correctness score. For your next slow solo set, cue yourself to finish toward the same target and reset fully between attempts. Repeat that drill slowly and compare the start and finish frames afterward. This helps make the repetitions comparable; it doesn't establish that you need a deeper bend or earlier extension."
+    },
+    {
+      "question": "Which measurements can help me understand my arm extension?",
+      "completion_ms": 3013.51,
+      "first_text_ms": 1207.56,
+      "model_latency_ms": 2840.52,
+      "grounding_replacement": false,
+      "answer": "At 0.00s, the stance width is 0.37 frame width. This is a tracked estimate, not a correctness score. For your next slow solo set, cue yourself to finish toward the same target and reset fully between attempts. Repeat that drill slowly and compare the start and finish frames afterward. This helps make the repetitions comparable; it doesn't establish that you need a deeper bend or earlier extension."
+    },
+    {
+      "question": "What is recovery in fencing?",
+      "completion_ms": 2113.82,
+      "first_text_ms": 1522.78,
+      "model_latency_ms": 1869.61,
+      "grounding_replacement": false,
+      "answer": "Recovery in fencing is the period of time between attacks when the fencer regains their balance and prepares for the next attack. It involves stepping back, shifting weight, and adjusting the position of the blade. Proper recovery is crucial for maintaining balance and avoiding mistakes."
+    },
+    {
+      "question": "Why?",
+      "completion_ms": 2073.89,
+      "first_text_ms": 961.07,
+      "model_latency_ms": 1813.63,
+      "grounding_replacement": false,
+      "answer": "Recovery is essential in fencing because it allows the fencer to regain balance and prepare for the next attack. Without proper recovery, the fencer risks losing their balance, which can lead to mistakes or even being caught off guard. A well-executed recovery ensures that the fencer is ready to respond effectively to their opponent's attacks."
+    }
+  ]
+}

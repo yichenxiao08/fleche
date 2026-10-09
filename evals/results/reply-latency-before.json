@@ -1,0 +1,108 @@
+{
+  "phase": "before",
+  "model": "qwen2.5:1.5b",
+  "cases": 8,
+  "p50_ms": 2709.285,
+  "p95_ms": 5088.139,
+  "first_text_p50_ms": 1473.4325499994156,
+  "coach_code_sha256": "baf3ecb9839e9e1c47b3a3603fbbd14b5d79fc99a79b27200845475ec3ef1e17",
+  "scope": "Same-machine warmed local model; offline diagnostic footage, not proof of coaching correctness; browser/queue overhead excluded.",
+  "answers": [
+    {
+      "case_id": "commons/dourdan-04:0",
+      "question": "What can you tell me about my lunge from this evidence?",
+      "latency_ms": 2376.12,
+      "first_text_ms": 2066.9182000019646,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "model_calls": 1,
+      "grounding_replacement": true,
+      "unsupported_claim_flags": [],
+      "answer": "At 29.20s, the tracked left knee angle at peak is 175.5 deg. That is a tracked estimate, rather than a correctness score. For your next slow solo set, cue yourself to finish toward the same target and reset fully between attempts. Repeat that drill slowly and compare the start and finish frames afterward. This helps make the repetitions comparable; it doesn't establish that you need a deeper bend or earlier extension."
+    },
+    {
+      "case_id": "commons/dourdan-04:1",
+      "question": "Which measurements can help me understand my arm extension?",
+      "latency_ms": 5138.63,
+      "first_text_ms": 1545.7113000011304,
+      "input_tokens": 1576,
+      "output_tokens": 180,
+      "model_calls": 1,
+      "grounding_replacement": false,
+      "unsupported_claim_flags": [],
+      "answer": "At 29.20s, the tracked left elbow angle at peak is 153.4 deg. That is a tracked estimate, rather than a correctness score. For your next slow solo set, cue yourself to finish toward the same target and reset fully between attempts. Repeat that drill slowly and compare the start and finish frames afterward. This helps make the repetitions comparable; it doesn't establish that you need a deeper bend or earlier extension."
+    },
+    {
+      "case_id": "commons/dourdan-04:2",
+      "question": "How consistent are the measured recovery intervals?",
+      "latency_ms": 1672.17,
+      "first_text_ms": 1671.188100001018,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "model_calls": 1,
+      "grounding_replacement": true,
+      "unsupported_claim_flags": [],
+      "answer": "At 29.20s, the tracked recovery image hip speed is 2.017 torso/s. That is a tracked estimate, rather than a correctness score. For your next slow solo set, cue yourself to finish toward the same target and reset fully between attempts. Repeat that drill slowly and compare the start and finish frames afterward. This helps make the repetitions comparable; it doesn't establish that you need a deeper bend or earlier extension."
+    },
+    {
+      "case_id": "commons/dourdan-04:3",
+      "question": "Give me one supported observation, one practice cue, and one drill. Explain why.",
+      "latency_ms": 4994.37,
+      "first_text_ms": 1401.1537999977008,
+      "input_tokens": 1469,
+      "output_tokens": 180,
+      "model_calls": 1,
+      "grounding_replacement": false,
+      "unsupported_claim_flags": [],
+      "answer": "At 29.20s, the tracked left knee angle at peak is 175.5 deg. That is a tracked estimate, rather than a correctness score. For your next slow solo set, cue yourself to finish toward the same target and reset fully between attempts. Repeat that drill slowly and compare the start and finish frames afterward. This helps make the repetitions comparable; it doesn't establish that you need a deeper bend or earlier extension."
+    },
+    {
+      "case_id": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000:5",
+      "question": "What can you tell me about my lunge from this evidence?",
+      "latency_ms": 4687.9,
+      "first_text_ms": 1049.087799998233,
+      "input_tokens": 1093,
+      "output_tokens": 180,
+      "model_calls": 1,
+      "grounding_replacement": false,
+      "unsupported_claim_flags": [],
+      "answer": "Over the measured span from 0.27s to 9.83s, the left knee angle median is 151.6 deg. That is a tracked estimate, rather than a correctness score. For your next slow solo set, cue yourself to finish toward the same target and reset fully between attempts. Repeat that drill slowly and compare the start and finish frames afterward. This helps make the repetitions comparable; it doesn't establish that you need a deeper bend or earlier extension."
+    },
+    {
+      "case_id": "footwork-clips/rigin-meinhardt-2016-t8-175000-185000:6",
+      "question": "Which measurements can help me understand my arm extension?",
+      "latency_ms": 3042.45,
+      "first_text_ms": 1032.2673000009672,
+      "input_tokens": 1144,
+      "output_tokens": 106,
+      "model_calls": 1,
+      "grounding_replacement": true,
+      "unsupported_claim_flags": [],
+      "answer": "Over the measured span from 2.10s to 9.83s, the right elbow angle median is 134.6 deg. That is a tracked estimate, rather than a correctness score. For your next slow solo set, cue yourself to finish toward the same target and reset fully between attempts. Repeat that drill slowly and compare the start and finish frames afterward. This helps make the repetitions comparable; it doesn't establish that you need a deeper bend or earlier extension."
+    },
+    {
+      "case_id": "followup:What is recovery in fencing?",
+      "question": "What is recovery in fencing?",
+      "latency_ms": 701.43,
+      "first_text_ms": 678.651300000638,
+      "input_tokens": 358,
+      "output_tokens": 16,
+      "model_calls": 1,
+      "grounding_replacement": false,
+      "unsupported_claim_flags": [],
+      "answer": "Resting the blade on the guard after a parry or riposte."
+    },
+    {
+      "case_id": "followup:Why?",
+      "question": "Why?",
+      "latency_ms": 1904.2,
+      "first_text_ms": 1880.3023000000394,
+      "input_tokens": 354,
+      "output_tokens": 11,
+      "model_calls": 1,
+      "grounding_replacement": false,
+      "unsupported_claim_flags": [],
+      "answer": "To ensure consistent starting position for repeatable drills."
+    }
+  ]
+}

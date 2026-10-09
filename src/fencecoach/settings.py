@@ -6,6 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    fencecoach_fast_reply_tokens: int = 112
     fencecoach_examples_dir: Path = Path("examples/video")
     fencecoach_seed_examples: bool = False
     fencecoach_phoenix_endpoint: str = ""

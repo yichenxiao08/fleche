@@ -94,6 +94,14 @@ def unsupported_claims(reply, metrics=()):
     sentences = re.split(r"(?<=[.!?])\s+|\n+|;|\b(?:but|however|so)\b", reply.lower())
     rules = (
         (
+            r"\b(?:knee|knees)\b.{0,90}\b(?:over[ -]?rotat\w*|under[ -]?rotat\w*|neutral range)\b",
+            "A projected knee angle does not establish knee rotation or a neutral angle range.",
+        ),
+        (
+            r"\b(?:avoid|prevent|reduce the risk of)\b.{0,35}\binjur\w*\b",
+            "These measurements do not establish injury risk or injury prevention.",
+        ),
+        (
             r"\b(?:knee|knees)\b.{0,65}\b(?:inward|inwards)\b",
             "Do not instruct inward knee movement.",
         ),
@@ -175,6 +183,16 @@ def assessment_issues(request, reply, metrics):
             issues.append("Assessment needs one cue, one drill, and its purpose.")
         if len(re.findall(r"\d+(?:\.\d+)?\s*(?:degrees?|deg\b|°|ratio\b)", reply, re.I)) > 2:
             issues.append("Assessment dumps measurements instead of selecting one observation.")
+        if (
+            re.search(
+                r"\b(my|this|these|assess|review)\b|supported observation", request.question, re.I
+            )
+            and any(m.start_ms is not None and m.confidence >= 0.65 for m in metrics)
+            and not re.search(r"\b\d+(?:\.\d+)?\s*(?:s\b|seconds\b)", reply)
+        ):
+            issues.append(
+                "A personal assessment needs a supplied timestamp rather than an unanchored correction."
+            )
     if brief["requested_topic"] in {"lunge", "arm"}:
         finish = next(
             (p for p in brief["patterns"] if p["topic"] == "weapon arm at the finish"), None

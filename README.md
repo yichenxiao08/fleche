@@ -109,7 +109,7 @@ The separate `compose.scale.yaml` retains PostgreSQL and independent workers. It
 - Background people and ambiguous frames could produce convincing wrong-athlete measurements. Tracking now abstains and QA restricts supported input to solo footage.
 - Low-resolution public drills are useful regression fixtures but fail the product filming requirements. The three packaged demos expose that failure explicitly.
 - Generic coaching substituted recovery advice for lunge questions and repeated raw data. Topic-specific evidence, shorter prompts, assessment checks, and concrete evidence-based fallbacks now address known cases; expert usefulness is still unmeasured.
-- Local latency misses the requested 3–5 second target. The smaller model is the default, cached evidence and warming reduce overhead, and the benchmark reports actual timings. A hosted fast path needs authenticated access before it can be compared.
+- Routine warmed local replies measured 2.04 seconds median / 3.15 seconds p95 across 27 diagnostic requests after reducing prompt size, limiting ordinary replies, and stopping at a checked complete answer. Cold starts, queued requests, and multi-tool plans can take longer. See the separate reply-speed results in [BENCHMARKS.md](BENCHMARKS.md); faster answers do not establish expert coaching quality.
 - Two connected recording groups cannot demonstrate generalized recognition. Automatic drafts remain separate from human review and automatic training is off by default.
 
 ## Demo and licensing

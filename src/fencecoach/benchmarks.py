@@ -162,7 +162,7 @@ def render_report(data):
         "Coverage is landmark usability, not correct-athlete accuracy. Rep scores use partially reviewed intervals and permissive boundary matching; they are not general action-recognition accuracy.",
         "Regression baseline is explicit; a passing engineering regression is not proof that a clip is supported or correctly coached.",
         "",
-        "## Coach model comparison",
+        "## Coach model comparison (before reply-speed changes)",
         "",
         "| Model | Answers | Evidence traceability | Unsupported-claim flags | p50 / p95 ms | Cost USD |",
         "|---|---:|---:|---:|---:|---:|",
@@ -204,6 +204,23 @@ def render_report(data):
         "```",
         "",
         "First-text latency measures the first checked text callback; it excludes browser polling/render time and missing callbacks. Full-answer latency is reported in the model table.",
+        "The preceding two-model comparison is historical. The newer reply-speed checks below use the updated routine-answer path and must not be treated as a new two-model quality comparison.",
+        "",
+        "## Routine reply speed",
+        "",
+        "| Run | Requests | Completion p50 / p95 ms | First checked text p50 ms | Grounding replacements |",
+        "|---|---:|---:|---:|---:|",
+    ]
+    for phase, row in data.get("reply_latency", {}).items():
+        replacements = sum(r["grounding_replacement"] for r in row["answers"])
+        lines.append(
+            f"| {phase} | {row['cases']} | {row['p50_ms']:.0f} / {row['p95_ms']:.0f} | {row['first_text_p50_ms']:.0f} | {replacements}/{row['cases']} |"
+        )
+    lines += [
+        "",
+        "Before/after use the same eight warmed requests on the same local qwen2.5:1.5b model. After-full covers 25 offline diagnostic questions plus two conversational follow-ups. Unsupported footage is used only for offline checks; production coaching remains gated. HTTP uses synthetic demo measurements, the real queue, accumulating conversation history, and 100ms polling.",
+        "These checks do not cover cold starts, queue contention, multi-tool plans, or expert usefulness. Nineteen of the 27 wider diagnostic answers required conservative grounding replacement: speed is improved, but reliable personal corrections are not established. Zero heuristic flags does not imply semantic correctness.",
+        "Shorter prompts, representative source measurements, relevant tool schemas, and a 112-token default ordinary-reply budget reduce generation work. Checked complete routine answers can end early; detailed answers and tool workflows retain larger budgets. Counters may be unavailable when streams close before the provider's final usage chunk; zero is not proof of zero tokens.",
         "",
         "## VLM versus pose evidence",
         "",

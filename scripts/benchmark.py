@@ -23,6 +23,11 @@ def main():
     directory.mkdir(parents=True, exist_ok=True)
     destination = directory / "benchmark.json"
     data = json.loads(destination.read_text()) if destination.exists() else {}
+    data["reply_latency"] = {
+        phase: json.loads((directory / f"reply-latency-{phase}.json").read_text(encoding="utf-8"))
+        for phase in ("before", "after", "after-full", "http")
+        if (directory / f"reply-latency-{phase}.json").is_file()
+    }
     data["integration"] = {
         name: json.loads((directory / filename).read_text(encoding="utf-8"))
         for name, filename in (
