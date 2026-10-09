@@ -596,14 +596,38 @@ def run_conversation(
     graph.add_edge("final_answer", END)
     # Keep the most recent exchange intact instead of overflowing the model's
     # context with twelve potentially six-thousand-character messages.
+    history_limit = 10000 if needs_tools else (700 if _needs_measurements(request.question) else 1600)
+    exchanges = []
+    pending_user = None
+    for item in request.conversation_history:
+        if item.role == "user":
+            pending_user = item
+        elif item.role == "assistant" and pending_user is not None:
+            exchanges.append((pending_user, item))
+            pending_user = None
     recent_history = []
-    remaining = 10000 if needs_tools else (700 if _needs_measurements(request.question) else 1600)
-    for item in reversed(request.conversation_history):
-        if remaining <= 0:
-            break
-        content = item.content[: min(3000, remaining)]
-        recent_history.append(item.model_copy(update={"content": content}))
-        remaining -= len(content)
+    remaining = history_limit
+    for user_message, assistant_message in reversed(exchanges):
+        cost = len(user_message.content) + len(assistant_message.content)
+        if cost <= remaining:
+            recent_history[0:0] = [user_message, assistant_message]
+            remaining -= cost
+            continue
+        if not recent_history and remaining >= 2:
+            # Preserve the latest question and its answer as a pair. If the old
+            # answer was unusually long, keep its ending within the same budget.
+            user_budget = min(len(user_message.content), 240, max(1, remaining // 3))
+            assistant_budget = remaining - user_budget
+            if user_budget and assistant_budget:
+                recent_history = [
+                    user_message.model_copy(
+                        update={"content": user_message.content[-user_budget:]}
+                    ),
+                    assistant_message.model_copy(
+                        update={"content": assistant_message.content[-assistant_budget:]}
+                    ),
+                ]
+        break
     history = [
         HumanMessage(content=item.content)
         if item.role == "user"

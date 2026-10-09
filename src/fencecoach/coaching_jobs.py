@@ -130,8 +130,17 @@ class CoachingWorker:
 
     def execute(self, job, owner):
         try:
+            last_publish = 0.0
 
             def publish(text):
+                nonlocal last_publish
+                now = time.monotonic()
+                # The browser polls every 300 ms. Persisting every model token
+                # only adds SQLite lock contention without making the answer
+                # appear any sooner; keep the first token and sample at 150 ms.
+                if last_publish and now - last_publish < 0.15:
+                    return
+                last_publish = now
                 self.jobs.update(
                     job["job_id"], owner, partial_reply=text, stage="Coach is replying"
                 )
@@ -192,15 +201,19 @@ class CoachingWorker:
         with ThreadPoolExecutor(max_workers=concurrency, thread_name_prefix="coach") as pool:
             while not self.stop.wait(0.2):
                 try:
-                    for job_id, future in list(active.items()):
+                    for job_id, (future, lease_renewed) in list(active.items()):
                         if future.done():
                             del active[job_id]
-                        else:
+                        elif time.monotonic() - lease_renewed >= 15:
                             self.jobs.update(job_id, owner)
+                            active[job_id] = (future, time.monotonic())
                     while len(active) < concurrency:
                         job = self.jobs.claim(owner)
                         if not job:
                             break
-                        active[job["job_id"]] = pool.submit(self.execute, job, owner)
+                        active[job["job_id"]] = (
+                            pool.submit(self.execute, job, owner),
+                            time.monotonic(),
+                        )
                 except Exception:
                     logging.exception("Coaching supervisor failed")
