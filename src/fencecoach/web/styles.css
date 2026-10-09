@@ -1,5 +1,5 @@
-@import url("./design-system.css?v=20261009-coach-workspace");
-@import url("./video.css");
+@import url("./design-system.css?v=20261009-replay-controls");
+@import url("./video.css?v=20261009-replay-controls");
 
 .journal-entry {
   display: flex;

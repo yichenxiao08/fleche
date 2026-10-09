@@ -13,6 +13,7 @@ import {
 import { setupMotion } from "./motion.js";
 import { setupJournal } from "./journal.js";
 import { screens } from "./views.js";
+import { replayControls, mountReplayControls } from "./replay-player.js";
 import {
   setupVideoController,
   initVideo,
@@ -52,6 +53,7 @@ let toastTimer,
   cameraEpoch = 0,
   finishPending = false;
 let stopOverlay = () => {};
+let stopPlayback = () => {};
 const motionController = setupMotion({ state, notice });
 motionController.setup();
 function notice(text = "") {
@@ -118,6 +120,7 @@ function render({ keepScroll = false, focus = false } = {}) {
 }
 function mountMedia(playback = null) {
   stopOverlay();
+  stopPlayback();
   if (state.screen === "analysis") {
     motionController.mount();
     stopOverlay = mountPose(
@@ -137,6 +140,11 @@ function mountMedia(playback = null) {
     (state.session?.video_job_id || getClipURL())
   ) {
     const video = $("replay-video");
+    video.controls = true;
+    if (state.reviewResult?.width > 0 && state.reviewResult?.height > 0)
+      video.parentElement.style.setProperty("--video-aspect", state.reviewResult.width / state.reviewResult.height);
+    video.parentElement.insertAdjacentHTML("afterend", replayControls(state));
+    stopPlayback = mountReplayControls(video, $("replay-controls"));
     video.src = state.session.video_job_id
       ? previewURL(state.session.video_job_id, state.reviewResult)
       : getClipURL();
