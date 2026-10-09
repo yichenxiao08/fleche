@@ -169,6 +169,12 @@ def unsupported_claims(reply, metrics=()):
 def assessment_issues(request, reply, metrics):
     """Require a specific reference when answering an actual arm-finish comparison."""
     issues = unsupported_claims(reply, metrics)
+    from fencecoach.coach.turns import general_instruction
+
+    if general_instruction(request.question):
+        # Keep measurement/claim checks, but don't demand a drill, timestamp or
+        # arm-finish comparison for a question about how to perform a movement.
+        return issues
     brief = build_coaching_brief(request.model_copy(update={"metrics": list(metrics)}))
     assessment = (
         bool(metrics) and brief["requested_topic"] in {"lunge", "knee", "arm", "recovery"}

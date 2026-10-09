@@ -21,3 +21,12 @@ https://static.fie.org/uploads/24/124021-LUNGE%20PERFORMANCE%20AND%20ITS%20DETER
 
 This paraphrased reference covers a conventional simple-lunge model, not universal
 bout timing, a medical recommendation, or a validated scoring threshold.
+
+## Questions about angles
+
+An elbow's bend and an arm's direction relative to the floor or torso are different
+angles. These references teach extending toward the chosen target and a conventional
+rear-arm finish; they do not establish a universal numeric shoulder-elevation target.
+Answer the direction question concretely: sword arm toward the target, non-sword arm
+behind in the traditional lunge finish. Target height changes the aiming direction.
+Do not turn an observed elbow measurement into an ideal angle for the whole arm.

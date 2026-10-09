@@ -114,6 +114,8 @@ The separate `compose.scale.yaml` retains PostgreSQL and independent workers. It
 
 ## What failed and what changed
 
+- General questions containing “I” or “my” were routed to a fixed video refusal. Desired-technique questions now inspect matching session measurements when available, then use general teaching references when the clip cannot establish an answer. General instruction does not require a timestamp or practice drill; measurement and unsupported-claim checks still apply. Arm direction and elbow bend are treated as different angle questions.
+
 - Background people and ambiguous frames could produce convincing wrong-athlete measurements. Tracking now abstains and QA restricts supported input to solo footage.
 - Low-resolution public drills are useful regression fixtures but fail the product filming requirements. The three packaged demos expose that failure explicitly.
 - Generic coaching substituted recovery advice for lunge questions and repeated raw data. Topic-specific evidence, shorter prompts, assessment checks, and concrete evidence-based fallbacks now address known cases; expert usefulness is still unmeasured.

@@ -12,6 +12,12 @@ def needs_evidence_reply(request, mode):
     if not request.evidence_unavailable_reason:
         return False
     from fencecoach.coach.conversation import _needs_measurements
+    from fencecoach.coach.turns import general_instruction
+
+    # Desired positions and "how should I...?" remain answerable from teaching
+    # references even when the uploaded clip fails tracking QA.
+    if mode != "demo" and general_instruction(request.question):
+        return False
 
     return (
         mode == "demo"
