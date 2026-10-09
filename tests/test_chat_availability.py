@@ -2,9 +2,10 @@ import unittest
 from unittest.mock import patch
 
 from fastapi import HTTPException
+from fastapi.testclient import TestClient
 from langchain_core.messages import AIMessage
 
-from fencecoach.api import coaching_request
+from fencecoach.api import app, coaching_request
 from fencecoach.coach.graph import run_coach
 from fencecoach.schemas import CoachRequest, ReportRequest, SessionRecord
 
@@ -42,7 +43,7 @@ class ChatAvailabilityTests(unittest.TestCase):
         self.assertEqual(request.training_history, [])
         self.assertIn("Body out of frame", request.session_notes)
 
-    def test_personal_analysis_remains_rejected(self):
+    def test_personal_questions_return_missing_evidence_reply_without_model(self):
         with (
             patch("fencecoach.api.repository.coaching_context", return_value=self.context),
             patch(
@@ -55,8 +56,51 @@ class ChatAvailabilityTests(unittest.TestCase):
                 "Compare with baseline",
                 "Review this clip",
             ):
-                with self.subTest(question=question), self.assertRaises(HTTPException):
-                    coaching_request(self.session, ReportRequest(question=question))
+                with self.subTest(question=question):
+                    request = coaching_request(self.session, ReportRequest(question=question))
+                    self.assertEqual(request.metrics, [])
+                    run = run_coach(request, "local", model=object())
+                    self.assertEqual(run.model_id, "evidence-check")
+                    self.assertEqual(run.citation_count, 0)
+                    self.assertIn("Body out of frame", run.report.summary)
+                    self.assertNotIn("111", run.report.summary)
+
+    def test_both_chat_endpoints_accept_quality_rejected_question(self):
+        with (
+            patch("fencecoach.api.get_session", return_value=self.session),
+            patch("fencecoach.api.repository.coaching_context", return_value=self.context),
+            patch("fencecoach.api.repository.save_run", side_effect=lambda run: run),
+            patch(
+                "fencecoach.api.require_supported_session",
+                side_effect=HTTPException(422, "Body out of frame"),
+            ),
+            patch(
+                "fencecoach.api.coaching_jobs.create",
+                return_value={"job_id": "fixture", "status": "queued"},
+            ) as create,
+        ):
+            client = TestClient(app)
+            body = {"question": "What's wrong with my lunge?", "mode": "local"}
+            direct = client.post("/api/sessions/rejected-video/reports", json=body)
+            self.assertEqual(direct.status_code, 201, direct.text)
+            self.assertEqual(direct.json()["model_id"], "evidence-check")
+            queued = client.post("/api/sessions/rejected-video/coaching-jobs", json=body)
+            self.assertEqual(queued.status_code, 202, queued.text)
+            self.assertEqual(create.call_args.args[0].metrics, [])
+            invalid = client.post(
+                "/api/sessions/rejected-video/coaching-jobs", json={"question": ""}
+            )
+            self.assertEqual(invalid.status_code, 422)
+
+    def test_sample_report_handles_missing_video_evidence(self):
+        request = CoachRequest(
+            session_id="missing",
+            question="Review my lunge",
+            evidence_unavailable_reason="Video unavailable",
+        )
+        run = run_coach(request, "demo")
+        self.assertEqual(run.model_id, "evidence-check")
+        self.assertIn("Video unavailable", run.report.summary)
 
     def test_supported_video_keeps_measurements(self):
         with (

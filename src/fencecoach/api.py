@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import logging
-import re
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -185,25 +184,17 @@ def require_supported_session(session):
 
 def coaching_request(session, data):
     """Keep general conversation available without exposing rejected video evidence."""
-    from fencecoach.coach.conversation import _needs_measurements
-
     context = repository.coaching_context(session.session_id)
     try:
         require_supported_session(session)
     except HTTPException as exc:
-        personal = _needs_measurements(data.question) or re.search(
-            r"\b(my|me|mine|video|clip|session|reps?|baseline|compare|history|previous|measurements?|timestamps?)\b",
-            data.question,
-            re.I,
-        )
-        if personal or data.focus_metric_id or data.mode == "demo":
-            raise
         # History tools must not reintroduce measurements from failed footage.
         return CoachRequest(
             session_id=session.session_id,
             question=data.question,
             skill_level=session.skill_level,
             metrics=[],
+            evidence_unavailable_reason=str(exc.detail),
             conversation_history=context["conversation_history"],
             session_notes="General fencing conversation only. Current video measurements are unavailable: "
             + str(exc.detail),

@@ -956,6 +956,10 @@ def _run_coach(
     on_step=None,
     on_text=None,
 ) -> RunRecord:
+    from fencecoach.coach.evidence_reply import evidence_reply, needs_evidence_reply
+
+    if needs_evidence_reply(request, mode):
+        return evidence_reply(request, mode, on_step, on_text)
     if mode != "demo":
         from fencecoach.coach.conversation import run_conversation
 

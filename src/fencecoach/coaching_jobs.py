@@ -137,6 +137,7 @@ class CoachingWorker:
                 )
 
             stages = {
+                "evidence_check": "Checking video availability",
                 "gather_metrics": "Reading session evidence",
                 "retrieve": "Finding relevant practice notes",
                 "agent": "Coach is replying",
