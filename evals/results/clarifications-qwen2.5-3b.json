@@ -1,0 +1,82 @@
+{
+  "model": "qwen2.5:3b",
+  "scope": "Five fixed diagnostic questions with the same known wrong prior answer. Actual warmed local model; heuristic checks are not expert coaching accuracy.",
+  "cases": 5,
+  "answers": [
+    {
+      "question": "can you describe better",
+      "answer": "The sword arm\u2014the arm holding your weapon\u2014reaches forward toward the target in a simple lunge. The non-sword arm has a separate role: in the conventional teaching position it extends behind you. My earlier instruction to extend the arm sideways was wrong.",
+      "latency_ms": 2437.79,
+      "quality_flags": [],
+      "reference_sources": [
+        "lunge_arm_roles.md"
+      ],
+      "grounding_replacement": true,
+      "repeated_bad_answer_streamed": false
+    },
+    {
+      "question": "which arm",
+      "answer": "I mean your sword arm\u2014the one holding the weapon. In a simple lunge, reach that arm forward toward the target. My earlier instruction to extend the arm sideways was wrong.",
+      "latency_ms": 1668.76,
+      "quality_flags": [],
+      "reference_sources": [
+        "lunge_arm_roles.md"
+      ],
+      "grounding_replacement": true,
+      "repeated_bad_answer_streamed": false
+    },
+    {
+      "question": "which arm, sword arm or non-sword arm",
+      "answer": "I mean your sword arm\u2014the one holding the weapon. In a simple lunge, reach that arm forward toward the target. My earlier instruction to extend the arm sideways was wrong.",
+      "latency_ms": 1773.94,
+      "quality_flags": [],
+      "reference_sources": [
+        "lunge_arm_roles.md"
+      ],
+      "grounding_replacement": true,
+      "repeated_bad_answer_streamed": false
+    },
+    {
+      "question": "What should the non-sword arm do in a simple lunge?",
+      "answer": "In a simple lunge, the non-sword arm should extend back behind the fencer, not sideways for balance. It should be positioned separately from the sword arm, maintaining a natural and balanced stance.",
+      "latency_ms": 1724.36,
+      "quality_flags": [],
+      "reference_sources": [
+        "lunge_arm_roles.md"
+      ],
+      "grounding_replacement": false,
+      "repeated_bad_answer_streamed": false
+    },
+    {
+      "question": "What is recovery in fencing?",
+      "answer": "Recovery in fencing refers to the process of returning from a lunge position back to the ready position, or en garde, after completing a lunge. This involves lowering the rear knee and pushing off the front leg to return to the guard position, ensuring a smooth and balanced transition.",
+      "latency_ms": 2208.95,
+      "quality_flags": [],
+      "reference_sources": [
+        "recovery_basics.md"
+      ],
+      "grounding_replacement": false,
+      "repeated_bad_answer_streamed": false
+    }
+  ],
+  "sequential_answers": [
+    {
+      "question": "can you describe better",
+      "answer": "The sword arm\u2014the arm holding your weapon\u2014reaches forward toward the target in a simple lunge. The non-sword arm has a separate role: in the conventional teaching position it extends behind you. My earlier instruction to extend the arm sideways was wrong.",
+      "latency_ms": 2027.25,
+      "quality_flags": []
+    },
+    {
+      "question": "which arm",
+      "answer": "In a lunge, the sword arm is the one holding the fencing weapon and it extends forward toward the target. The non-sword arm, which is not holding the weapon, extends behind you to maintain balance.",
+      "latency_ms": 1760.92,
+      "quality_flags": []
+    },
+    {
+      "question": "which arm, sword arm or non-sword arm",
+      "answer": "I mean your sword arm\u2014the one holding the weapon. In a simple lunge, reach that arm forward toward the target.",
+      "latency_ms": 1089.99,
+      "quality_flags": []
+    }
+  ]
+}

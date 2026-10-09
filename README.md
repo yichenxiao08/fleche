@@ -12,7 +12,7 @@ Requires Docker Engine/Desktop with Compose, internet for initial downloads, and
 docker compose up --build
 ```
 
-Open [FenceCoach](http://127.0.0.1:8000) and [Phoenix traces](http://127.0.0.1:6006). The stack downloads `qwen2.5:1.5b`, installs checksum-verified pose weights, starts SQLite-backed workers, and seeds three preprocessed archival examples. No account or API key is required. First-start time depends on network and hardware; the under-ten-minute target has **not** been verified on a fresh machine. Docker is unavailable on the development machine; CI contains image-build and container API checks, which have not yet been run for this revision.
+Open [FenceCoach](http://127.0.0.1:8000) and [Phoenix traces](http://127.0.0.1:6006). The stack downloads `qwen2.5:3b`, installs checksum-verified pose weights, starts SQLite-backed workers, and seeds three preprocessed archival examples. No account or API key is required. First-start time depends on network and hardware; the under-ten-minute target has **not** been verified on a fresh machine. Docker is unavailable on the development machine; CI contains image-build and container API checks, which have not yet been run for this revision.
 
 The three MIT examples demonstrate QA, overlays, and rep proposals. They are low resolution and **unsupported for personal coaching**. They are not quietly upgraded or assigned synthetic measurements. The separate **Try synthetic sample review** demonstrates the evidence/report workflow without claiming video accuracy. Select **Local AI** there for a real model conversation; **Sample report** is deterministic and makes no LLM calls.
 
@@ -27,7 +27,7 @@ py -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.lock -r requirements-video.lock
 .\.venv\Scripts\python.exe -m pip install -e '.[dev,video]'
 .\.venv\Scripts\python.exe scripts/setup_video.py
-ollama pull qwen2.5:1.5b
+ollama pull qwen2.5:3b
 $env:FENCECOACH_SEED_EXAMPLES='true'
 .\.venv\Scripts\python.exe -m uvicorn fencecoach.api:app --host 127.0.0.1 --port 8000
 ```
@@ -109,8 +109,9 @@ The separate `compose.scale.yaml` retains PostgreSQL and independent workers. It
 - Background people and ambiguous frames could produce convincing wrong-athlete measurements. Tracking now abstains and QA restricts supported input to solo footage.
 - Low-resolution public drills are useful regression fixtures but fail the product filming requirements. The three packaged demos expose that failure explicitly.
 - Generic coaching substituted recovery advice for lunge questions and repeated raw data. Topic-specific evidence, shorter prompts, assessment checks, and concrete evidence-based fallbacks now address known cases; expert usefulness is still unmeasured.
+- Clarifications repeated an earlier wrong sideways-arm instruction. General questions now retrieve technique notes using the latest topic; follow-ups must answer the current question, copied sentences are checked before streaming, and known arm-role/return-to-guard failures use cited reference responses. The 3b local model is now the default after a five-question diagnostic comparison; it still needed three reference replacements. This narrow check does not establish broad conversational or coaching accuracy. Replay it with `python scripts/evaluate_clarifications.py --model qwen2.5:3b`.
 - Rejected legacy clips previously left chat appearing unresponsive. The composer now shows the filming issue and inline request errors, offers sample chat, and supports Enter to send. General questions remain available with rejected measurements and evidence histories removed. Personal questions receive a saved missing-evidence reply instead of an HTTP 422; this reply makes no model call or technique finding. Missing or failed saved jobs restore the composer. Invalid request fields still return validation errors.
-- Routine warmed local replies measured 2.04 seconds median / 3.15 seconds p95 across 27 diagnostic requests after reducing prompt size, limiting ordinary replies, and stopping at a checked complete answer. Cold starts, queued requests, and multi-tool plans can take longer. See the separate reply-speed results in [BENCHMARKS.md](BENCHMARKS.md); faster answers do not establish expert coaching quality.
+- The earlier 1.5b routine path measured 2.04 seconds median / 3.15 seconds p95 across 27 diagnostic requests. Five fixed clarification checks and three sequential follow-ups on the newer 3b default measured 1.09–2.44 seconds before queue/browser overhead; broader 3b latency is not remeasured yet. The diagnostic results are archived in `evals/results/clarifications-qwen2.5-3b.json`. Cold starts, queued requests, and multi-tool plans can take longer. See [BENCHMARKS.md](BENCHMARKS.md); faster answers do not establish expert coaching quality.
 - Two connected recording groups cannot demonstrate generalized recognition. Automatic drafts remain separate from human review and automatic training is off by default.
 
 ## Demo and licensing

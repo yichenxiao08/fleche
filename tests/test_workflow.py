@@ -149,7 +149,7 @@ class DataAndEvidenceTests(unittest.TestCase):
                 return self
 
             def invoke(self, messages):
-                return AIMessage(content="Start with a comfortable guard. What feels difficult?")
+                return AIMessage(content="Recovery means returning to en garde after a lunge. What feels difficult?")
 
             def with_structured_output(self, *args, **kwargs):
                 raise AssertionError("Conversation must not call a report formatter")
@@ -158,7 +158,13 @@ class DataAndEvidenceTests(unittest.TestCase):
         data.question = "What does recovery mean?"
         run = run_coach(data, mode="local", model=PlainModel())
         self.assertEqual(run.response_kind, "conversation")
-        self.assertEqual(run.report.observations, [])
+        self.assertTrue(
+            all(
+                ref.source_type == "knowledge"
+                for obs in run.report.observations
+                for ref in obs.evidence
+            )
+        )
         self.assertIsNone(run.report.next_drill)
         self.assertIn("What feels difficult?", run.report.summary)
 

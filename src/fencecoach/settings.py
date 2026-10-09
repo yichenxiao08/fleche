@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     fencecoach_coaching_worker: bool = True
     fencecoach_coaching_concurrency: int = 1
     ollama_base_url: str = "http://127.0.0.1:11434"
-    ollama_chat_model: str = "qwen2.5:1.5b"
+    ollama_chat_model: str = "qwen2.5:3b"
     fencecoach_database_url: str = ""
     fencecoach_worker_concurrency: int = 1
     fencecoach_queue_limit: int = 100

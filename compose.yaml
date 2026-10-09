@@ -14,7 +14,7 @@ services:
     image: ollama/ollama:0.35.1
     environment:
       OLLAMA_HOST: http://ollama:11434
-    entrypoint: [ollama, pull, "qwen2.5:1.5b"]
+    entrypoint: [ollama, pull, "qwen2.5:3b"]
     depends_on:
       ollama:
         condition: service_healthy
@@ -47,7 +47,7 @@ services:
       FENCECOACH_EXAMPLES_DIR: /app/examples/video
       FENCECOACH_CHAT_PROVIDER: local
       OLLAMA_BASE_URL: http://ollama:11434
-      OLLAMA_CHAT_MODEL: qwen2.5:1.5b
+      OLLAMA_CHAT_MODEL: qwen2.5:3b
       FENCECOACH_PHOENIX_ENDPOINT: http://phoenix:6006/v1/traces
     volumes:
       - fencecoach-data:/app/data

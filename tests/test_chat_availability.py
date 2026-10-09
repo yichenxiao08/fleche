@@ -110,7 +110,7 @@ class ChatAvailabilityTests(unittest.TestCase):
             request = coaching_request(self.session, ReportRequest(question="Review my lunge"))
         self.assertEqual(request.metrics, self.session.metrics)
 
-    def test_general_conversation_with_no_measurements_needs_no_citation(self):
+    def test_general_conversation_with_no_measurements_uses_technique_references(self):
         class Model:
             model = "general-chat-fixture"
 
@@ -128,8 +128,14 @@ class ChatAvailabilityTests(unittest.TestCase):
             model=Model(),
         )
         self.assertIn("return to en garde", run.report.summary)
-        self.assertEqual(run.citation_count, 0)
-        self.assertEqual(run.report.observations, [])
+        self.assertGreater(run.citation_count, 0)
+        self.assertTrue(
+            all(
+                ref.source_type == "knowledge"
+                for obs in run.report.observations
+                for ref in obs.evidence
+            )
+        )
 
 
 if __name__ == "__main__":
