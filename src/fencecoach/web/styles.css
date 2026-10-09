@@ -1,5 +1,5 @@
-@import url("./design-system.css?v=20261009-replay-controls");
-@import url("./video.css?v=20261009-replay-controls");
+@import url("./design-system.css?v=20261009-compact-coach");
+@import url("./video.css?v=20261009-compact-coach");
 
 .journal-entry {
   display: flex;
