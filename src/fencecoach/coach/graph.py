@@ -524,7 +524,7 @@ def _demo_report(request: CoachRequest, sources: list[KnowledgeSource]) -> Coach
 
 def build_coach_graph(
     request: CoachRequest,
-    mode: Literal["demo", "bedrock", "local"] = "demo",
+    mode: Literal["demo", "bedrock", "local", "gemini"] = "demo",
     model=None,
     on_step=None,
 ):
@@ -951,7 +951,7 @@ def build_coach_graph(
 
 def _run_coach(
     request: CoachRequest,
-    mode: Literal["demo", "bedrock", "local"] = "demo",
+    mode: Literal["demo", "bedrock", "local", "gemini"] = "demo",
     model=None,
     on_step=None,
     on_text=None,

@@ -82,11 +82,20 @@ export async function initStore() {
   state.config = config;
   state.logs = logs;
   state.plans = plans;
-  state.mode = config.local_ready
-    ? "local"
-    : config.bedrock_ready
-      ? "bedrock"
-      : "demo";
+  const ready = {
+    local: config.local_ready,
+    gemini: config.gemini_ready,
+    bedrock: config.bedrock_ready,
+  };
+  state.mode = ready[config.provider]
+    ? config.provider
+    : config.gemini_ready
+      ? "gemini"
+      : config.local_ready
+        ? "local"
+        : config.bedrock_ready
+          ? "bedrock"
+          : "demo";
   state.sessions = sessions;
   let saved;
   try {

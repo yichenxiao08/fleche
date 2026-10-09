@@ -43,19 +43,30 @@ def provider_status():
     except (URLError, TimeoutError, ValueError, OSError):
         error = "Local model server is not running."
     provider = settings.fencecoach_chat_provider
+    ready = {
+        "local": model_ready,
+        "bedrock": bool(settings.bedrock_chat_model_id),
+        "gemini": bool(settings.gemini_api_key.get_secret_value()),
+    }
     return {
         "provider": provider,
         "local_ready": model_ready,
         "bedrock_ready": bool(settings.bedrock_chat_model_id),
-        "live_configured": model_ready
-        if provider == "local"
-        else bool(settings.bedrock_chat_model_id),
-        "model_id": settings.ollama_chat_model
-        if provider == "local"
-        else settings.bedrock_chat_model_id,
+        "gemini_ready": ready["gemini"],
+        "gemini_model_id": settings.gemini_chat_model,
+        "live_configured": ready.get(provider, False),
+        "model_id": configured_model_id(provider),
         "local_error": error
         or (None if model_ready else "The selected local model is not downloaded."),
     }
+
+
+def configured_model_id(mode):
+    return {
+        "local": settings.ollama_chat_model,
+        "bedrock": settings.bedrock_chat_model_id,
+        "gemini": settings.gemini_chat_model,
+    }.get(mode)
 
 
 def chat_model(mode):
@@ -77,6 +88,27 @@ def chat_model(mode):
             num_predict=240,
             keep_alive=-1,
             client_kwargs={"timeout": 180},
+        )
+    if mode == "gemini":
+        from langchain_google_genai import ChatGoogleGenerativeAI
+
+        if not settings.gemini_api_key.get_secret_value():
+            raise RuntimeError("Save GEMINI_API_KEY in the server's .env file for Gemini coaching.")
+        options = (
+            {"thinking_level": "low"}
+            if "gemini-3" in settings.gemini_chat_model
+            else {"thinking_budget": 0}
+        )
+        return ChatGoogleGenerativeAI(
+            model=settings.gemini_chat_model,
+            api_key=settings.gemini_api_key,
+            vertexai=False,
+            temperature=1.0,
+            max_tokens=2048,
+            timeout=20,
+            max_retries=0,
+            include_thoughts=False,
+            **options,
         )
     if mode == "bedrock":
         from botocore.config import Config

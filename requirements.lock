@@ -89,3 +89,14 @@ pyjwt==2.15.1
 referencing==0.37.0
 rpds-py==2026.9.1
 sse-starlette==3.5.0
+
+# Gemini Developer API provider
+langchain-google-genai==4.4.0
+google-genai==2.29.0
+google-auth==2.61.0
+filetype==1.2.0
+pyasn1==0.6.4
+pyasn1-modules==0.4.2
+cryptography==50.0.2
+cffi==2.1.1
+pycparser==3.0

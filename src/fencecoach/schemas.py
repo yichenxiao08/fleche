@@ -116,7 +116,7 @@ class SessionRecord(SessionCreate):
 
 class ReportRequest(BaseModel):
     question: str = Field(min_length=1, max_length=1500)
-    mode: Literal["demo", "bedrock", "local"] = "local"
+    mode: Literal["demo", "bedrock", "local", "gemini"] = "local"
     focus_metric_id: str | None = Field(default=None, min_length=1, max_length=120)
 
 
@@ -143,7 +143,7 @@ class RunRecord(BaseModel):
     question: str
     response_kind: Literal["report", "conversation"] = "report"
     focus_metric_id: str | None = None
-    mode: Literal["demo", "bedrock", "local"]
+    mode: Literal["demo", "bedrock", "local", "gemini"]
     model_id: str | None = None
     retrieval_method: str
     report: CoachingReport

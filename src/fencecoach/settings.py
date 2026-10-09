@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,6 +19,8 @@ class Settings(BaseSettings):
     fencecoach_coaching_concurrency: int = 1
     ollama_base_url: str = "http://127.0.0.1:11434"
     ollama_chat_model: str = "qwen2.5:3b"
+    gemini_api_key: SecretStr = SecretStr("")
+    gemini_chat_model: str = "gemini-3.8-flash"
     fencecoach_database_url: str = ""
     fencecoach_worker_concurrency: int = 1
     fencecoach_queue_limit: int = 100

@@ -34,6 +34,8 @@ services:
       FENCECOACH_POSE_MODEL: /app/models/pose_landmarker_full.task
       FENCECOACH_GESTURE_MODEL: /app/models/gestures.json
       FENCECOACH_CHAT_PROVIDER: ${FENCECOACH_CHAT_PROVIDER:-local}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_CHAT_MODEL: ${GEMINI_CHAT_MODEL:-gemini-3.8-flash}
       OLLAMA_BASE_URL: http://ollama:11434
       OLLAMA_CHAT_MODEL: ${OLLAMA_CHAT_MODEL:-qwen2.5:3b}
       AWS_REGION: ${AWS_REGION:-us-east-1}

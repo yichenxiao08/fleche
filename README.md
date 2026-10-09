@@ -34,6 +34,14 @@ $env:FENCECOACH_SEED_EXAMPLES='true'
 
 Start Ollama first if its desktop service is not running. On this development computer `scripts/start_local.ps1` also supports the existing portable runtime. Copy `.env.example` to `.env` for optional settings. Saved sessions/reviews and logs live in SQLite; unsent camera drafts live in browser IndexedDB. Clearing browser storage deletes unsent drafts, not saved server sessions.
 
+## Gemini coaching
+
+Create a key in [Google AI Studio](https://aistudio.google.com/api-keys), then save `GEMINI_API_KEY` in the ignored server `.env` file. Never put it in browser code or commit it. Install the project dependencies, then run `python scripts/configure_gemini.py`: it lists available models, makes one generic coaching request, and selects Gemini as the default only after success. Restart the server and refresh the app; choose **Gemini AI** in the coach. API usage is subject to Google quotas and billing settings. The setup command does not enable billing.
+
+`GEMINI_CHAT_MODEL` defaults to `gemini-3.8-flash`; change it if unavailable to your account. Gemini uses the existing LangGraph conversation, evidence tools and local retrieval library. Messages and relevant measurements/history are sent to Google; video files are not sent by this chat integration. The configured flag means a key exists, not that account quota is available. Ollama and AWS remain selectable. A low reasoning setting and no automatic retries limit extra delay, but responses are not guaranteed within 3–5 seconds. The initial direct setup response took about 7 seconds; this is not a conversational quality benchmark.
+
+Implementation references: [LangChain Gemini integration](https://docs.langchain.com/oss/python/integrations/chat/google_generative_ai), [Google thinking configuration](https://ai.google.dev/gemini-api/docs/thinking).
+
 ## Product flow
 
 1. **Record/upload:** silent camera recording or a video under two minutes / 200 MB. Confirm the weapon/lead side, camera motion, and reusable camera setup name.
@@ -53,7 +61,7 @@ flowchart LR
   Evidence --> DB[SQLite / optional PostgreSQL]
   DB --> Graph[Bounded LangGraph coach]
   Library[Coaching library / BM25 or optional embeddings] --> Graph
-  Graph --> LLM[Ollama / optional Bedrock]
+  Graph --> LLM[Ollama / Gemini / optional Bedrock]
   Graph --> Checks[Known-claim and evidence checks]
   Checks --> Browser
   Graph --> Phoenix[OpenTelemetry / Phoenix + local trace log]

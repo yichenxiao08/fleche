@@ -23,7 +23,7 @@ from fencecoach.coach.grounding import (
     unsupported_claims,
 )
 from fencecoach.coach.latency import compact_guidance, compact_measurements, wants_detail
-from fencecoach.coach.providers import chat_model
+from fencecoach.coach.providers import chat_model, configured_model_id
 from fencecoach.coach.turns import (
     clarification,
     conversation_issues,
@@ -778,7 +778,7 @@ def run_conversation(
         mode=mode,
         model_id=getattr(model, "model", None)
         or getattr(model, "model_id", None)
-        or (settings.ollama_chat_model if mode == "local" else settings.bedrock_chat_model_id),
+        or configured_model_id(mode),
         retrieval_method="bedrock-vector"
         if mode == "bedrock" and settings.bedrock_embedding_model_id
         else "bm25",

@@ -12,6 +12,8 @@ Updated October 9, 2026. Implementation was performed in plan order using existi
 
 The archived examples deliberately demonstrate an unsupported state. The synthetic measurement example demonstrates workflow wiring. Neither is evidence of excellent personal coaching.
 
+Gemini Developer API chat was connected on October 9 with `gemini-3.8-flash`. A generic arm-role question completed through the actual conversation and retrieval workflow in 3.63 seconds with one reference consulted. This confirms access and workflow wiring for that request; a hosted/local quality comparison, tool-heavy latency and expert coaching usefulness remain unmeasured. The key stays in the ignored server `.env` file.
+
 ## Next priorities
 
 1. Obtain several full-body fixed-camera modern solo clips that pass QA and inspect the overlays. Existing public footage can be used if it meets those conditions and has appropriate reuse rights.
