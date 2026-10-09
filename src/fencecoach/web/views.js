@@ -118,20 +118,35 @@ export function review(state) {
 export function coach(state) {
   if (!state.session)
     return `${heading("SESSION COACH", "Let’s work on it.")}${emptySession("Bring a session to the conversation.")}`;
-  const { metric } = selectedMetrics(state),
-    value = displayMetric(metric);
-  const run = state.run;
-  const turns = run?.response_kind === "conversation"
-    ? state.runs.filter((item) => item.response_kind === "conversation" && item.created_at <= run.created_at).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 12)
-    : run ? [run] : [];
-  const conversation = turns.map((turn) => `<article class="coach-turn"><div class="chat-message user"><span class="eyebrow">YOU</span><p>${e(turn.question)}</p></div><div class="chat-message coach"><span class="coach-emblem">${icon("spark")}</span><div>${reportContent(turn)}</div></div></article>`).join("");
-  const pending = state.generating ? `<article class="coach-turn"><div class="chat-message user"><span class="eyebrow">YOU</span><p>${e(state.question)}</p></div><div class="chat-message coach" ${state.partialReply ? "" : "hidden"}><span class="coach-emblem">${icon("spark")}</span><p id="coaching-partial" class="conversation-answer">${e(state.partialReply || "")}</p></div><div class="generating" role="status"><span class="spinner"></span><span id="coaching-stage">Coach is replying…</span></div></article>` : "";
-  return `${heading("SESSION COACH", "Let’s work on it.")}${sessionPicker(state)}<div class="coach-layout"><section>
-  <div class="coach-composer"><form id="coach-form"><label for="question" class="eyebrow">MESSAGE YOUR COACH</label><textarea id="question" name="question" rows="2" minlength="1" maxlength="1500" required placeholder="Ask a question or follow up…" ${state.generating ? "disabled" : ""}>${e(state.question)}</textarea><button class="send-question" type="submit" aria-label="Send message to coach" ${state.generating ? "disabled" : ""}>${icon("arrow")}</button></form><p class="helper">Enter to send · Shift+Enter for a new line</p><div class="coach-prompts">${state.reviewResult?.quality_gate?.coaching_allowed === false ? `<button data-question="What is a fencing lunge?" ${state.generating ? "disabled" : ""}>Explain the lunge</button><button data-question="What is recovery in fencing?" ${state.generating ? "disabled" : ""}>Explain recovery</button>` : `<button data-question="Compare my supplied measurements with their baselines." ${state.generating ? "disabled" : ""}>Compare with baseline</button><button data-question="Suggest one drill for my next practice using the supplied evidence." ${state.generating ? "disabled" : ""}>One drill for next time</button><button data-question="Which measurements have low confidence and what should I review?" ${state.generating ? "disabled" : ""}>Understand confidence</button>`}</div>${coachStatus(state)}</div>
-  <div class="coach-context">${photo("", "")}<div><span>CURRENT SESSION</span><strong>${e(state.session.title)}</strong><small>${e(label(metric.name))} · ${e(value.value)} ${e(value.unit)}${state.session.is_demo ? " · Sample" : ""}</small></div><button class="icon-button" data-go="review" aria-label="Back to session review">${icon("chevron")}</button></div>
-  ${state.runs.length ? `<div class="report-history"><label for="report-history">CONVERSATION HISTORY · NEWEST FIRST</label><select id="report-history" ${state.generating ? "disabled" : ""}>${state.runs.map((r) => `<option value="${e(r.run_id)}" ${r.run_id === run?.run_id ? "selected" : ""}>${e(date(r.created_at))} · ${r.mode === "demo" ? "Demo" : "Live AI"} · ${e(r.question.slice(0, 65))}</option>`).join("")}</select></div>` : ""}
-  <div class="coach-conversation">${pending}${turns.length ? conversation : !state.generating ? `<div class="coach-welcome"><span class="coach-emblem">${icon("spark")}</span><h2>Let’s talk fencing.</h2><p>Ask about your lunge, unpack a cue, or work through a question. I can consult your reviewed measurements when we need them.</p></div>` : ""}</div></section>
-  <aside class="coach-side"><div class="side-card">${modePicker(state)}</div>${run ? runDetails(run) : '<div class="daily-focus"><p class="eyebrow">GROUND YOUR PRACTICE</p><h3>Ask. Review.<br>Try again.</h3><p>Open a source beneath a coaching observation to see the measurement or practice note it refers to.</p></div>'}<p class="helper">Coaching notes are a development library. Review technique guidance with your fencing coach.</p></aside></div>`;
+  const turns = [...state.runs].sort(
+    (a, b) => new Date(b.created_at) - new Date(a.created_at),
+  );
+  const run = turns[0] || state.run;
+  const sessionReview = turns.find(
+    (turn) => turn.response_kind !== "conversation",
+  );
+  const practiceQuestion =
+    state.reviewResult?.quality_gate?.coaching_allowed === false
+      ? "Suggest a general drill for practicing a fencing lunge."
+      : "Suggest one drill for my next practice using the supplied evidence.";
+  const hasClip = state.session.video_job_id || getClipURL();
+  const footage = hasClip
+    ? `<video id="replay-video" data-session-id="${e(state.session.session_id)}" controls playsinline preload="metadata" aria-label="Practice session video"></video>${state.session.video_job_id ? `<canvas id="review-overlay" aria-hidden="true"></canvas><button class="overlay-toggle" data-video-overlay aria-pressed="${state.videoOverlay}">${icon("target")}Landmarks ${state.videoOverlay ? "on" : "off"}</button>` : ""}`
+    : `<div class="no-footage">${icon("camera")}<h2>${state.session.is_demo ? "Sample session" : "No video attached"}</h2><p>${state.session.is_demo ? "This session uses illustrative measurements. Upload your footage to see it here." : "Attach the video for this practice session to watch it alongside your coach."}</p><button type="button" class="secondary-action" ${state.session.is_demo ? 'data-go="record"' : "data-attach-video"}>${state.session.is_demo ? "Upload a clip" : "Attach session video"} ${icon("upload")}</button></div>`;
+  const conversation = turns
+    .map(
+      (turn) =>
+        `<article class="coach-turn"><div class="chat-message user"><span class="eyebrow">YOU</span><p>${e(turn.question)}</p></div><div class="chat-message coach"><span class="coach-emblem">${icon("spark")}</span><div>${reportContent(turn)}</div></div></article>`,
+    )
+    .join("");
+  const pending = state.generating
+    ? `<article class="coach-turn"><div class="chat-message user"><span class="eyebrow">YOU</span><p>${e(state.question)}</p></div><div class="chat-message coach" ${state.partialReply ? "" : "hidden"}><span class="coach-emblem">${icon("spark")}</span><p id="coaching-partial" class="conversation-answer">${e(state.partialReply || "")}</p></div><div class="generating" role="status"><span class="spinner"></span><span id="coaching-stage">Coach is replying…</span></div></article>`
+    : "";
+  return `${heading("SESSION COACH", "Let’s work on it.")}${sessionPicker(state)}<div class="coach-workspace">
+  <section class="coach-replay" aria-label="Session video"><div class="review-caption"><span>${e(state.session.title)}</span><button type="button" class="text-action" data-go="review">Review measurements ${icon("arrow")}</button></div><div class="replay-view">${footage}</div>${state.session.is_demo && state.reviewResult?.source_credit ? `<p class="video-credit">${e(state.reviewResult.source_credit)} · <a href="https://ocw.mit.edu/courses/pe-740-fencing-spring-2007/pages/video/" target="_blank" rel="noreferrer">Video source</a></p>` : ""}<input class="sr-only" id="session-video-file" type="file" accept="video/*" /></section>
+  <section class="coach-general" aria-labelledby="coach-general-title"><div class="coach-general-heading"><div><p class="eyebrow">GENERAL COACHING</p><h2 id="coach-general-title">One clear focus.</h2><p>Ask about technique, understand a cue, or connect it to your session.</p></div><div class="coach-model-control">${modePicker(state)}</div></div>${coachStatus({ ...state, coachError: "" })}${sessionReview ? `<div class="coach-session-summary">${reportContent(sessionReview, { compact: true })}</div>` : ""}<div class="coach-prompts"><button type="button" data-question="How should I extend my sword arm and non-sword arm during a lunge?" ${state.generating ? "disabled" : ""}>Arm position</button><button type="button" data-question="What is recovery in fencing?" ${state.generating ? "disabled" : ""}>Recovery</button><button type="button" data-question="${e(practiceQuestion)}" ${state.generating ? "disabled" : ""}>Next practice</button></div></section>
+  <section class="coach-chat" aria-labelledby="coach-chat-title"><h2 id="coach-chat-title">Talk with your coach</h2><div class="coach-composer"><form id="coach-form"><label for="question" class="sr-only">Message your coach</label><textarea id="question" name="question" rows="2" minlength="1" maxlength="1500" required placeholder="Ask a question or follow up…" ${state.generating ? "disabled" : ""}>${e(state.question)}</textarea><button class="send-question" type="submit" aria-label="Send message to coach" ${state.generating ? "disabled" : ""}>${icon("arrow")}</button></form><p class="helper">Enter to send · Shift+Enter for a new line</p>${state.coachError ? `<div class="coach-status coach-error" role="alert"><strong>Your message wasn’t answered.</strong><p>${e(state.coachError)}</p></div>` : ""}</div>
+  <div class="coach-conversation">${pending}${turns.length ? conversation : !state.generating ? `<div class="coach-welcome"><span class="coach-emblem">${icon("spark")}</span><p>Start with a question. Your replies will appear here, newest first.</p></div>` : ""}</div>${run ? runDetails(run) : ""}</section></div>`;
 }
 export function progress(state) {
   const stats = practiceStats(state.sessions, state.logs),
@@ -155,13 +170,22 @@ export function progress(state) {
           unit: metrics[0].unit,
           points: [],
         });
-      allGroups
-        .get(key)
-        .points.push({ value: mean(metrics), created_at: session.created_at, capture_profile: session.capture_profile || {} });
+      allGroups.get(key).points.push({
+        value: mean(metrics),
+        created_at: session.created_at,
+        capture_profile: session.capture_profile || {},
+      });
     }
   const selected =
     allGroups.get(state.trendKey) || allGroups.values().next().value;
-  const comparable = selected?.points.length >= 2 && selected.points.every(point => comparableSetup(selected.points[0].capture_profile, point.capture_profile));
+  const comparable =
+    selected?.points.length >= 2 &&
+    selected.points.every((point) =>
+      comparableSetup(
+        selected.points[0].capture_profile,
+        point.capture_profile,
+      ),
+    );
   const calendar = Array.from({ length: 7 }, (_, i) => {
     const dt = new Date(weekStart);
     dt.setDate(dt.getDate() + i);
@@ -188,6 +212,22 @@ export const screens = {
 };
 
 function comparableSetup(a, b) {
-  const fields = ["camera_setup_id", "weapon", "weapon_arm", "front_leg", "facing", "camera_motion", "scene_type"];
-  return fields.every(key => a[key] && a[key] !== "unknown" && a[key] === b[key]) && a.camera_motion === "fixed" && a.scene_type === "solo" && JSON.stringify(a.inference_crop || null) === JSON.stringify(b.inference_crop || null);
+  const fields = [
+    "camera_setup_id",
+    "weapon",
+    "weapon_arm",
+    "front_leg",
+    "facing",
+    "camera_motion",
+    "scene_type",
+  ];
+  return (
+    fields.every(
+      (key) => a[key] && a[key] !== "unknown" && a[key] === b[key],
+    ) &&
+    a.camera_motion === "fixed" &&
+    a.scene_type === "solo" &&
+    JSON.stringify(a.inference_crop || null) ===
+      JSON.stringify(b.inference_crop || null)
+  );
 }

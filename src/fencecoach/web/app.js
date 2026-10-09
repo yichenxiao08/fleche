@@ -9,7 +9,6 @@ import {
   generateReport,
   resumeCoaching,
   savePreferences,
-  restoreRunFocus,
 } from "./store.js";
 import { setupMotion } from "./motion.js";
 import { setupJournal } from "./journal.js";
@@ -72,6 +71,15 @@ function route() {
 }
 function render({ keepScroll = false, focus = false } = {}) {
   const scroll = window.scrollY;
+  const coachVideo = document.querySelector(".coach-replay video");
+  const playback = coachVideo ? {
+    sessionId: coachVideo.dataset.sessionId,
+    time: coachVideo.currentTime,
+    paused: coachVideo.paused || coachVideo.ended,
+    volume: coachVideo.volume,
+    muted: coachVideo.muted,
+    rate: coachVideo.playbackRate,
+  } : null;
   const dark = ["review", "coach", "analysis"].includes(state.screen);
   document.body.className = dark ? "studio" : "piste";
   document.querySelector('meta[name="theme-color"]').content = dark
@@ -103,12 +111,12 @@ function render({ keepScroll = false, focus = false } = {}) {
     ? '<div class="loading-state"><span class="spinner"></span><h1>Getting your training space ready.</h1><p>Loading your saved sessions…</p></div>'
     : screens[state.screen](state);
   document.title = `FenceCoach · ${state.screen === "drill" ? findDrill(state.drillId).name : state.screen.charAt(0).toUpperCase() + state.screen.slice(1)}`;
-  mountMedia();
+  mountMedia(playback);
   if (!keepScroll) window.scrollTo({ top: 0, behavior: "instant" });
   else window.scrollTo({ top: scroll, behavior: "instant" });
   if (focus) $("screen").focus({ preventScroll: true });
 }
-function mountMedia() {
+function mountMedia(playback = null) {
   stopOverlay();
   if (state.screen === "analysis") {
     motionController.mount();
@@ -124,7 +132,7 @@ function mountMedia() {
     if ($("draft-preview") && draftURL) $("draft-preview").src = draftURL;
   }
   if (
-    state.screen === "review" &&
+    ["review", "coach"].includes(state.screen) &&
     $("replay-video") &&
     (state.session?.video_job_id || getClipURL())
   ) {
@@ -142,6 +150,17 @@ function mountMedia() {
       state,
     );
     video.onloadedmetadata = () => {
+      if (!video.isConnected) return;
+      if (state.screen === "coach") {
+        if (playback?.sessionId === video.dataset.sessionId) {
+          video.currentTime = Math.min(playback.time, Math.max(0, video.duration - 0.01));
+          video.volume = playback.volume;
+          video.muted = playback.muted;
+          video.playbackRate = playback.rate;
+          if (!playback.paused) video.play().catch(() => {});
+        }
+        return;
+      }
       const metric = selectedMetrics(state).metric;
       if (metric?.start_ms != null && metric.start_ms / 1000 < video.duration)
         video.currentTime = metric.start_ms / 1000;
@@ -443,11 +462,6 @@ document.addEventListener("change", async (event) => {
     else if (target.id === "mode") {
       state.mode = target.value;
       render({ keepScroll: true });
-    } else if (target.id === "report-history") {
-      state.run =
-        state.runs.find((run) => run.run_id === target.value) || state.run;
-      restoreRunFocus();
-      render({ keepScroll: true });
     } else if (target.id === "trend-picker") {
       state.trendKey = target.value;
       render({ keepScroll: true });
@@ -521,7 +535,7 @@ document.addEventListener("submit", async (event) => {
     try {
       await pending;
       render({ keepScroll: true });
-      $("question")?.focus();
+      $("question")?.focus({ preventScroll: true });
     } catch (error) {
       state.question = question;
       render({ keepScroll: true });
