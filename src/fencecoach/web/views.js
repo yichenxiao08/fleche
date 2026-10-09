@@ -27,7 +27,6 @@ import {
   sessionPicker,
   emptySession,
   modePicker,
-  coachStatus,
   metricEvidence,
   reportContent,
   runDetails,
@@ -125,10 +124,13 @@ export function coach(state) {
   const sessionReview = turns.find(
     (turn) => turn.response_kind !== "conversation",
   );
-  const overview = sessionReview?.report.summary || "Ask about technique, your session, or your next practice.";
+  const needsClearerClip = state.reviewResult?.quality_gate?.coaching_allowed === false;
+  const overview = needsClearerClip
+    ? "Ask general technique questions here. For personal feedback, upload a fixed-camera clip showing your full body and weapon hand."
+    : sessionReview?.report.summary || "Ask about technique, your session, or your next practice.";
   const shortOverview = overview.length > 220 ? overview.slice(0, 217).replace(/\s+\S*$/, "") + "…" : overview;
   const practiceQuestion =
-    state.reviewResult?.quality_gate?.coaching_allowed === false
+    needsClearerClip
       ? "Suggest a general drill for practicing a fencing lunge."
       : "Suggest one drill for my next practice using the supplied evidence.";
   const hasClip = state.session.video_job_id || getClipURL();
@@ -146,7 +148,7 @@ export function coach(state) {
     : "";
   return `${heading("SESSION COACH", "Let’s work on it.")}${sessionPicker(state)}<div class="coach-workspace">
   <section class="coach-replay" aria-label="Session video"><div class="review-caption"><span>${e(state.session.title)}</span><button type="button" class="text-action" data-go="review">Review measurements ${icon("arrow")}</button></div><div class="replay-view">${footage}</div>${state.session.is_demo && state.reviewResult?.source_credit ? `<p class="video-credit">${e(state.reviewResult.source_credit)} · <a href="https://ocw.mit.edu/courses/pe-740-fencing-spring-2007/pages/video/" target="_blank" rel="noreferrer">Video source</a></p>` : ""}<input class="sr-only" id="session-video-file" type="file" accept="video/*" /></section>
-  <section class="coach-general" aria-labelledby="coach-general-title"><div class="coach-general-heading"><h2 id="coach-general-title">General coaching</h2><details class="coach-model-control"><summary>Coach settings</summary><div class="coach-settings-panel">${modePicker(state)}</div></details></div><p class="coach-overview">${e(shortOverview)}</p><div class="coach-prompts"><button type="button" data-question="How should I extend my sword arm and non-sword arm during a lunge?" ${state.generating ? "disabled" : ""}>Arm position</button><button type="button" data-question="What is recovery in fencing?" ${state.generating ? "disabled" : ""}>Recovery</button><button type="button" data-question="${e(practiceQuestion)}" ${state.generating ? "disabled" : ""}>Next practice</button></div>${state.reviewResult?.quality_gate?.coaching_allowed === false ? `<details class="coach-filming-help"><summary>General questions available · clearer footage needed for personal feedback</summary>${coachStatus({ ...state, coachError: "" })}</details>` : ""}</section>
+  <section class="coach-general" aria-labelledby="coach-general-title"><div class="coach-general-heading"><h2 id="coach-general-title">General coaching</h2><details class="coach-model-control"><summary>Coach settings</summary><div class="coach-settings-panel">${modePicker(state)}</div></details></div><p class="coach-overview">${e(shortOverview)}</p><div class="coach-prompts" role="group" aria-label="Suggested questions and next actions"><button type="button" data-question="How should I extend my sword arm and non-sword arm during a lunge?" ${state.generating ? "disabled" : ""}>Arm position</button><button type="button" data-question="What is recovery in fencing?" ${state.generating ? "disabled" : ""}>Recovery</button><button type="button" data-question="${e(practiceQuestion)}" ${state.generating ? "disabled" : ""}>Next practice</button>${needsClearerClip ? '<button type="button" data-go="record">Upload clearer clip</button>' : ""}</div></section>
   <section class="coach-chat" aria-labelledby="coach-chat-title"><h2 id="coach-chat-title">Talk with your coach</h2><div class="coach-composer"><form id="coach-form"><label for="question" class="sr-only">Message your coach</label><textarea id="question" name="question" rows="2" minlength="1" maxlength="1500" required placeholder="Ask a question or follow up…" ${state.generating ? "disabled" : ""}>${e(state.question)}</textarea><button class="send-question" type="submit" aria-label="Send message to coach" ${state.generating ? "disabled" : ""}>${icon("arrow")}</button></form><p class="helper">Enter to send · Shift+Enter for a new line</p>${state.coachError ? `<div class="coach-status coach-error" role="alert"><strong>Your message wasn’t answered.</strong><p>${e(state.coachError)}</p></div>` : ""}</div>
   <div class="coach-conversation">${pending}${turns.length ? conversation : !state.generating ? `<div class="coach-welcome"><span class="coach-emblem">${icon("spark")}</span><p>Start with a question. Your replies will appear here, newest first.</p></div>` : ""}</div>${run ? runDetails(run) : ""}</section></div>`;
 }

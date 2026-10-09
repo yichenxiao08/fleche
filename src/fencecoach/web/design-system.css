@@ -1624,13 +1624,11 @@ html.coach-page {
   line-height: 1.5;
   color: var(--muted);
 }
-.coach-model-control,
-.coach-filming-help {
+.coach-model-control {
   font-size: 11px;
   color: var(--muted);
 }
-.coach-model-control summary,
-.coach-filming-help summary {
+.coach-model-control summary {
   cursor: pointer;
 }
 .coach-model-control {
@@ -1655,9 +1653,6 @@ html.coach-page {
 }
 .coach-settings-panel .helper {
   margin-bottom: 0;
-}
-.coach-filming-help {
-  margin-top: 8px;
 }
 .coach-chat > h2 {
   font-size: 24px;
