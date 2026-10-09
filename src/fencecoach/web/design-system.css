@@ -1793,8 +1793,92 @@ td .text-action {
 }
 .coach-status p { margin: 8px 0; }
 .coach-status small { color: var(--muted); }
-.coach-status-actions { display: flex; flex-wrap: wrap; gap: 8px 18px; }
-.coach-status-actions .text-action { margin-top: 0; }
+.coach-status-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  margin: 18px 0 12px;
+}
+.coach-status-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 46px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: left;
+}
+.coach-status-action svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  color: var(--accent);
+}
+.coach-status-action:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--soft);
+}
+.coach-status-action:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.coach-status-action:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+.coach-status-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+}
+.coach-status-heading svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--accent);
+}
+.coach-capture-tips {
+  padding-left: 18px;
+  margin: 12px 0 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.coach-capture-tips li + li {
+  margin-top: 6px;
+}
+.coach-composer .coach-prompts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr));
+  gap: 10px;
+  margin: 16px 0 20px;
+}
+.coach-composer .coach-prompts button {
+  display: block;
+  min-height: 44px;
+  padding: 12px 14px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text);
+  text-align: left;
+}
+.coach-composer .coach-prompts button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+.coach-composer .coach-prompts button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.coach-composer .coach-prompts button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
 .toast {
   position: fixed;
   bottom: 25px;
