@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -182,15 +183,36 @@ def require_supported_session(session):
         )
 
 
-@app.post("/api/sessions/{session_id}/reports", response_model=RunRecord, status_code=201)
-def create_report(session_id: str, data: ReportRequest):
-    session = get_session(session_id)
-    require_supported_session(session)
+def coaching_request(session, data):
+    """Keep general conversation available without exposing rejected video evidence."""
+    from fencecoach.coach.conversation import _needs_measurements
+
+    context = repository.coaching_context(session.session_id)
+    try:
+        require_supported_session(session)
+    except HTTPException as exc:
+        personal = _needs_measurements(data.question) or re.search(
+            r"\b(my|me|mine|video|clip|session|reps?|baseline|compare|history|previous|measurements?|timestamps?)\b",
+            data.question,
+            re.I,
+        )
+        if personal or data.focus_metric_id or data.mode == "demo":
+            raise
+        # History tools must not reintroduce measurements from failed footage.
+        return CoachRequest(
+            session_id=session.session_id,
+            question=data.question,
+            skill_level=session.skill_level,
+            metrics=[],
+            conversation_history=context["conversation_history"],
+            session_notes="General fencing conversation only. Current video measurements are unavailable: "
+            + str(exc.detail),
+        )
     if data.focus_metric_id and not any(
         metric.metric_id == data.focus_metric_id for metric in session.metrics
     ):
         raise HTTPException(422, "The selected measurement is not in this session.")
-    request = CoachRequest(
+    return CoachRequest(
         session_id=session.session_id,
         question=data.question,
         skill_level=session.skill_level,
@@ -198,8 +220,14 @@ def create_report(session_id: str, data: ReportRequest):
         focus_metric_id=data.focus_metric_id,
         session_notes=session.notes,
         capture_profile=session.capture_profile,
-        **repository.coaching_context(session_id),
+        **context,
     )
+
+
+@app.post("/api/sessions/{session_id}/reports", response_model=RunRecord, status_code=201)
+def create_report(session_id: str, data: ReportRequest):
+    session = get_session(session_id)
+    request = coaching_request(session, data)
     return repository.save_run(_report_or_error(request, data.mode))
 
 
@@ -252,18 +280,8 @@ def delete_training_log(log_id: str):
 @app.post("/api/sessions/{session_id}/coaching-jobs", status_code=202)
 def queue_coaching(session_id: str, data: ReportRequest):
     session = get_session(session_id)
-    require_supported_session(session)
     try:
-        request = CoachRequest(
-            session_id=session_id,
-            question=data.question,
-            skill_level=session.skill_level,
-            metrics=session.metrics,
-            focus_metric_id=data.focus_metric_id,
-            session_notes=session.notes,
-            capture_profile=session.capture_profile,
-            **repository.coaching_context(session_id),
-        )
+        request = coaching_request(session, data)
         return coaching_jobs.create(request, data.mode)
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc

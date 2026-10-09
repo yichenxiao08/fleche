@@ -75,6 +75,9 @@ class ConversationMessage(BaseModel):
 
 
 class CoachRequest(MetricSet):
+    # General conversation can run without supplying rejected video measurements.
+    # Saved sessions still require at least one measurement through MetricSet.
+    metrics: list[MetricObservation] = Field(default_factory=list, max_length=1000)
     session_id: str = Field(min_length=1, max_length=100)
     question: str = Field(min_length=1, max_length=1500)
     skill_level: Literal["beginner", "intermediate"] = "beginner"

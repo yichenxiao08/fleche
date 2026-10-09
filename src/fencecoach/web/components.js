@@ -27,6 +27,12 @@ export function emptySession(title = "One session. One clear focus.") {
 export function modePicker(state) {
   return `<label class="field"><span>Coaching model</span><select id="mode"><option value="local" ${state.mode === "local" ? "selected" : ""} ${!state.config.local_ready ? "disabled" : ""}>Local AI ${!state.config.local_ready ? "· setup needed" : "· private"}</option><option value="bedrock" ${state.mode === "bedrock" ? "selected" : ""} ${!state.config.bedrock_ready ? "disabled" : ""}>Cloud AI ${!state.config.bedrock_ready ? "· setup needed" : ""}</option><option value="demo" ${state.mode === "demo" ? "selected" : ""}>Sample report · no LLM</option></select></label><p class="helper">${state.mode === "local" ? "Your model uses video measurements, retrieved notes, your journal, and previous reviews. Video stays on this server." : state.mode === "bedrock" ? "Cloud coaching sends measurements and training context to the configured provider. Provider charges apply." : "Sample reports summarize evidence. They do not interpret questions."}</p>`;
 }
+export function coachStatus(state) {
+  const qa = state.reviewResult?.quality_gate;
+  const unsupported = qa?.coaching_allowed === false;
+  const tips = (qa?.issues || []).filter((issue) => issue.severity === "reject");
+  return `${unsupported ? `<section class="coach-status" aria-label="Video coaching availability"><strong>This clip can’t support personal feedback yet.</strong><p>${tips.map((issue) => e(issue.tip)).join(" ") || "The video did not pass the tracking quality check."}</p><p>You can still ask general fencing questions.</p><div class="coach-status-actions"><button type="button" class="text-action" data-question="What is recovery in fencing?" ${state.generating ? "disabled" : ""}>Try a general question</button><button type="button" class="text-action" data-sample-coach ${state.generating ? "disabled" : ""}>Try sample chat</button><button type="button" class="text-action" data-go="record">Upload a clearer clip</button></div><small>Sample chat uses synthetic measurements.</small></section>` : ""}${state.coachError ? `<div class="coach-status coach-error" role="alert"><strong>Your message wasn’t answered.</strong><p>${e(state.coachError)}</p></div>` : ""}`;
+}
 export function metricEvidence(metric, isDemo) {
   const display = displayMetric(metric);
   let baseline = "No baseline was supplied for this measurement.";

@@ -303,7 +303,13 @@ document.addEventListener("click", async (event) => {
     else if (button.dataset.drill) {
       state.drillId = button.dataset.drill;
       go("drill");
-    } else if (button.hasAttribute("data-sample"))
+    } else if (button.hasAttribute("data-sample-coach"))
+      await withBusy(async () => {
+        await loadSample();
+        await sessionMedia(state.session.session_id);
+        go("coach");
+      });
+    else if (button.hasAttribute("data-sample"))
       await withBusy(async () => {
         await loadSample();
         await sessionMedia(state.session.session_id);
@@ -496,6 +502,12 @@ document.addEventListener("change", async (event) => {
 document.addEventListener("input", (event) => {
   if (event.target.id === "question") state.question = event.target.value;
 });
+document.addEventListener("keydown", (event) => {
+  if (event.target.id === "question" && event.key === "Enter" && !event.shiftKey && !event.isComposing) {
+    event.preventDefault();
+    if (!state.generating) event.target.form.requestSubmit();
+  }
+});
 document.addEventListener("submit", async (event) => {
   if (event.target.id === "coach-form") {
     event.preventDefault();
@@ -513,7 +525,8 @@ document.addEventListener("submit", async (event) => {
     } catch (error) {
       state.question = question;
       render({ keepScroll: true });
-      $("question").value = question;
+      const input = $("question");
+      if (input) input.value = question;
       notice(error.message);
     }
   } else if (event.target.id === "import-form") {

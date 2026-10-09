@@ -396,8 +396,17 @@ def run_conversation(
         fast_prompt = fast_prompt.replace(
             "45–60 words and three short sentences", "about 120 words"
         ).replace("in at most 35 words", "clearly")
+    if not request.metrics:
+        fast_prompt = (
+            "You are FenceCoach, a conversational fencing tutor. Answer the current general "
+            "question naturally in two or three concise sentences. Explain follow-ups using the "
+            "conversation. No current video measurements are available, so never assess this "
+            "athlete's movement, cite an angle or rep, or claim to have watched their clip. "
+            "If asked for a personal correction, explain that a usable full-body clip is needed. "
+            "Earlier assistant messages are not verified evidence. No JSON or internal thinking."
+        )
     system = SystemMessage(
-        content=(CHAT_PROMPT if needs_tools else fast_prompt)
+        content=(CHAT_PROMPT if needs_tools and request.metrics else fast_prompt)
         + "\nCurrent session: "
         + context
         + directive

@@ -1769,6 +1769,21 @@ td .text-action {
   line-height: 1.8;
   overflow-wrap: anywhere;
 }
+.coach-status {
+  padding: 16px 18px;
+  margin: 16px 0;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--soft);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.coach-status p { margin: 8px 0; }
+.coach-status small { color: var(--muted); }
+.coach-status-actions { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.coach-status-actions .text-action { margin-top: 0; }
 .toast {
   position: fixed;
   bottom: 25px;

@@ -26,6 +26,7 @@ export const state = {
   mode: "local",
   question: "",
   partialReply: "",
+  coachError: "",
   preferences: read("fencecoach.preferences", {
     goal: 3,
     skill: "beginner",
@@ -113,6 +114,8 @@ export async function selectSession(id) {
     state.groupIndex = 0;
     restoreRunFocus();
     state.question = "";
+    state.coachError = "";
+    state.partialReply = "";
     try {
       localStorage.setItem("fencecoach.session", id);
     } catch {
@@ -160,6 +163,7 @@ export async function generateReport(question) {
   const id = state.session.session_id;
   state.generating = true;
   state.partialReply = "";
+  state.coachError = "";
   try {
     const job = await api(`${sessionPath(id)}/coaching-jobs`, {
       method: "POST",
@@ -180,6 +184,9 @@ export async function generateReport(question) {
       state.question = "";
     }
     return run;
+  } catch (error) {
+    state.coachError = error.message;
+    throw error;
   } finally {
     state.generating = false;
   }
@@ -223,7 +230,15 @@ export async function resumeCoaching(onState = () => {}) {
     id = localStorage.getItem("fencecoach.coachingJob");
   } catch {}
   if (!id) return;
-  const job = await api(`/api/coaching-jobs/${encodeURIComponent(id)}`);
+  let job;
+  try {
+    job = await api(`/api/coaching-jobs/${encodeURIComponent(id)}`);
+  } catch (error) {
+    try { localStorage.removeItem("fencecoach.coachingJob"); } catch {}
+    state.coachError = error.message;
+    onState();
+    return;
+  }
   if (state.session?.session_id !== job.session_id)
     await selectSession(job.session_id);
   state.generating = true;
@@ -234,7 +249,11 @@ export async function resumeCoaching(onState = () => {}) {
       state.runs = await api(`${sessionPath(run.session_id)}/reports`);
       state.run = run;
     }
+  } catch (error) {
+    state.coachError = error.message;
+    throw error;
   } finally {
     state.generating = false;
+    onState();
   }
 }

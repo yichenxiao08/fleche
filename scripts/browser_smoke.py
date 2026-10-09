@@ -115,6 +115,45 @@ def main():
                     expect(page.locator(".chat-message.coach").last).to_contain_text(
                         "slow", timeout=15000
                     )
+                    if name == "one":
+                        # A rejected request must be visible at the composer and leave it usable.
+                        pattern = "**/api/sessions/*/coaching-jobs"
+
+                        def reject_chat(route):
+                            route.fulfill(
+                                status=422,
+                                content_type="application/json",
+                                body=json.dumps(
+                                    {
+                                        "detail": "This video is unsupported for coaching. Whole body must stay in frame."
+                                    }
+                                ),
+                            )
+
+                        page.route(pattern, reject_chat)
+                        page.locator("#question").fill("Review my lunge again")
+                        page.locator("#question").press("Enter")
+                        expect(page.locator(".coach-error")).to_contain_text(
+                            "Whole body must stay in frame"
+                        )
+                        expect(page.locator("#question")).to_be_enabled()
+                        page.unroute(pattern, reject_chat)
+                        page.locator("#question").fill("What is recovery in fencing?")
+                        page.locator("#question").press("Enter")
+                        expect(page.locator("#question")).to_be_enabled(timeout=15000)
+                        expect(page.locator(".coach-error")).to_have_count(0)
+                        # A missing persisted job should clear itself instead of disabling chat.
+                        page.evaluate(
+                            "localStorage.setItem('fencecoach.coachingJob', 'missing-fixture-job')"
+                        )
+                        page.reload()
+                        expect(page.locator(".coach-error")).to_contain_text(
+                            "Coaching request not found"
+                        )
+                        expect(page.locator("#question")).to_be_enabled()
+                        assert (
+                            page.evaluate("localStorage.getItem('fencecoach.coachingJob')") is None
+                        )
                     page.locator('[data-go="progress"]').first.click()
                     page.locator("[data-log-new]").click()
                     page.locator('#training-log-form [name="focus"]').fill(
