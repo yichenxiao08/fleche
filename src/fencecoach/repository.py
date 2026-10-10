@@ -139,6 +139,27 @@ class Repository:
             return result.rowcount > 0
 
     def coaching_context(self, session_id):
+        import json
+
+        reviewed_feedback = {}
+        session = self.get_session(session_id)
+        if session and session.video_job_id:
+            with closing(self._connect()) as db:
+                exists = (
+                    db.execute(
+                        "SELECT name FROM sqlite_master WHERE type='table' AND name='coach_feedback'"
+                    ).fetchone()
+                    if not db.postgres
+                    else db.execute("SELECT to_regclass('coach_feedback')").fetchone()
+                )
+                if exists and exists[0]:
+                    row = db.execute(
+                        "SELECT payload FROM coach_feedback WHERE job_id=?", (session.video_job_id,)
+                    ).fetchone()
+                    if row:
+                        payload = json.loads(row[0])
+                        if payload.get("status") == "submitted":
+                            reviewed_feedback = {**payload, "job_id": session.video_job_id}
         logs = [
             {**log.model_dump(mode="json"), "notes": log.notes[:200]}
             for log in self.list_logs()[:14]
@@ -180,6 +201,7 @@ class Repository:
             )
         ]
         return {
+            "reviewed_feedback": reviewed_feedback,
             "training_history": logs,
             "previous_reviews": reviews,
             "session_history": history,

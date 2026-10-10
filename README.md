@@ -141,3 +141,21 @@ The three packaged sources and derived previews/contact sheets are attributed MI
 See [five-stage status](docs/finish-status.md) and [reliable coaching validation](docs/coaching-validation.md). Missing external acceptance items are clean supported solo/flèche clips, independent coaching references/usefulness ratings, authenticated hosted model comparisons, Claude-client integration, and a fresh-machine Docker run. Accounts, native mobile, and crowded-bout tactics remain outside this release.
 
 Implementation references: [LangGraph](https://docs.langchain.com/oss/python/langgraph/graph-api), [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk/tree/v1.x), [Phoenix](https://github.com/Arize-ai/phoenix), [Bedrock Converse](https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_Converse.html), [Ollama Docker](https://docs.ollama.com/docker), [Compose startup order](https://docs.docker.com/compose/how-tos/startup-order/).
+# Submitted technique feedback and personalized coaching
+
+Submitted coach reviews are loaded into session chat through the reviewed-feedback
+tool and attributed sources. Drafts are excluded. Submission recalculates rep
+geometry using corrected frame bookmarks, preserving the existing session ID and
+unrelated clip measurements. Finish-to-guard intervals include holds; they are
+not active recovery speed. The submitted revision and examples are saved in the
+same transaction. Intentional variations retain their stated corrections.
+
+Run `python scripts/prepare_coach_learning.py` to integrate existing submissions
+and export `data/coach-learning/technique-examples.jsonl`, review snapshots and
+the readiness report. The running local app is not required for this command.
+This prepares personalized retrieval data, not LLM fine-tuning or gesture training.
+Reference-rated reps that also list issues are mixed examples, not flawless
+negative examples. Free text is not silently turned into per-issue classifier
+targets; independent recordings and explicit labels are needed for supervised
+technique evaluation. Sparse action/lunge/guard anchors are not dense phase labels.
+

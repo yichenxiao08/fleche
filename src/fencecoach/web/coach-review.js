@@ -38,10 +38,10 @@ async function save(status = 'draft') {
   saving = true; $('save').disabled = true; $('submit').disabled = true; $('save-status').textContent = 'Saving…';
   try {
     const saved = await api('PUT', payload);
-    draft.revision = saved.revision; draft.saved_at = saved.saved_at; draft.attribution = saved.attribution;
+    draft.revision = saved.revision; draft.saved_at = saved.saved_at; draft.attribution = saved.attribution; draft.integration = saved.integration;
     if (currentGeneration === generation) { dirty = false; draft.status = saved.status; }
     localBackup(); $('error').hidden = true;
-    $('save-status').textContent = dirty ? 'More changes waiting to save…' : saved.status === 'submitted' ? 'All rep feedback submitted and saved.' : 'Saved to server · refresh-safe';
+    $('save-status').textContent = dirty ? 'More changes waiting to save…' : saved.status === 'submitted' ? `Submitted · connected to coach · ${saved.integration?.remeasured_metrics || 0} measurements recalculated. Technique examples saved; classifier weights unchanged.` : 'Saved to server · refresh-safe';
   } catch (error) {
     conflict = error.status === 409; dirty = true; localBackup(); fail(error);
     $('save-status').textContent = `${error.message} · Browser draft retained.`;
@@ -60,7 +60,7 @@ function nav() {
   draft.reps.forEach((rep, index) => {
     const button = document.createElement('button'); button.type = 'button';
     button.textContent = `Rep ${index+1}${rep.rating ? ' ✓' : ''}`; button.setAttribute('aria-current', String(index === active));
-    button.addEventListener('click', () => { readForm(); active = index; renderRep(); seek((context.windows[index].onset_ms ?? context.windows[index].start_ms)/1000); });
+    button.addEventListener('click', () => { readForm(); active = index; renderRep(); seek((rep.action_start_ms ?? context.windows[index].onset_ms ?? context.windows[index].start_ms)/1000); });
     $('rep-nav').append(button);
   });
   $('progress').textContent = `${draft.reps.filter(r => r.rating).length} / ${draft.reps.length} assessed`;
@@ -72,9 +72,18 @@ function renderRep() {
   $('jump-evidence').disabled = rep.evidence_ms == null;
   $('phase-jumps').replaceChildren();
   const w = context.windows[active];
-  for (const [label, time] of [['Action start',w.onset_ms ?? w.start_ms],[context.intervals_reviewed ? 'Reviewed lunge' : 'Suggested lunge',w.start_ms],['Return to guard',w.end_ms]]) {
-    const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.addEventListener('click', () => seek(time/1000)); $('phase-jumps').append(b);
+  for (const [label, field, original] of [['Action start','action_start_ms',w.onset_ms ?? w.start_ms],[context.intervals_reviewed ? 'Reviewed lunge' : 'Suggested lunge','lunge_ms',w.start_ms],['Return to guard','guard_ms',w.end_ms]]) {
+    const time = rep[field] ?? original;
+    const row = document.createElement('div'); row.className = 'phase-edit-row';
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.addEventListener('click', () => seek(time/1000));
+    const stamp = document.createElement('span'); stamp.textContent = clock(time); stamp.className = 'phase-time';
+    const set = document.createElement('button'); set.type = 'button'; set.textContent = 'Set to current frame'; set.setAttribute('aria-label', `Set ${label.toLowerCase()} to current frame`); set.dataset.phaseSet = ''; set.disabled = video.readyState < 2 || video.seeking;
+    set.addEventListener('click', () => { video.pause(); rep[field] = Math.round(visibleTime()*1000); changed(); renderRep(); });
+    const reset = document.createElement('button'); reset.type = 'button'; reset.textContent = 'Reset'; reset.disabled = rep[field] == null; reset.setAttribute('aria-label', `Reset ${label.toLowerCase()} time`);
+    reset.addEventListener('click', () => { rep[field] = null; changed(); renderRep(); });
+    row.append(b, stamp, set, reset); $('phase-jumps').append(row);
   }
+  const note = document.createElement('p'); note.className = 'timing-note'; note.textContent = 'Pause on the correct frame, then set its bookmark. Changes autosave with this review; existing analysis measurements stay unchanged. Timing order is checked when you submit.'; $('phase-jumps').append(note);
   nav();
 }
 function seek(time) {
@@ -98,9 +107,10 @@ if ('requestVideoFrameCallback' in video) {
   video.requestVideoFrameCallback(onFrame);
 }
 video.addEventListener('timeupdate', updateClock); video.addEventListener('seeked', updateClock);
-video.addEventListener('seeking', () => { $('mark-frame').disabled = true; });
-video.addEventListener('seeked', () => { $('mark-frame').disabled = false; });
-video.addEventListener('loadeddata', () => { $('mark-frame').disabled = false; });
+function frameButtons(disabled) { $('mark-frame').disabled = disabled; document.querySelectorAll('[data-phase-set]').forEach(b => { b.disabled = disabled; }); }
+video.addEventListener('seeking', () => frameButtons(true));
+video.addEventListener('seeked', () => frameButtons(false));
+video.addEventListener('loadeddata', () => frameButtons(false));
 $('prev-frame').addEventListener('click', () => step(-1)); $('next-frame').addEventListener('click', () => step(1));
 $('seek').addEventListener('click', () => { const time = Number($('seek-time').value); if (Number.isFinite(time)) seek(time); });
 $('speed').addEventListener('change', () => { video.playbackRate = Number($('speed').value); });

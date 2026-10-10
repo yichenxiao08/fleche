@@ -9,6 +9,8 @@ from typing import Literal
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from fencecoach.feedback_learning import apply_submitted_feedback
+
 
 class RepFeedback(BaseModel):
     rep_number: int = Field(ge=1, le=50)
@@ -16,6 +18,9 @@ class RepFeedback(BaseModel):
     done_well: str = Field(default="", max_length=2000)
     main_issue: str = Field(default="", max_length=2000)
     evidence_ms: int | None = Field(default=None, ge=0)
+    action_start_ms: int | None = Field(default=None, ge=0)
+    lunge_ms: int | None = Field(default=None, ge=0)
+    guard_ms: int | None = Field(default=None, ge=0)
     evidence_description: str = Field(default="", max_length=2000)
     cue: str = Field(default="", max_length=2000)
     improvement: str = Field(default="", max_length=2000)
@@ -88,7 +93,7 @@ def coach_review_router(jobs):
 
     @router.put("/{job_id}/coach-feedback")
     def save_feedback(job_id: str, data: CoachFeedback):
-        _, result, windows = context(job_id)
+        job, result, windows = context(job_id)
         numbers = [r.rep_number for r in data.reps]
         if sorted(numbers) != list(range(1, len(windows) + 1)):
             raise HTTPException(422, "Include feedback for each rep exactly once.")
@@ -97,6 +102,22 @@ def coach_review_router(jobs):
         ):
             raise HTTPException(422, "An evidence timestamp is outside this video.")
         if data.status == "submitted":
+            for rep in data.reps:
+                window = windows[rep.rep_number - 1]
+                start = (
+                    rep.action_start_ms
+                    if rep.action_start_ms is not None
+                    else window.get("onset_ms")
+                    if window.get("onset_ms") is not None
+                    else window["start_ms"]
+                )
+                lunge = rep.lunge_ms if rep.lunge_ms is not None else window["start_ms"]
+                guard = rep.guard_ms if rep.guard_ms is not None else window["end_ms"]
+                if not 0 <= start <= lunge < guard <= result["duration_ms"]:
+                    raise HTTPException(
+                        422,
+                        f"Rep {rep.rep_number}: order bookmarks as action start, lunge, then return to guard, within the video.",
+                    )
             if not data.reviewer.strip() or not data.intended_drill.strip():
                 raise HTTPException(
                     422, "Enter the reviewer's name and intended drill before submitting."
@@ -132,10 +153,34 @@ def coach_review_router(jobs):
                 saved_at=datetime.now(UTC).isoformat(),
                 attribution="Human-entered review; reviewer role is self-declared. Not automatically used as training ground truth.",
             )
+            try:
+                payload["integration"] = apply_submitted_feedback(db, job, result, payload, windows)
+            except ValueError as exc:
+                raise HTTPException(422, str(exc)) from exc
             db.execute(
                 "INSERT INTO coach_feedback VALUES (?,?,?) ON CONFLICT(job_id) DO UPDATE SET revision=excluded.revision,payload=excluded.payload",
                 (job_id, revision + 1, json.dumps(payload)),
             )
         return payload
+
+    @router.get("/{job_id}/coach-training")
+    def training_snapshot(job_id: str):
+        context(job_id)
+        with closing(jobs.connect()) as db:
+            exists = (
+                db.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name='coach_training_examples'"
+                ).fetchone()
+                if not db.postgres
+                else db.execute("SELECT to_regclass('coach_training_examples')").fetchone()
+            )
+            if not exists or not exists[0]:
+                raise HTTPException(409, "Submit technique feedback to prepare training examples.")
+            row = db.execute(
+                "SELECT payload FROM coach_training_examples WHERE job_id=?", (job_id,)
+            ).fetchone()
+        if not row:
+            raise HTTPException(409, "Submit technique feedback to prepare training examples.")
+        return json.loads(row[0])
 
     return router

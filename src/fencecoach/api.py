@@ -207,6 +207,7 @@ def coaching_request(session, data):
             training_history=context["training_history"],
             session_history=context["session_history"],
             conversation_history=context["conversation_history"],
+            reviewed_feedback=context["reviewed_feedback"],
             session_notes=(
                 "Current video measurements are unavailable. Prior sessions and self-reported "
                 "training logs may be used as historical context, but are not evidence about "
