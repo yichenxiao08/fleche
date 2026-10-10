@@ -301,9 +301,7 @@ def run_conversation(
         if not metric_name:
             return json.dumps({"error": "Choose one specific measurement to compare."})
         matched_current = [
-            metric
-            for metric in request.metrics
-            if metric_name.lower() in metric.name.lower()
+            metric for metric in request.metrics if metric_name.lower() in metric.name.lower()
         ]
         current_units = {metric.unit for metric in matched_current}
         current_profile = request.capture_profile or {}
@@ -314,8 +312,7 @@ def run_conversation(
             measurements = [
                 metric
                 for metric in session["metrics"]
-                if metric_name.lower() in metric["name"].lower()
-                and metric["unit"] in current_units
+                if metric_name.lower() in metric["name"].lower() and metric["unit"] in current_units
             ][:12]
             sessions.append(
                 {
@@ -395,7 +392,9 @@ def run_conversation(
         advertised.append(inspect_reviewed_rep)
     if re.search(r"\b(baseline|compare)\b", request.question, re.I):
         advertised.extend([compare_to_baseline, compare_recent_sessions])
-    if needs_history or re.search(r"\b(history|previous|last|log|journal)\b", request.question, re.I):
+    if needs_history or re.search(
+        r"\b(history|previous|last|log|journal)\b", request.question, re.I
+    ):
         advertised.extend([get_training_history, get_previous_reviews, compare_recent_sessions])
     advertised = list({item.name: item for item in advertised}.values())
     with_tools = model.bind_tools(advertised) if needs_tools else model
@@ -642,7 +641,9 @@ def run_conversation(
     graph.add_edge("final_answer", END)
     # Keep the most recent exchange intact instead of overflowing the model's
     # context with twelve potentially six-thousand-character messages.
-    history_limit = 10000 if needs_tools else (700 if _needs_measurements(request.question) else 1600)
+    history_limit = (
+        10000 if needs_tools else (700 if _needs_measurements(request.question) else 1600)
+    )
     exchanges = []
     pending_user = None
     for item in request.conversation_history:

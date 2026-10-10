@@ -149,7 +149,9 @@ class DataAndEvidenceTests(unittest.TestCase):
                 return self
 
             def invoke(self, messages):
-                return AIMessage(content="Recovery means returning to en garde after a lunge. What feels difficult?")
+                return AIMessage(
+                    content="Recovery means returning to en garde after a lunge. What feels difficult?"
+                )
 
             def with_structured_output(self, *args, **kwargs):
                 raise AssertionError("Conversation must not call a report formatter")
