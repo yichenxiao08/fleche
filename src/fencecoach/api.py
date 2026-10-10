@@ -195,9 +195,14 @@ def coaching_request(session, data):
             skill_level=session.skill_level,
             metrics=[],
             evidence_unavailable_reason=str(exc.detail),
+            training_history=context["training_history"],
+            session_history=context["session_history"],
             conversation_history=context["conversation_history"],
-            session_notes="General fencing conversation only. Current video measurements are unavailable: "
-            + str(exc.detail),
+            session_notes=(
+                "Current video measurements are unavailable. Prior sessions and self-reported "
+                "training logs may be used as historical context, but are not evidence about "
+                "the rejected clip. " + str(exc.detail)
+            ),
         )
     if data.focus_metric_id and not any(
         metric.metric_id == data.focus_metric_id for metric in session.metrics

@@ -41,6 +41,17 @@ def general_instruction(question):
     )
 
 
+def history_instruction(question):
+    """Recognize cross-session progress requests without treating generic tips as history."""
+    return bool(
+        re.search(
+            r"\b(progress|trend|improved|improvement|improving|getting better|gotten better|doing better|more consistent|less consistent|over time|since (?:my )?(?:last|previous)|last (?:session|practice|time)|(?:previous|prior|earlier) (?:sessions?|practices?))\b",
+            question,
+            re.I,
+        )
+    )
+
+
 def general_guidance_query(request):
     topics = r"\b(arm|hand|lunge|recovery|footwork|en garde|advance|retreat|fleche|flèche)\b"
     current = request.question.lower()
