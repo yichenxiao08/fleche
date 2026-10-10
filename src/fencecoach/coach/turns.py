@@ -45,7 +45,7 @@ def history_instruction(question):
     """Recognize cross-session progress requests without treating generic tips as history."""
     return bool(
         re.search(
-            r"\b(progress|trend|improved|improvement|improving|getting better|gotten better|doing better|more consistent|less consistent|over time|since (?:my )?(?:last|previous)|last (?:session|practice|time)|(?:previous|prior|earlier) (?:sessions?|practices?))\b",
+            r"\b(progress|trend|improved|improvement|improving|getting better|gotten better|doing better|more consistent|less consistent|over time|since (?:my )?(?:last|previous)|last (?:session|practice|time|week|month)|(?:previous|prior|earlier) (?:sessions?|practices?|week|month)|what (?:has )?changed|compare .{0,30}(?:last|previous|earlier|session|practice|week|month)|versus (?:my )?(?:last|previous))\b",
             question,
             re.I,
         )
