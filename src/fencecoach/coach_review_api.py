@@ -9,7 +9,8 @@ from typing import Literal
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from fencecoach.feedback_learning import apply_submitted_feedback
+from fencecoach.feedback_learning import apply_submitted_feedback, corrected_windows
+from fencecoach.technique import evaluate_lunges
 
 
 class RepFeedback(BaseModel):
@@ -89,6 +90,13 @@ def coach_review_router(jobs):
             "fps": result.get("preview", {}).get("fps_hint", 30),
             "pose_sample_interval_ms": result.get("sample_interval_ms"),
             "feedback": feedback,
+            "technique_evaluation": evaluate_lunges(
+                result,
+                corrected_windows(feedback, windows)
+                if feedback.get("status") == "submitted"
+                else windows,
+                job.get("capture_profile", {}),
+            ),
         }
 
     @router.put("/{job_id}/coach-feedback")

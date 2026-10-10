@@ -90,6 +90,7 @@ class CoachRequest(MetricSet):
     capture_profile: dict = Field(default_factory=dict)
     conversation_history: list[ConversationMessage] = Field(default_factory=list, max_length=12)
     reviewed_feedback: dict = Field(default_factory=dict)
+    technique_evaluation: dict = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def focus_is_in_session(self):

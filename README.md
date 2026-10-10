@@ -143,6 +143,27 @@ See [five-stage status](docs/finish-status.md) and [reliable coaching validation
 Implementation references: [LangGraph](https://docs.langchain.com/oss/python/langgraph/graph-api), [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk/tree/v1.x), [Phoenix](https://github.com/Arize-ai/phoenix), [Bedrock Converse](https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_Converse.html), [Ollama Docker](https://docs.ollama.com/docker), [Compose startup order](https://docs.docker.com/compose/how-tos/startup-order/).
 # Submitted technique feedback and personalized coaching
 
+## Automatic evaluation across clips
+
+Each analyzed clip now exposes `/api/videos/{job_id}/technique`: visible frames
+near each lunge bookmark, knee angles, separate knee-to-toe projection, torso
+pitch change, weapon-arm direction, return stance and sampled action timing.
+The evaluator runs without human technique text. Explicit solo-drill heuristics
+produce provisional review flags with timestamps and practice cues. Thresholds
+are versioned development rules, not validated universal technique cutoffs.
+View and anatomical roles may be inferred from consistent landmark geometry;
+declared capture roles take precedence. New uploads offer a camera-view selector.
+Poor setup/exit framing excludes whole-clip metrics but can leave individual reps
+usable. Missing joints disable their checks; moving cameras, multiple people,
+tracking identity breaks and low-resolution sources retain rejection gates.
+
+The conversational coach receives the evaluation through an evidence tool and
+attributed source. Submitted human review remains the stronger reference when
+available. Ask for an automatic evaluation to inspect geometry-only findings.
+`python scripts/evaluate_technique.py` saves evaluation reports for existing clips
+to `data/technique-evaluations`. Related recordings are not independent validation
+data. No technique classifier weights are trained or promoted by this evaluator.
+
 Submitted coach reviews are loaded into session chat through the reviewed-feedback
 tool and attributed sources. Drafts are excluded. Submission recalculates rep
 geometry using corrected frame bookmarks, preserving the existing session ID and

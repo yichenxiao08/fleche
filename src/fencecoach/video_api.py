@@ -150,7 +150,29 @@ def video_router(jobs, settings):
         from fencecoach.quality import assess_quality
 
         payload["quality_gate"] = payload.get("quality_gate") or assess_quality(payload)
+        from fencecoach.technique import evaluate_lunges
+
+        windows = job.get("reviewed_windows") or payload.get("candidates", [])
+        if job.get("session_id"):
+            from fencecoach.repository import Repository
+            from fencecoach.feedback_learning import corrected_windows
+
+            feedback = Repository(jobs.db_path).coaching_context(job["session_id"])[
+                "reviewed_feedback"
+            ]
+            if feedback:
+                windows = corrected_windows(feedback, windows)
+
+        payload["technique_evaluation"] = evaluate_lunges(
+            payload,
+            windows,
+            job.get("capture_profile", {}),
+        )
         return payload
+
+    @router.get("/{job_id}/technique")
+    def technique_evaluation(job_id: str):
+        return result(job_id)["technique_evaluation"]
 
     @router.get("/{job_id}/annotations")
     def annotations(job_id: str):

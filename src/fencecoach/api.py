@@ -194,22 +194,41 @@ def require_supported_session(session):
 def coaching_request(session, data):
     """Keep general conversation available without exposing rejected video evidence."""
     context = repository.coaching_context(session.session_id)
+    evaluation = {}
+    if session.video_job_id:
+        from fencecoach.technique import evaluate_lunges
+        from fencecoach.feedback_learning import corrected_windows
+
+        path = video_jobs.directory / session.video_job_id / "result.json"
+        if path.is_file():
+            result = json.loads(path.read_text(encoding="utf-8"))
+            job = video_jobs.get(session.video_job_id)
+            windows = job.get("reviewed_windows") or result.get("candidates", [])
+            if context["reviewed_feedback"]:
+                windows = corrected_windows(context["reviewed_feedback"], windows)
+            evaluation = evaluate_lunges(result, windows, session.capture_profile)
     try:
         require_supported_session(session)
     except HTTPException as exc:
         # History tools must not reintroduce measurements from failed footage.
+        usable_reps = any(
+            "projected_torso_tilt" in r.get("measurements", {}) for r in evaluation.get("reps", [])
+        )
         return CoachRequest(
             session_id=session.session_id,
             question=data.question,
             skill_level=session.skill_level,
             metrics=[],
-            evidence_unavailable_reason=str(exc.detail),
+            evidence_unavailable_reason="" if usable_reps else str(exc.detail),
             training_history=context["training_history"],
             session_history=context["session_history"],
             conversation_history=context["conversation_history"],
             reviewed_feedback=context["reviewed_feedback"],
+            technique_evaluation=evaluation,
             session_notes=(
-                "Current video measurements are unavailable. Prior sessions and self-reported "
+                "Whole-clip summaries were excluded, but selected reps have usable local geometry. Use only the per-rep evaluator findings for personal coaching; no whole-clip metrics were supplied."
+                if usable_reps
+                else "Current video measurements are unavailable. Prior sessions and self-reported "
                 "training logs may be used as historical context, but are not evidence about "
                 "the rejected clip. " + str(exc.detail)
             ),
@@ -226,6 +245,7 @@ def coaching_request(session, data):
         focus_metric_id=data.focus_metric_id,
         session_notes=session.notes,
         capture_profile=session.capture_profile,
+        technique_evaluation=evaluation,
         **context,
     )
 

@@ -124,7 +124,8 @@ export function coach(state) {
   const sessionReview = turns.find(
     (turn) => turn.response_kind !== "conversation",
   );
-  const needsClearerClip = state.reviewResult?.quality_gate?.coaching_allowed === false;
+  const localEvidence = state.reviewResult?.technique_evaluation?.reps?.some(rep => rep.measurements?.projected_torso_tilt);
+  const needsClearerClip = state.reviewResult?.quality_gate?.coaching_allowed === false && !localEvidence;
   const overview = needsClearerClip
     ? "Ask general technique questions here. For personal feedback, upload a fixed-camera clip showing your full body and weapon hand."
     : sessionReview?.report.summary || "Ask about technique, your session, or your next practice.";

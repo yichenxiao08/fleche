@@ -73,6 +73,7 @@ class CaptureProfile(BaseModel):
     front_leg: Literal["unknown", "left", "right"] = "unknown"
     facing: Literal["unknown", "left", "right"] = "unknown"
     camera_motion: Literal["unknown", "fixed", "moving"] = "unknown"
+    camera_view: Literal["unknown", "side", "front", "oblique"] = "unknown"
     initial_guard_confirmed: bool = False
 
 
@@ -228,13 +229,26 @@ class VideoJobs:
     def accept(self, job_id, review: AcceptReview, result):
         from fencecoach.quality import assess_quality
 
+        clip_supported = True
         if result.get("width") and result.get("height"):
             quality = result.get("quality_gate") or assess_quality(result)
+            clip_supported = quality["coaching_allowed"]
             if not quality["coaching_allowed"]:
-                raise ValueError(
-                    "Clip unsupported for coaching: "
-                    + " ".join(i["tip"] for i in quality["issues"] if i["severity"] == "reject")
+                from fencecoach.technique import evaluate_lunges
+
+                evaluation = evaluate_lunges(
+                    result,
+                    [w.model_dump() for w in review.windows],
+                    self.get(job_id).get("capture_profile", {}),
                 )
+                if not evaluation["reps"] or any(
+                    "projected_torso_tilt" not in r.get("measurements", {})
+                    for r in evaluation["reps"]
+                ):
+                    raise ValueError(
+                        "Selected reps lack usable local geometry. "
+                        + " ".join(i["tip"] for i in quality["issues"] if i["severity"] == "reject")
+                    )
         with closing(self.connect()) as db, db:
             db.execute("BEGIN IMMEDIATE")
             row = db.execute("SELECT payload FROM video_jobs WHERE id=?", (job_id,)).fetchone()
@@ -320,7 +334,9 @@ class VideoJobs:
                             ),
                         )
                     )
-            for j, measurement in enumerate(result.get("clip_measurements", [])):
+            for j, measurement in enumerate(
+                result.get("clip_measurements", []) if clip_supported else []
+            ):
                 metrics.append(
                     MetricObservation(
                         metric_id=f"video-{job_id[:10]}-clip-{j + 1:02}",
@@ -334,7 +350,9 @@ class VideoJobs:
                         ),
                     )
                 )
-            for j, measurement in enumerate(result.get("initial_guard_measurements", [])):
+            for j, measurement in enumerate(
+                result.get("initial_guard_measurements", []) if clip_supported else []
+            ):
                 metrics.append(
                     MetricObservation(
                         metric_id=f"video-{job_id[:10]}-guard-{j + 1:02}",

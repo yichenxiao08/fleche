@@ -83,7 +83,21 @@ function renderRep() {
     reset.addEventListener('click', () => { rep[field] = null; changed(); renderRep(); });
     row.append(b, stamp, set, reset); $('phase-jumps').append(row);
   }
-  const note = document.createElement('p'); note.className = 'timing-note'; note.textContent = 'Pause on the correct frame, then set its bookmark. Changes autosave with this review; existing analysis measurements stay unchanged. Timing order is checked when you submit.'; $('phase-jumps').append(note);
+  const note = document.createElement('p'); note.className = 'timing-note'; note.textContent = 'Pause on the correct frame, then set its bookmark. Drafts autosave. Submitting applies corrected timings to session measurements and checks their order.'; $('phase-jumps').append(note);
+  const evaluated = context.technique_evaluation?.reps?.[active];
+  if (evaluated) {
+    const details = document.createElement('details'); const summary = document.createElement('summary'); summary.textContent = `Automatic checks · ${evaluated.findings.length} review flags`; details.append(summary);
+    const intro = document.createElement('p'); intro.className = 'timing-note'; intro.textContent = 'Computed from tracked video frames using the basic-lunge rubric. Review flags are provisional; absence of flags does not establish correct technique.'; details.append(intro);
+    for (const finding of evaluated.findings) {
+      const p = document.createElement('p'); p.className = 'timing-note'; p.textContent = `${finding.observation} ${finding.cue}`;
+      const jump = document.createElement('button'); jump.type = 'button'; jump.textContent = `View ${clock(finding.evidence_ms)}`; jump.addEventListener('click', () => seek(finding.evidence_ms/1000)); details.append(p, jump);
+    }
+    for (const [key, measurement] of Object.entries(evaluated.measurements)) {
+      const p = document.createElement('p'); p.className = 'timing-note'; p.textContent = `${key.replaceAll('_',' ')}: ${measurement.value} ${measurement.unit}${measurement.note ? ` · ${measurement.note}` : ''}`; details.append(p);
+    }
+    for (const gap of evaluated.unavailable) { const p = document.createElement('p'); p.className = 'timing-note'; p.textContent = gap; details.append(p); }
+    $('phase-jumps').append(details);
+  }
   nav();
 }
 function seek(time) {

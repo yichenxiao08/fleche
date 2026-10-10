@@ -11,6 +11,14 @@ from fencecoach.schemas import CoachingReport, RunRecord, TraceEvent
 def needs_evidence_reply(request, mode):
     if not request.evidence_unavailable_reason:
         return False
+    if (
+        any(
+            "projected_torso_tilt" in r.get("measurements", {})
+            for r in request.technique_evaluation.get("reps", [])
+        )
+        and mode != "demo"
+    ):
+        return False
     from fencecoach.coach.conversation import _needs_measurements
     from fencecoach.coach.turns import general_instruction, history_instruction
 
