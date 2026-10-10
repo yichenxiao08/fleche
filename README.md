@@ -50,6 +50,12 @@ Implementation references: [LangChain Gemini integration](https://docs.langchain
 4. **Coach:** a natural conversation over saved measurements and retrieved notes. Assessments aim for a timestamped observation, one cue, one drill, and its purpose. Ordinary follow-ups retain conversational history. Measurements are not correctness scores.
 5. **Practice/progress:** persistent journal entries and drills. Comparisons require the same declared, named camera setup and capture details; different setups show **Not comparable**. Shorter return time alone is not an improvement claim.
 
+## Coach feedback workspace
+
+Choose **Coach feedback · review frame by frame** from movement review, or open `/coach-review/<video-job-id>`. The workspace keeps video beside one form per rep, supports native seeking, slow playback, frame stepping, and attaching the displayed frame as evidence. It displays milliseconds for video and original-source timing; this does not increase the pose-sample resolution. Set the source offset in clip details for trimmed footage.
+
+Draft feedback autosaves to the server with a browser backup. Saves use revisions to prevent another reviewer being silently overwritten. Submission requires an author, intended drill, and each rep's assessment; corrections additionally require a timestamp, visible reason, cue, and improvement check. JSON export preserves attribution. Reviewer roles are self-declared, and submission does not automatically promote feedback into training ground truth. A localhost URL is accessible on the computer running FenceCoach.
+
 ## Architecture
 
 ```mermaid

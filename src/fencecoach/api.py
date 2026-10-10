@@ -12,6 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from fencecoach.automatic_training import AutomaticTraining
 from fencecoach.coach.graph import EvidenceValidationError, run_coach
 from fencecoach.coach.providers import provider_status
+from fencecoach.coach_review_api import coach_review_router
 from fencecoach.coaching_jobs import CoachingJobs, CoachingWorker
 from fencecoach.dataset_api import dataset_router
 from fencecoach.repository import Repository
@@ -68,6 +69,7 @@ app = FastAPI(
 )
 app.add_middleware(UploadLimit)
 app.include_router(video_router(video_jobs, settings))
+app.include_router(coach_review_router(video_jobs))
 app.include_router(
     dataset_router(settings.fencecoach_video_dir.parent / "training", automatic_training)
 )
@@ -83,6 +85,13 @@ def dashboard():
 @app.get("/dataset", include_in_schema=False)
 def dataset_workspace():
     return FileResponse(web / "dataset.html")
+
+
+@app.get("/coach-review/{job_id}", include_in_schema=False)
+def coach_review_workspace(job_id: str):
+    if not video_jobs.get(job_id):
+        raise HTTPException(404, "Video review not found.")
+    return FileResponse(web / "coach-review.html")
 
 
 @app.get("/health")
