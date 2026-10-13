@@ -1,0 +1,206 @@
+{
+  "scope": "Live answer relevance, follow-up continuity, repetition coverage, selected numeric facts and presentation. Automated checks are not expert validation of fencing advice.",
+  "model": "gemini-3.5-flash-lite",
+  "passed": 10,
+  "total": 15,
+  "results": [
+    {
+      "scenario": "arm-followups",
+      "question": "what about my arm",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "answer": "In your session, your right sword arm extends toward the target as you reach the lunge finish, with measured elbow angles ranging from 145.7 to 174.4 degrees across your reps. In fencing, the weapon arm leads directly toward the target with the point aimed forward, while your non-weapon arm extends back behind you in the traditional finish to help balance your recovery.",
+      "issues": [],
+      "status": "passed",
+      "latency_ms": 2914.39,
+      "pipeline_ms": 3232.22,
+      "model_calls": 2,
+      "review_corrections": [
+        "Reviewed relevance and interpretation against actual session record IDs. Removed unsupported timing claims and refocused the arm observation on recorded weapon-arm extension and elbow measurements."
+      ],
+      "actual_model": "gemini-3.5-flash-lite",
+      "actual_mode": "gemini"
+    },
+    {
+      "scenario": "arm-followups",
+      "question": "Which arm do you mean?",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "answer": "I mean your right sword arm, which holds the weapon and extends toward the target during each lunge. In your session, your right sword arm reaches toward the target at the lunge finish with elbow angles from 145.7 to 174.4 degrees. In fencing, the weapon arm leads the attack with the point aimed forward, while the rear non-weapon arm extends backward in the traditional finish to help balance your recovery.",
+      "issues": [],
+      "status": "passed",
+      "latency_ms": 2526.91,
+      "pipeline_ms": 2582.38,
+      "model_calls": 2,
+      "review_corrections": [
+        "Reviewed relevance and interpretation against actual session record IDs. Clarified that the arm being referred to is the right sword arm holding the weapon."
+      ],
+      "actual_model": "gemini-3.5-flash-lite",
+      "actual_mode": "gemini"
+    },
+    {
+      "scenario": "arm-followups",
+      "question": "Was I extending it before my foot landed?",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "status": "error",
+      "error_type": "CoachAnswerError",
+      "details": "The coach couldn't verify this answer against the session. Your question is kept; try again."
+    },
+    {
+      "scenario": "torso-followups",
+      "question": "How was my torso?",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "answer": "Your torso tilt at the lunge finish stayed lower than your reference range across your reps, meaning your torso was more upright than the reference examples. Across a lunge, keep in mind that a classical teaching model aims for an erect torso, though individual posture can vary.",
+      "issues": [],
+      "status": "passed",
+      "latency_ms": 2484.04,
+      "pipeline_ms": 2576.96,
+      "model_calls": 2,
+      "review_corrections": [
+        "Reviewed relevance and interpretation against actual session record IDs. Removed the ungrounded instruction to keep the torso more upright and the false claim that finish tilt stays lower than the reference range indicates a fault."
+      ],
+      "actual_model": "gemini-3.5-flash-lite",
+      "actual_mode": "gemini"
+    },
+    {
+      "scenario": "torso-followups",
+      "question": "And on the last one?",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "answer": "On your final rep, your torso remained more upright than your reference range at the finish. Try settling into a lower finish, closer to the front-leg bend in your reference reps.",
+      "issues": [],
+      "status": "passed",
+      "latency_ms": 4262.12,
+      "pipeline_ms": 4352.16,
+      "model_calls": 2,
+      "review_corrections": [
+        "Reviewed relevance and interpretation against actual session record IDs. Lead with the practice cue; supporting numbers belong after the advice."
+      ],
+      "actual_model": "gemini-3.5-flash-lite",
+      "actual_mode": "gemini"
+    },
+    {
+      "scenario": "torso-followups",
+      "question": "Should I lean forward more?",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "answer": "Your torso tilt at the lunge finish stayed lower than your reference range across your reps, meaning your torso was more upright than in your reference examples. To explore a forward lean, try allowing your torso to incline naturally over your front leg as you drive forward.",
+      "issues": [],
+      "status": "passed",
+      "latency_ms": 2093.04,
+      "pipeline_ms": 2186.24,
+      "model_calls": 2,
+      "review_corrections": [
+        "Reviewed relevance and interpretation against actual session record IDs. Removed unsupported assertion that torso tilt increases toward the reference range at 12.8 seconds."
+      ],
+      "actual_model": "gemini-3.5-flash-lite",
+      "actual_mode": "gemini"
+    },
+    {
+      "scenario": "rear-leg-power",
+      "question": "How straight was my back leg at the finish of rep 3?",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "answer": "At the finish of rep 3, your back leg was nearly straight with an extended rear-knee angle, matching your other session reps. General classical instruction aims for a fully straightened rear leg at the finish to support extension.",
+      "issues": [],
+      "status": "passed",
+      "latency_ms": 2574.1,
+      "pipeline_ms": 2752.02,
+      "model_calls": 2,
+      "review_corrections": [
+        "Reviewed relevance and interpretation against actual session record IDs. Removed unsupported general claims and presented the session evidence about rep 3 directly."
+      ],
+      "actual_model": "gemini-3.5-flash-lite",
+      "actual_mode": "gemini"
+    },
+    {
+      "scenario": "rear-leg-power",
+      "question": "Does that mean it was explosive?",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "status": "error",
+      "error_type": "CoachAnswerError",
+      "details": "The coach couldn't verify this answer against the session. Your question is kept; try again."
+    },
+    {
+      "scenario": "multi-part",
+      "question": "Compare my arm and torso at the lunge finish in reps 2 and 7.",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "status": "error",
+      "error_type": "CoachAnswerError",
+      "details": "The coach couldn't verify this answer against the session. Your question is kept; try again."
+    },
+    {
+      "scenario": "duration-comparison",
+      "question": "Which rep had the shortest action-to-lunge interval?",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "answer": "Rep 2 had the fastest action-to-lunge interval in this clip, at the 4.3-second mark.",
+      "issues": [],
+      "status": "passed",
+      "latency_ms": 51.82,
+      "pipeline_ms": 206.75,
+      "model_calls": 0,
+      "review_corrections": [],
+      "actual_model": "evidence-ranked rep comparison",
+      "actual_mode": "gemini"
+    },
+    {
+      "scenario": "duration-comparison",
+      "question": "And which one took the longest?",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "status": "error",
+      "error_type": "CoachAnswerError",
+      "details": "The coach couldn't verify this answer against the session. Your question is kept; try again."
+    },
+    {
+      "scenario": "vague",
+      "question": "Something feels off. What should I work on first?",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "answer": "Across your session reps, your front knee angle was consistently higher at the lunge finish than your reference range, meaning your front leg was too straight when arriving in the lunge. Try settling into a lower finish with more bend in your front leg. You can observe this on your first rep at 2.8 seconds.",
+      "issues": [],
+      "status": "passed",
+      "latency_ms": 3690.86,
+      "pipeline_ms": 3830.44,
+      "model_calls": 2,
+      "review_corrections": [
+        "Reviewed relevance and interpretation against actual session record IDs. Removed unsupported whole-session general assertions and focused specifically on the front knee angle at the lunge finish supported by all reps."
+      ],
+      "actual_model": "gemini-3.5-flash-lite",
+      "actual_mode": "gemini"
+    },
+    {
+      "scenario": "vague",
+      "question": "Why that?",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "answer": "Across all of your session reps, your front knee angle was consistently higher at the lunge finish compared to your reference range, which means your front leg was too straight when you arrived in the lunge finish. Settling into a deeper front-knee bend helps absorb the impact and control your landing.",
+      "issues": [],
+      "status": "passed",
+      "latency_ms": 3708.66,
+      "pipeline_ms": 3816.01,
+      "model_calls": 2,
+      "review_corrections": [
+        "Reviewed relevance and interpretation against actual session record IDs. "
+      ],
+      "actual_model": "gemini-3.5-flash-lite",
+      "actual_mode": "gemini"
+    },
+    {
+      "scenario": "misleading-premise",
+      "question": "You said I only had two reps. Can you review the whole set?",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "answer": "My apologies, all eight reps are visible in your session. Across your set, your front knee angle is higher at the finish than the reference range, so try settling into a lower finish closer to your reference reps.",
+      "issues": [],
+      "status": "passed",
+      "latency_ms": 5372.36,
+      "pipeline_ms": 5464.6,
+      "model_calls": 2,
+      "review_corrections": [
+        "Reviewed relevance and interpretation against actual session record IDs. Removed fabricated general statement about front knee staying higher and more open without proper citation format Fixed evidence IDs to correctly reference the matching per-rep reference comparison records from the session"
+      ],
+      "actual_model": "gemini-3.5-flash-lite",
+      "actual_mode": "gemini"
+    },
+    {
+      "scenario": "precise-number",
+      "question": "Give me the rear knee angle at the lunge finish in rep 3, in degrees.",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "status": "error",
+      "error_type": "CoachAnswerError",
+      "details": "The coach couldn't verify this answer against the session. Your question is kept; try again."
+    }
+  ]
+}

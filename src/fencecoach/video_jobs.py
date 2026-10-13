@@ -62,6 +62,7 @@ class AcceptReview(BaseModel):
     windows: list[ReviewWindow] = Field(default_factory=list, max_length=50)
     notes: str = Field(default="", max_length=2000)
     practiced_on: date | None = None
+    update_existing: bool = False
 
 
 class CaptureProfile(BaseModel):
@@ -100,9 +101,12 @@ class VideoJobs:
             row = db.execute("SELECT payload FROM video_jobs WHERE id=?", (job_id,)).fetchone()
         return json.loads(row[0]) if row else None
 
-    def list(self):
+    def list(self, limit=20):
         with closing(self.connect()) as db:
-            rows = db.execute("SELECT payload FROM video_jobs ORDER BY created_at DESC LIMIT 20")
+            query = "SELECT payload FROM video_jobs ORDER BY created_at DESC"
+            rows = db.execute(
+                query if limit is None else query + " LIMIT ?", () if limit is None else (limit,)
+            )
             return [json.loads(row[0]) for row in rows]
 
     def create(self, title, skill, crop, source="upload", profile=None):
@@ -259,8 +263,19 @@ class VideoJobs:
                 saved = db.execute(
                     "SELECT payload FROM sessions WHERE id=?", (job["session_id"],)
                 ).fetchone()
-                return SessionRecord.model_validate_json(saved[0])
-            if job["status"] != "review_ready":
+                if not review.update_existing:
+                    if not saved:
+                        raise ValueError("The saved practice no longer exists.")
+                    return SessionRecord.model_validate_json(saved[0])
+                if not saved:
+                    raise ValueError("The saved practice no longer exists.")
+                saved_session = SessionRecord.model_validate_json(saved[0])
+            else:
+                saved_session = None
+            if review.update_existing and saved_session is None:
+                raise ValueError("This practice has not been saved yet.")
+            expected_status = "completed" if review.update_existing else "review_ready"
+            if job["status"] != expected_status:
                 raise ValueError("Wait for analysis before saving a review.")
             ordered = sorted(review.windows, key=lambda w: w.start_ms)
             if any(a.end_ms > b.start_ms for a, b in zip(ordered, ordered[1:])):
@@ -389,30 +404,37 @@ class VideoJobs:
             data = SessionCreate(
                 title=job["title"],
                 skill_level=job["skill_level"],
-                notes=review.notes,
-                practiced_on=review.practiced_on,
+                notes=saved_session.notes if saved_session else review.notes,
+                practiced_on=(saved_session.practiced_on if saved_session else review.practiced_on),
                 capture_profile={
                     **job.get("capture_profile", {}),
                     "inference_crop": job.get("crop"),
                 },
                 metrics=metrics,
             )
-            session = SessionRecord(
-                **data.model_dump(),
-                session_id=uuid4().hex,
-                created_at=datetime.now(UTC),
-                is_demo=job["source"] == "mit_ocw",
-                video_job_id=job_id,
-            )
-            db.execute(
-                "INSERT INTO sessions VALUES (?,?,?)",
-                (session.session_id, session.created_at.isoformat(), session.model_dump_json()),
-            )
+            if saved_session:
+                session = saved_session.model_copy(update={"metrics": metrics})
+                db.execute(
+                    "UPDATE sessions SET payload=? WHERE id=?",
+                    (session.model_dump_json(), session.session_id),
+                )
+            else:
+                session = SessionRecord(
+                    **data.model_dump(),
+                    session_id=uuid4().hex,
+                    created_at=datetime.now(UTC),
+                    is_demo=job["source"] == "mit_ocw",
+                    video_job_id=job_id,
+                )
+                db.execute(
+                    "INSERT INTO sessions VALUES (?,?,?)",
+                    (session.session_id, session.created_at.isoformat(), session.model_dump_json()),
+                )
             job.update(
                 status="completed",
                 session_id=session.session_id,
                 reviewed_windows=[w.model_dump() for w in ordered],
-                stage="Review saved",
+                stage="Timing updates saved" if review.update_existing else "Review saved",
             )
             db.execute(
                 "UPDATE video_jobs SET status='completed',payload=? WHERE id=?",

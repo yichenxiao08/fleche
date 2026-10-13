@@ -37,6 +37,8 @@ class GestureLabel(BaseModel):
         "fleche",
         "recovery",
         "bounce",
+        "ballestra",
+        "duck",
         "jump_forward",
         "jump_back",
         "shuffle",
@@ -64,9 +66,26 @@ class ActivityLabel(BaseModel):
         return self
 
 
+class RepReviewLabel(BaseModel):
+    """Athlete-confirmed cycle label for the clip-level rep detector."""
+
+    start_ms: int = Field(ge=0)
+    peak_ms: int = Field(gt=0)
+    end_ms: int = Field(gt=0)
+    label: Literal["lunge", "step_or_reset"]
+    candidate_id: str | None = Field(default=None, max_length=80)
+
+    @model_validator(mode="after")
+    def ordered(self):
+        if not self.start_ms < self.peak_ms < self.end_ms:
+            raise ValueError("Rep review needs ordered start, lunge peak and return times.")
+        return self
+
+
 class Annotations(BaseModel):
     labels: list[GestureLabel] = Field(default_factory=list, max_length=250)
     activity_labels: list[ActivityLabel] = Field(default_factory=list, max_length=250)
+    rep_reviews: list[RepReviewLabel] = Field(default_factory=list, max_length=250)
     reviewer: str = Field(default="athlete", min_length=1, max_length=100)
     domain_verified: bool = False
 

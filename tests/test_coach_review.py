@@ -20,7 +20,14 @@ class CoachReviewTests(unittest.TestCase):
         folder = self.jobs.directory / self.job_id
         folder.mkdir(parents=True)
         (folder / "result.json").write_text(
-            json.dumps({"duration_ms": 1000, "candidates": [], "preview": {"fps_hint": 30}})
+            json.dumps(
+                {
+                    "duration_ms": 1000,
+                    "candidates": [],
+                    "preview": {"fps_hint": 30},
+                    "model_sha256": "test-pose-model",
+                }
+            )
         )
         self.jobs.update(
             self.job_id,

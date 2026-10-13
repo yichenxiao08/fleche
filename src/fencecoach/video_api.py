@@ -38,6 +38,22 @@ def video_router(jobs, settings):
     def list_jobs():
         return jobs.list()
 
+    @router.get("/technique-audit")
+    def technique_audit():
+        path = jobs.directory.parent / "technique-evaluations" / "report.html"
+        if not path.is_file():
+            raise HTTPException(404, "Analysis audit has not been generated yet.")
+        return FileResponse(path, media_type="text/html", headers={"Cache-Control": "no-store"})
+
+    @router.get("/technique-audit/assets/{filename}")
+    def technique_audit_asset(filename: str):
+        if not re.fullmatch(r"[a-f0-9]{32}\.jpg", filename):
+            raise HTTPException(404, "Audit image not found.")
+        path = jobs.directory.parent / "technique-evaluations" / filename
+        if not path.is_file():
+            raise HTTPException(404, "Audit image not found.")
+        return FileResponse(path, media_type="image/jpeg")
+
     @router.post("", status_code=202)
     async def upload_video(
         file: UploadFile = File(...),
@@ -143,6 +159,16 @@ def video_router(jobs, settings):
         payload = json.loads(
             ensure(jobs.directory / job_id, job, "result.json").read_text(encoding="utf-8")
         )
+        # Upgrade unsaved proposals cheaply; approved windows and annotations
+        # keep their original timestamps and are never regenerated here.
+        from fencecoach.video_pipeline import PROPOSAL_VERSION, refresh_cached_proposals
+
+        if (
+            not job.get("session_id")
+            and not job.get("reviewed_windows")
+            and payload.get("proposal_version") != PROPOSAL_VERSION
+        ):
+            payload = refresh_cached_proposals(payload, job.get("capture_profile", {}))
         # Older analyses can expose their existing movement evidence without
         # rerunning pose inference or changing the stored review/annotations.
         if "movement_timeline" not in payload:
@@ -154,8 +180,8 @@ def video_router(jobs, settings):
 
         windows = job.get("reviewed_windows") or payload.get("candidates", [])
         if job.get("session_id"):
-            from fencecoach.repository import Repository
             from fencecoach.feedback_learning import corrected_windows
+            from fencecoach.repository import Repository
 
             feedback = Repository(jobs.db_path).coaching_context(job["session_id"])[
                 "reviewed_feedback"
@@ -167,6 +193,16 @@ def video_router(jobs, settings):
             payload,
             windows,
             job.get("capture_profile", {}),
+        )
+        from fencecoach.reference_comparison import attach_reference_comparisons
+        from fencecoach.repository import Repository
+
+        payload["technique_evaluation"] = attach_reference_comparisons(
+            payload["technique_evaluation"],
+            job,
+            jobs.directory,
+            Repository(jobs.db_path),
+            jobs,
         )
         return payload
 
@@ -186,6 +222,7 @@ def video_router(jobs, settings):
             else {
                 "labels": [],
                 "activity_labels": [],
+                "rep_reviews": [],
                 "reviewer": "athlete",
                 "domain_verified": False,
             }
@@ -214,6 +251,21 @@ def video_router(jobs, settings):
             raise HTTPException(422, "A phase label extends past the clip.")
         if any(a.end_ms > b.start_ms for a, b in zip(activity_labels, activity_labels[1:])):
             raise HTTPException(422, "Activity phase labels cannot overlap.")
+        rep_reviews = sorted(data.rep_reviews, key=lambda item: item.start_ms)
+        if any(item.end_ms > analysis["duration_ms"] for item in rep_reviews):
+            raise HTTPException(422, "A rep review extends past the clip.")
+        confirmed = [item for item in rep_reviews if item.label == "lunge"]
+        if any(a.end_ms > b.start_ms for a, b in zip(confirmed, confirmed[1:])):
+            raise HTTPException(422, "Confirmed lunge intervals cannot overlap.")
+        if len({item.candidate_id for item in rep_reviews if item.candidate_id}) != sum(
+            item.candidate_id is not None for item in rep_reviews
+        ):
+            raise HTTPException(422, "A suggested rep can only be reviewed once.")
+        candidate_ids = {item["candidate_id"] for item in analysis.get("candidates", [])}
+        if any(
+            item.candidate_id and item.candidate_id not in candidate_ids for item in rep_reviews
+        ):
+            raise HTTPException(422, "A rep review refers to an unknown suggestion.")
         payload = data.model_dump()
         payload.update(
             job_id=job_id,

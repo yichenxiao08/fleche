@@ -10,6 +10,19 @@ from fencecoach.coach.graph import run_coach
 from fencecoach.schemas import CoachRequest, ReportRequest, SessionRecord
 
 
+class MissingEvidenceModel:
+    model = "missing-evidence-fixture"
+
+    def bind_tools(self, tools):
+        return self
+
+    def invoke(self, messages):
+        self.messages = messages
+        return AIMessage(
+            content="This clip has no usable lunge measurements. For a basic lunge, reach the sword arm toward the target, then recover to en garde."
+        )
+
+
 class ChatAvailabilityTests(unittest.TestCase):
     def setUp(self):
         self.session = SessionRecord(
@@ -24,9 +37,10 @@ class ChatAvailabilityTests(unittest.TestCase):
             previous_reviews=[{"summary": "old"}],
             session_history=[{"metrics": self.session.metrics}],
             conversation_history=[],
+            reviewed_feedback={},
         )
 
-    def test_rejected_clip_allows_general_chat_without_metrics_or_history_tools(self):
+    def test_rejected_clip_allows_general_chat_without_current_video_metrics(self):
         with (
             patch("fencecoach.api.repository.coaching_context", return_value=self.context),
             patch(
@@ -39,11 +53,11 @@ class ChatAvailabilityTests(unittest.TestCase):
             )
         self.assertEqual(request.metrics, [])
         self.assertEqual(request.previous_reviews, [])
-        self.assertEqual(request.session_history, [])
-        self.assertEqual(request.training_history, [])
+        self.assertEqual(request.session_history, self.context["session_history"])
+        self.assertEqual(request.training_history, self.context["training_history"])
         self.assertIn("Body out of frame", request.session_notes)
 
-    def test_personal_questions_return_missing_evidence_reply_without_model(self):
+    def test_personal_questions_use_live_coach_with_session_evidence_gap(self):
         with (
             patch("fencecoach.api.repository.coaching_context", return_value=self.context),
             patch(
@@ -59,10 +73,11 @@ class ChatAvailabilityTests(unittest.TestCase):
                 with self.subTest(question=question):
                     request = coaching_request(self.session, ReportRequest(question=question))
                     self.assertEqual(request.metrics, [])
-                    run = run_coach(request, "local", model=object())
-                    self.assertEqual(run.model_id, "evidence-check")
-                    self.assertEqual(run.citation_count, 0)
-                    self.assertIn("Body out of frame", run.report.summary)
+                    model = MissingEvidenceModel()
+                    run = run_coach(request, "local", model=model)
+                    self.assertNotEqual(run.model_id, "evidence-check")
+                    self.assertTrue(any(e.step == "assess_current_session" for e in run.trace))
+                    self.assertTrue(any("Body out of frame" in m.content for m in model.messages))
                     self.assertNotIn("111", run.report.summary)
 
     def test_both_chat_endpoints_accept_quality_rejected_question(self):
@@ -70,6 +85,7 @@ class ChatAvailabilityTests(unittest.TestCase):
             patch("fencecoach.api.get_session", return_value=self.session),
             patch("fencecoach.api.repository.coaching_context", return_value=self.context),
             patch("fencecoach.api.repository.save_run", side_effect=lambda run: run),
+            patch("fencecoach.coach.conversation.chat_model", return_value=MissingEvidenceModel()),
             patch(
                 "fencecoach.api.require_supported_session",
                 side_effect=HTTPException(422, "Body out of frame"),
@@ -83,7 +99,7 @@ class ChatAvailabilityTests(unittest.TestCase):
             body = {"question": "What's wrong with my lunge?", "mode": "local"}
             direct = client.post("/api/sessions/rejected-video/reports", json=body)
             self.assertEqual(direct.status_code, 201, direct.text)
-            self.assertEqual(direct.json()["model_id"], "evidence-check")
+            self.assertNotEqual(direct.json()["model_id"], "evidence-check")
             queued = client.post("/api/sessions/rejected-video/coaching-jobs", json=body)
             self.assertEqual(queued.status_code, 202, queued.text)
             self.assertEqual(create.call_args.args[0].metrics, [])

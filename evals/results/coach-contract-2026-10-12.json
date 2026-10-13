@@ -1,0 +1,21 @@
+{
+  "schema": "coach-evidence-contract-report-v1",
+  "status": "passed",
+  "intent_cases_passed": 16,
+  "intent_cases_total": 16,
+  "intent_failures": [],
+  "local_evidence": {
+    "status": "passed",
+    "rep_count": 8,
+    "session_first_cases_checked": 16,
+    "selection_cases_checked": 14,
+    "topic_evidence_cases_passed": 3,
+    "topic_evidence_cases_total": 3,
+    "comparison_contract_passed": true,
+    "all_reps_covered_count": 8,
+    "integrated_routes_passed": 2,
+    "integrated_routes_total": 2,
+    "failures": []
+  },
+  "scope": "Current-session-first routing and answer coverage only; not expert validation of fencing technique."
+}

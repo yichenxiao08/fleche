@@ -19,6 +19,8 @@ ONTOLOGY = {
         "lunge",
         "recovery",
         "fleche",
+        "ballestra",
+        "duck",
         "jump_forward",
         "jump_back",
         "bounce",

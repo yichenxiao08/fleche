@@ -1,0 +1,250 @@
+"""Semantic review against the same canonical evidence, independent of question categories."""
+
+import json
+import re
+
+from langchain_core.messages import HumanMessage, SystemMessage
+from pydantic import BaseModel, Field
+
+from fencecoach.coach.policy import EVIDENCE_REVIEW_POLICY
+
+
+class PersonalChange(BaseModel):
+    feature: str = Field(
+        description="Exact metric name from the evidence record establishing the correction."
+    )
+    evidence_id: str = Field(
+        description="Exact ID of a reference_comparison with supported_change, or submitted human feedback."
+    )
+
+
+class AnswerDraft(BaseModel):
+    answer: str = Field(
+        description="Natural conversational answer; do not include internal evidence IDs in the prose."
+    )
+    session_evidence_ids: list[str] = Field(
+        default_factory=list,
+        description="Exact evidence_id values supporting all current-session observations and comparisons. Cite the requested rep/phase; empty for entirely general answers.",
+    )
+
+
+class AnswerReview(BaseModel):
+    session_evidence_relevant: bool = Field(
+        default=False,
+        description="Independently inspect ALL active-session records against the question and recent conversation. True when any record answers part of the question, even if the draft omitted it or the user did not explicitly mention the session. A relevant record must be used in the final answer.",
+    )
+    addresses_question: bool = Field(
+        description="The final answer directly addresses every part of the current question."
+    )
+    grounded: bool = Field(
+        description="Every personal observation or correction in the final answer is supported by relevant supplied evidence; general guidance is not presented as a detected fault."
+    )
+    uses_session_evidence: bool = Field(
+        description="The final answer makes at least one observation or comparison about the current session."
+    )
+    final_answer: str = Field(
+        description="A concise natural answer, corrected if necessary. Lead with a useful cue or qualitative current-session observation; do not list angles or durations unless requested. No review commentary or internal IDs."
+    )
+    session_evidence_ids: list[str] = Field(
+        default_factory=list,
+        description="Exact evidence_id values supporting the personal claims in the final answer. Empty when the answer is entirely general.",
+    )
+    personal_changes: list[PersonalChange] = Field(
+        default_factory=list,
+        description="Every correction of the athlete's current technique in the final answer. A matching feature needs no correction. General instructions and clearly optional experiments are not detected faults.",
+    )
+    corrections: list[str] = Field(
+        default_factory=list,
+        description="Errors corrected in the draft; empty if no corrections were needed.",
+    )
+
+
+def evidence_ids(value):
+    """Extract actual record IDs, not model-created identifiers."""
+    found = set()
+    if isinstance(value, dict):
+        if isinstance(value.get("evidence_id"), str):
+            found.add(value["evidence_id"])
+        for item in value.values():
+            found.update(evidence_ids(item))
+    elif isinstance(value, list):
+        for item in value:
+            found.update(evidence_ids(item))
+    return found
+
+
+def supported_changes(value):
+    records = {}
+    if isinstance(value, dict):
+        record_id = value.get("evidence_id")
+        if record_id and (value.get("supported_change") or str(record_id).startswith("review:")):
+            records[record_id] = value.get("metric")
+        for item in value.values():
+            records.update(supported_changes(item))
+    elif isinstance(value, list):
+        for item in value:
+            records.update(supported_changes(item))
+    return records
+
+
+def focused_packet(packet, selected_ids):
+    """Select exact cited facts, independent of question wording or feature names."""
+    records = []
+    selected = set(selected_ids)
+
+    def collect(value):
+        if isinstance(value, dict):
+            if value.get("evidence_id") in selected:
+                records.append(value)
+            for item in value.values():
+                collect(item)
+        elif isinstance(value, list):
+            for item in value:
+                collect(item)
+
+    collect(packet)
+    return {
+        **{
+            key: packet.get(key)
+            for key in (
+                "current_session_id",
+                "current_clip_reps_detected",
+                "capture_context",
+                "measured_features_available",
+                "measurement_policy",
+                "feature_meanings",
+            )
+        },
+        "cited_evidence_records": records,
+        "instruction": "Only the cited records support personal claims. The feature inventory indicates other measurements exist, not their values. If the wrong feature was cited, fix the answer's relevance without inventing missing values.",
+    }
+
+
+def cited_subject_issues(
+    packet, selected_ids, requested_features=(), rep_number=None, requested_phases=()
+):
+    """Reject wrong-feature/rep citations before the single-call answer is released."""
+    records = focused_packet(packet, selected_ids)["cited_evidence_records"]
+    issues = []
+    if requested_features and records:
+        available = set(packet.get("measured_features_available", []))
+        wanted = set(requested_features) & available
+        features = set()
+        for record in records:
+            features.update(record.get("values", {}))
+            features.add(record.get("feature") or record.get("metric") or record.get("name"))
+        if wanted and not features.intersection(wanted):
+            issues.append("The cited records omit the requested measured feature.")
+    if (
+        rep_number is not None
+        and records
+        and not any(record.get("rep") == rep_number for record in records)
+    ):
+        issues.append("The cited records omit the requested rep.")
+    matching = [
+        record
+        for record in records
+        if record.get("feature") in requested_features
+        or record.get("metric") in requested_features
+        or set(record.get("values", {})).intersection(requested_features)
+    ]
+    if (
+        requested_phases
+        and matching
+        and not any(record.get("phase") in requested_phases for record in matching)
+    ):
+        issues.append(
+            "The cited feature belongs to a different phase than the athlete asked about."
+        )
+    return issues
+
+
+def review_issues(
+    decision,
+    packet,
+    requested_features=(),
+    rep_number=None,
+    require_session=False,
+    requested_phases=(),
+):
+    """Local acceptance rules shared by initial reviews and their bounded repair."""
+    if not isinstance(decision, AnswerReview):
+        return ["The review was incomplete."]
+    issues = []
+    if not decision.grounded or not decision.addresses_question:
+        issues.append("The answer is unsupported or does not address the exact question.")
+    if (
+        require_session or decision.session_evidence_relevant
+    ) and not decision.uses_session_evidence:
+        issues.append(
+            "Relevant current-session evidence exists but the answer is entirely general."
+        )
+    if decision.uses_session_evidence and not decision.session_evidence_ids:
+        issues.append("Personal observations need actual session record IDs.")
+    if not set(decision.session_evidence_ids).issubset(evidence_ids(packet)):
+        issues.append("A cited evidence ID is absent from the current session.")
+    issues.extend(
+        cited_subject_issues(
+            packet, decision.session_evidence_ids, requested_features, rep_number, requested_phases
+        )
+    )
+    records = focused_packet(packet, decision.session_evidence_ids)["cited_evidence_records"]
+    degree_values = []
+    for record in records:
+        if record.get("unit") == "deg":
+            degree_values.extend(
+                value
+                for value in (record.get("value"), record.get("current"))
+                if isinstance(value, (int, float))
+            )
+            degree_values.extend(
+                value
+                for value in record.get("reference_range", [])
+                if isinstance(value, (int, float))
+            )
+        for feature, value in record.get("values", {}).items():
+            if any(
+                term in feature for term in ("angle", "tilt", "pitch", "arm_direction")
+            ) and isinstance(value, (int, float)):
+                degree_values.append(value)
+    if records:
+        reported = re.findall(
+            r"(-?\d+(?:\.\d+)?)\s*(?:degrees?|deg\b|°)", decision.final_answer, re.I
+        )
+        if any(
+            not any(abs(float(number) - value) <= 0.15 for value in degree_values)
+            for number in reported
+        ):
+            issues.append("A reported angle is absent from the cited feature/phase records.")
+    allowed = supported_changes(packet)
+    for change in decision.personal_changes:
+        if requested_features and change.feature not in requested_features:
+            issues.append(
+                "A corrective cue addresses an unrequested feature instead of the athlete's current subject."
+            )
+        if change.evidence_id not in allowed or (
+            allowed[change.evidence_id] is not None
+            and allowed[change.evidence_id] != change.feature
+        ):
+            issues.append(
+                "A personal correction needs the matching authorized feature/phase, not a plain measurement."
+            )
+    return list(dict.fromkeys(issues))
+
+
+def review_messages(question, draft, packet, guidance, history):
+    return [
+        SystemMessage(content=EVIDENCE_REVIEW_POLICY),
+        HumanMessage(
+            content=json.dumps(
+                {
+                    "question": question,
+                    "draft": draft,
+                    "active_session": packet,
+                    "guidance": guidance,
+                    "recent_conversation": history,
+                },
+                separators=(",", ":"),
+            )
+        ),
+    ]

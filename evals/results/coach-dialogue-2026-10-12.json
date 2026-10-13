@@ -1,0 +1,82 @@
+{
+  "scope": "Live answer relevance, follow-up continuity, repetition coverage, selected numeric facts and presentation. Automated checks are not expert validation of fencing advice.",
+  "model": "gemini-3.5-flash-lite",
+  "passed": 3,
+  "total": 6,
+  "results": [
+    {
+      "scenario": "arm-followups",
+      "question": "what about my arm",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "answer": "In a conventional lunge, your right sword arm reaches forward toward the target with the point aimed at it, while your rear arm extends back behind you in the traditional finish.",
+      "issues": [],
+      "status": "passed",
+      "latency_ms": 3090.05,
+      "pipeline_ms": 3143.07,
+      "model_calls": 2,
+      "review_corrections": [
+        "Reviewed relevance and interpretation against actual session record IDs. Removed unsupported session arm measurements and replaced with general arm guidance for the right sword arm and rear arm."
+      ]
+    },
+    {
+      "scenario": "arm-followups",
+      "question": "Which arm do you mean?",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "answer": "I mean your right sword arm, which holds the weapon and extends forward toward the target, while your left rear arm balances behind you in the traditional finish.",
+      "issues": [],
+      "status": "passed",
+      "latency_ms": 2267.95,
+      "pipeline_ms": 2330.51,
+      "model_calls": 2,
+      "review_corrections": [
+        "Reviewed relevance and interpretation against actual session record IDs. "
+      ]
+    },
+    {
+      "scenario": "arm-followups",
+      "question": "Was I extending it before my foot landed?",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "answer": "Your video captures record weapon arm direction and elbow angles at the lunge finish, but do not provide separate timing frames to confirm whether arm extension started before your front foot landed. In general fencing technique, initiating your arm extension before the front foot moves forward is essential to establish the attack and gain priority.",
+      "issues": [],
+      "status": "passed",
+      "latency_ms": 2530.19,
+      "pipeline_ms": 2632.14,
+      "model_calls": 2,
+      "review_corrections": [
+        "Reviewed relevance and interpretation against actual session record IDs. "
+      ]
+    },
+    {
+      "scenario": "torso-followups",
+      "question": "How was my torso?",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "status": "error",
+      "error_type": "CoachAnswerError",
+      "details": "The coach couldn't verify this answer against the session. Your question is kept; try again."
+    },
+    {
+      "scenario": "torso-followups",
+      "question": "And on the last one?",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "answer": "On your final lunge around 12.8 seconds, your front knee is higher at the finish than the reference range, meaning your leg is straighter than desired. Try settling into a lower finish on that final rep, keeping your front leg closer to the deeper bend seen in your reference reps.",
+      "issues": [
+        "Missing requested aspect: torso|trunk|upright|upper body"
+      ],
+      "status": "failed",
+      "latency_ms": 3030.53,
+      "pipeline_ms": 3135.35,
+      "model_calls": 2,
+      "review_corrections": [
+        "Reviewed relevance and interpretation against actual session record IDs. Removed unsupported general claims about stabilizing the recovery phase and replaced them with direct session evidence from the final rep."
+      ]
+    },
+    {
+      "scenario": "torso-followups",
+      "question": "Should I lean forward more?",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "status": "error",
+      "error_type": "GoogleRateLimitError",
+      "details": "Error calling model 'gemini-3.5-flash-lite' (RESOURCE_EXHAUSTED): 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 250000, model: g"
+    }
+  ]
+}

@@ -1,6 +1,5 @@
 """Missing evidence is a conversation outcome, rather than a failed chat request."""
 
-import re
 import time
 from datetime import UTC, datetime
 from uuid import uuid4
@@ -9,37 +8,10 @@ from fencecoach.schemas import CoachingReport, RunRecord, TraceEvent
 
 
 def needs_evidence_reply(request, mode):
-    if not request.evidence_unavailable_reason:
-        return False
-    if (
-        any(
-            "projected_torso_tilt" in r.get("measurements", {})
-            for r in request.technique_evaluation.get("reps", [])
-        )
-        and mode != "demo"
-    ):
-        return False
-    from fencecoach.coach.conversation import _needs_measurements
-    from fencecoach.coach.turns import general_instruction, history_instruction
-
-    # Desired positions and "how should I...?" remain answerable from teaching
-    # references even when the uploaded clip fails tracking QA.
-    if mode != "demo" and (
-        general_instruction(request.question) or history_instruction(request.question)
-    ):
-        return False
-
-    return (
-        mode == "demo"
-        or _needs_measurements(request.question)
-        or bool(
-            re.search(
-                r"\b(video|clip|reps?|baseline|compare|measurements?|timestamps?)\b",
-                request.question,
-                re.I,
-            )
-        )
-    )
+    # A live coach must inspect the same available session context and answer
+    # the actual question, even when tracking failed. Do not replace personal
+    # follow-ups with a canned request for a new video based on their wording.
+    return mode == "demo" and bool(request.evidence_unavailable_reason)
 
 
 def evidence_reply(request, mode, on_step=None, on_text=None):

@@ -124,12 +124,35 @@ def enrich_candidates(frames, candidates, baseline, profile=None):
             cues, cue_count = {}, 0
         candidate["lunge_cues"] = cues
         candidate["lunge_cue_count"] = cue_count
-        candidate["movement_label"] = "lunge" if cue_count >= 2 else "stance_expansion"
-        candidate["classification"] = (
-            "lunge_like_stance_expansion" if cue_count >= 2 else "stance_expansion_and_return"
+        evidence = candidate.get("detection_evidence", {})
+        directional_drive_supported = (
+            evidence.get("front_foot_forward_travel_torso_lengths") is not None
+            and (
+                (profile or {}).get("camera_motion") != "moving"
+                or (profile or {}).get("camera_translation_compensated")
+            )
         )
-        candidate["classification_source"] = "heuristic"
+        cycle_supported = (
+            candidate.get("detection_method") == "local-guard-drive-return-v3"
+            and directional_drive_supported
+        )
+        candidate["movement_label"] = (
+            "lunge" if cycle_supported or cue_count >= 2 else "stance_expansion"
+        )
+        candidate["classification"] = (
+            "lunge_like_drive_and_return"
+            if cycle_supported
+            else "lunge_like_stance_expansion"
+            if cue_count >= 2
+            else "stance_expansion_and_return"
+        )
+        candidate["classification_source"] = (
+            "local_guard_cycle_heuristic" if cycle_supported else "heuristic"
+        )
         candidate["camera_motion"] = (profile or {}).get("camera_motion", "unknown")
+        candidate["camera_translation_compensated"] = (profile or {}).get(
+            "camera_translation_compensated", False
+        )
         candidate["measurements"] = window_measurements(
             frames, candidate["start_ms"], candidate["end_ms"], candidate
         )
@@ -173,17 +196,21 @@ def window_measurements(frames, start_ms, end_ms, candidate=None, profile=None):
     for a, b in zip(selected, selected[1:]):
         dt = (b["time_ms"] - a["time_ms"]) / 1000
         if 0 < dt <= 0.3 and a.get("landmarks") and b.get("landmarks"):
+            points_a = a.get("motion_landmarks", a["landmarks"])
+            points_b = b.get("motion_landmarks", b["landmarks"])
             # Fix scale to the first frame in the interval to avoid motion from changing normalization.
             dx = abs(
                 (
-                    b["landmarks"][23][0]
-                    + b["landmarks"][24][0]
-                    - a["landmarks"][23][0]
-                    - a["landmarks"][24][0]
+                    points_b[23][0]
+                    + points_b[24][0]
+                    - points_a[23][0]
+                    - points_a[24][0]
                 )
                 / 2
             )
             # hip_x_torso is only used to recover the image width / fixed torso scale.
+            # The raw image coordinate and torso-normalized feature recover
+            # frame-width / torso-pixel scale even after translation correction.
             hipx = (peak["landmarks"][23][0] + peak["landmarks"][24][0]) / 2
             hip_scale = peak["features"].get("hip_x_torso")
             if hipx and hip_scale is not None:
@@ -191,7 +218,11 @@ def window_measurements(frames, start_ms, end_ms, candidate=None, profile=None):
     if speeds:
         camera = (profile or {}).get("camera_motion", (candidate or {}).get("camera_motion"))
         add(
-            "recovery_hip_speed" if camera == "fixed" else "recovery_image_hip_speed",
+            "recovery_hip_speed"
+            if camera == "fixed"
+            else "recovery_compensated_hip_speed"
+            if (candidate or {}).get("camera_translation_compensated")
+            else "recovery_image_hip_speed",
             median(speeds),
             "torso/s",
             min(f["quality"] for f in selected),
@@ -291,9 +322,23 @@ def footwork_proposals(frames, baseline, profile):
     events, active = [], None
     for a, b in zip(valid, valid[1:]):
         dt = (b["time_ms"] - a["time_ms"]) / 1000
-        hip_x = (a["landmarks"][23][0] + a["landmarks"][24][0]) / 2
-        dx = (b["landmarks"][23][0] + b["landmarks"][24][0]) / 2 - hip_x
-        speed = dx * a["features"]["hip_x_torso"] / hip_x / dt if hip_x and dt else 0
+        if profile.get("camera_motion") == "moving" and not profile.get(
+            "camera_translation_compensated"
+        ):
+            active = None
+            continue
+        points_a = a.get("motion_landmarks", a["landmarks"])
+        points_b = b.get("motion_landmarks", b["landmarks"])
+        hip_x = (points_a[23][0] + points_a[24][0]) / 2
+        dx = (points_b[23][0] + points_b[24][0]) / 2 - hip_x
+        raw_hip_x = (a["landmarks"][23][0] + a["landmarks"][24][0]) / 2
+        hip_scale = a["features"].get("hip_x_torso")
+        if hip_scale is None:
+            # Older cached poses can lack scale; withhold translation rather
+            # than inventing a speed or failing the review.
+            active = None
+            continue
+        speed = dx * hip_scale / raw_hip_x / dt if raw_hip_x and dt else 0
         direction = "right" if speed > 0 else "left"
         moving = (
             0 < dt <= 0.3

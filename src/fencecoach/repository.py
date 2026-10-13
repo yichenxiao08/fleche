@@ -138,6 +138,33 @@ class Repository:
             result = db.execute("DELETE FROM training_logs WHERE id=?", (log_id,))
             return result.rowcount > 0
 
+    def list_reference_reviews(self):
+        """Submitted source-specific reference reps; ratings alone are not fault-free labels."""
+        import json
+
+        with closing(self._connect()) as db:
+            exists = (
+                db.execute("SELECT to_regclass('coach_feedback')").fetchone()
+                if db.postgres
+                else db.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name='coach_feedback'"
+                ).fetchone()
+            )
+            if not exists or not exists[0]:
+                return []
+            rows = db.execute("SELECT job_id,payload FROM coach_feedback")
+            reviews = [{**json.loads(row[1]), "job_id": row[0]} for row in rows]
+        return sorted(
+            [
+                r
+                for r in reviews
+                if r.get("status") == "submitted"
+                and any(p.get("rating") == "reference" for p in r.get("reps", []))
+            ],
+            key=lambda r: r.get("saved_at", ""),
+            reverse=True,
+        )[:10]
+
     def coaching_context(self, session_id):
         import json
 

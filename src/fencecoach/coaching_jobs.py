@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 from fencecoach.coach.graph import EvidenceValidationError, run_coach
-from fencecoach.coach.providers import warm_local_model
+from fencecoach.coach.providers import provider_failure, warm_local_model
 from fencecoach.schemas import CoachRequest
 from fencecoach.settings import settings
 
@@ -55,12 +55,29 @@ class CoachingJobs:
 
     @staticmethod
     def public(job):
-        return {k: v for k, v in job.items() if k not in {"request", "owner", "lease_until"}}
+        result = {k: v for k, v in job.items() if k not in {"request", "owner", "lease_until"}}
+        result["question"] = job.get("request", {}).get("question", "")
+        return result
 
     def get(self, job_id):
         with closing(self.repository._connect()) as db:
             row = db.execute("SELECT payload FROM coaching_jobs WHERE id=?", (job_id,)).fetchone()
             return self.public(json.loads(row[0])) if row else None
+
+    def cancel(self, job_id):
+        with closing(self.repository._connect()) as db, db:
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute("SELECT payload FROM coaching_jobs WHERE id=?", (job_id,)).fetchone()
+            if not row:
+                return None
+            job = json.loads(row[0])
+            if job["status"] in {"queued", "running"}:
+                job.update(status="cancelled", stage="Stopped", error=None)
+                db.execute(
+                    "UPDATE coaching_jobs SET status='cancelled',payload=? WHERE id=?",
+                    (json.dumps(job), job_id),
+                )
+            return self.public(job)
 
     def claim(self, owner):
         with closing(self.repository._connect()) as db, db:
@@ -88,6 +105,7 @@ class CoachingJobs:
             job.update(
                 status="running",
                 stage="Reading session evidence",
+                started_at=time.time(),
                 owner=owner,
                 lease_until=time.time() + 45,
             )
@@ -184,14 +202,25 @@ class CoachingWorker:
                 )
         except Exception as exc:
             logging.exception("Coaching job failed")
+            import httpx
+
+            known_failure = provider_failure(exc)
+            if known_failure:
+                _, message = known_failure
+            elif isinstance(exc, (httpx.TransportError, ConnectionError, OSError)):
+                message = "FenceCoach couldn't connect to the coaching provider. Your question is kept; check the server's internet connection and retry."
+            else:
+                message = (
+                    str(exc)[:400]
+                    if isinstance(exc, (EvidenceValidationError, RuntimeError))
+                    else "The coaching provider couldn't answer. Your question is kept; try again."
+                )
             self.jobs.update(
                 job["job_id"],
                 owner,
                 status="failed",
                 stage="Review interrupted",
-                error=str(exc)[:400]
-                if isinstance(exc, (EvidenceValidationError, RuntimeError))
-                else "The model request was interrupted. Check the model server and submit your question again.",
+                error=message,
             )
 
     def supervise(self):
@@ -205,7 +234,22 @@ class CoachingWorker:
                         if future.done():
                             del active[job_id]
                         elif time.monotonic() - lease_renewed >= 15:
-                            self.jobs.update(job_id, owner)
+                            with closing(self.jobs.repository._connect()) as db:
+                                row = db.execute(
+                                    "SELECT payload FROM coaching_jobs WHERE id=?", (job_id,)
+                                ).fetchone()
+                            current = json.loads(row[0]) if row else {}
+                            limit = 90 if current.get("mode") == "local" else 45
+                            if time.time() - current.get("started_at", time.time()) > limit:
+                                self.jobs.update(
+                                    job_id,
+                                    owner,
+                                    status="failed",
+                                    stage="Timed out",
+                                    error="The coach took too long to respond. Your question is kept; try again.",
+                                )
+                            else:
+                                self.jobs.update(job_id, owner)
                             active[job_id] = (future, time.monotonic())
                     while len(active) < concurrency:
                         job = self.jobs.claim(owner)

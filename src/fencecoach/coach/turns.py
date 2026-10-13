@@ -26,6 +26,8 @@ def clarification(request):
 
 def general_instruction(question):
     """A desired technique is not an observation of the athlete's recorded technique."""
+    if re.search(r"\brep(?:etition)?\s*\d+\b", question, re.I):
+        return False
     if re.search(
         r"\b(?:did i|was my|am i|is my|why did|what(?: is|'s) wrong|what should i (?:change|fix|improve)|analy[sz]e my|review my)\b",
         question,
@@ -35,6 +37,55 @@ def general_instruction(question):
     return bool(
         re.search(
             r"\b(?:should|supposed to|proper|ideal|recommended|generally|usually|in general|how to)\b|\bhow (?:do|can) (?:i|you|we) (?:extend|hold|position|perform|do|recover|advance|retreat|lunge|stand)\b",
+            question,
+            re.I,
+        )
+    )
+
+
+def contextual_question(request):
+    """Carry only the immediately active rep into a follow-up, preserving its subject."""
+    question = request.question.strip()
+    # Resolve an elliptical subject before rep selection, using the latest
+    # athlete question rather than trusting an earlier assistant's claims.
+    users = [m.content for m in request.conversation_history if m.role == "user"]
+    if users and re.search(r"^(?:and|what about|how about)\b", question, re.I):
+        from fencecoach.coach.intent import question_topic
+
+        if question_topic(question) is None and not re.search(
+            r"\b(?:shoulder|hip|ankle|wrist|shin|head|blade|weapon)\b", question, re.I
+        ):
+            topic = question_topic(users[-1])
+            if topic:
+                question = f"Regarding {topic} in this session: {question}"
+    followup = bool(
+        re.search(
+            r"^(?:so\s+)?(?:what should i do|what (?:do i|should i) (?:do|change|fix|work on)|"
+            r"what about (?:my|the)|how (?:do|can|should) i (?:fix|improve|change) (?:it|that|this)|"
+            r"is (?:it|that|this|the lunge) (?:fast|slow|powerful|explosive|long|far)|"
+            r"can you (?:explain|describe) (?:it|that|this))\b",
+            question,
+            re.I,
+        )
+    )
+    if not followup or re.search(r"\brep(?:etition)?\s*\d+\b", question, re.I):
+        return question
+    # Never scan older turns for a rep after the athlete changed the scope.
+    # Do not inject the preceding body part into an explicit new question.
+    previous = users[-1] if users else ""
+    if re.search(r"\b(?:all|each|every|whole|entire|overall|drill|session)\b", question, re.I):
+        return question
+    named = re.search(r"\brep(?:etition)?\s*(\d+)\b", previous, re.I)
+    broad_scope = re.search(r"\b(?:all|each|every)\s+(?:\d+\s+)?(?:reps|lunges)\b", previous, re.I)
+    if named and not broad_scope:
+        return f"Follow-up about rep {named[1]} in this session: {question}"
+    return question
+
+
+def motion_question(question):
+    return bool(
+        re.search(
+            r"\b(?:speed|fast|faster|slow|slower|power|powerful|unpowerful|explosive|unexplosive|explosiveness|distance|disatnce|stride|reach|long|far)\b",
             question,
             re.I,
         )

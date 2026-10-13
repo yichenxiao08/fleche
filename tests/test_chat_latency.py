@@ -1,6 +1,6 @@
 import unittest
 
-from langchain_core.messages import AIMessageChunk
+from langchain_core.messages import AIMessage, AIMessageChunk
 
 from fencecoach.coach.graph import run_coach
 from fencecoach.coach.grounding import unsupported_claims
@@ -23,19 +23,22 @@ class StreamingModel:
     def stream(self, messages):
         try:
             for text in (
-                "At 2.00s, the tracked left knee angle is 110 degrees. ",
                 "Try a slow set with a deliberate reset between attempts. ",
+                "At 2.0 seconds, the tracked left knee angle is 110 degrees. ",
                 "Repeat this drill toward the same target because it helps make the attempts comparable. ",
-                "This unnecessary fourth sentence should never be generated. ",
+                "Compare the same phase on your next attempt. ",
             ):
                 self.read += 1
                 yield AIMessageChunk(content=text)
         finally:
             self.closed = True
 
+    def invoke(self, messages):
+        return AIMessage(content="".join(chunk.content for chunk in self.stream(messages)))
+
 
 class ChatLatencyTests(unittest.TestCase):
-    def test_complete_checked_answer_closes_stream(self):
+    def test_only_complete_checked_answer_is_published_and_stream_is_closed(self):
         model = StreamingModel()
         request = CoachRequest(
             session_id="latency-test",
@@ -52,12 +55,13 @@ class ChatLatencyTests(unittest.TestCase):
                 )
             ],
         )
-        run = run_coach(request, "local", model=model, on_text=lambda _: None)
-        self.assertEqual(model.read, 3)
+        published = []
+        run = run_coach(request, "local", model=model, on_text=published.append)
+        self.assertEqual(model.read, 4)
         self.assertTrue(model.closed)
-        self.assertLessEqual(model.options["num_predict"], 112)
-        self.assertNotIn("fourth", run.report.summary)
-        self.assertTrue(any(step.step == "early_completion" for step in run.trace))
+        self.assertLessEqual(model.options["num_predict"], 160)
+        self.assertIn("same phase", run.report.summary)
+        self.assertEqual(published, [run.report.summary])
 
     def test_compaction_preserves_ids_values_and_confirmed_side(self):
         rows = [

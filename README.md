@@ -180,3 +180,118 @@ negative examples. Free text is not silently turned into per-issue classifier
 targets; independent recordings and explicit labels are needed for supervised
 technique evaluation. Sparse action/lunge/guard anchors are not dense phase labels.
 
+
+### Phase measurements and existing-clip audit
+
+The v3 solo-lunge evaluator summarizes each repetition separately: starting guard,
+lunge drive, observed lunge hold (or an explicit finish-window fallback), active
+recovery, deepest observed rear-knee recovery bend, and returned guard. Geometry
+uses visible samples within the matching phase, with sample counts, ranges and
+representative timestamps. It does not use a whole-clip median to grade a rep.
+Phase boundaries and flags remain heuristic proposals, not expert-validated labels.
+
+`python scripts/evaluate_technique.py --contact-sheets` audits all stored uploads
+without changing saved reviews. Open `/api/videos/technique-audit` on the running
+server for the report, frame sheets and phase jumps. Duplicate/related uploads
+are grouped by source hash and must not count as independent validation footage.
+Unsaved older analyses refresh movement proposals from cached pose samples;
+saved rep timings remain unchanged.
+
+`python scripts/evaluate_coach_contract.py` checks question routing, topic-specific
+evidence selection and per-rep answer coverage against the latest saved
+reference-comparison request in the local database. It makes no model/API calls
+and writes only aggregate results to the ignored
+`data/evals/coach-contract-latest.json`. This checks that the right evidence reaches
+the answer path; it does not validate the coaching criteria or prove that a
+measured difference is a technique fault.
+
+Live Gemini conversation now uses one complete session evidence packet for every
+question, including per-rep phase measurements, their meanings, submitted feedback,
+and reference comparisons. The answer generator cites exact internal record IDs;
+a structured reviewer checks the question's relevance and the interpretation of
+those same records before prose is displayed. Personal corrections must cite a
+supplied reference correction or submitted feedback. New measured features enter
+the same flow without adding a question category or a canned reply.
+
+Rejected drafts are repaired against the same question and evidence. Provider
+failures never produce substitute technique feedback. A transient Gemini failure
+can try `GEMINI_FALLBACK_MODEL` with the same context; quota errors are reported as
+quota errors, with the question retained. Gemini deadlines use
+`GEMINI_REQUEST_TIMEOUT_SECONDS` (default 12, minimum 10 allowed by Google).
+The generation and semantic review are separate API calls; a healthy provider
+is required to exercise this live path. Regression checks:
+`python -m unittest discover -s tests -p test_coach_response_reliability.py`.
+
+Save reviewed practice is available once a rep interval or supported clip
+measurement is selected. The server validates edited timings and local evidence
+on save. Failed saves display a reason beside the button and leave edits in place;
+a loading cursor appears only while the save request is in progress.
+
+### Athlete review and interrupted chat
+
+The Review tab shows video, numbered repetitions, phase jumps and plain-language
+review flags. Selecting a rep updates its feedback without recreating the video
+player. Session measurement tables are optional details. Athlete pages no longer
+expose measurement JSON import controls.
+
+Chat provides Stop and retains the question after failures. Polling is bounded
+(55 seconds for cloud, 100 seconds for local), with individual status requests
+limited to 8 seconds. The supervisor also marks overlong running jobs failed;
+late results from cancelled/failed jobs are not saved. Stop cancels the application
+job, not necessarily an already dispatched remote provider computation. Provider
+connection errors are distinguished from evidence validation errors. Gemini's
+HTTP client has an explicit 20-second timeout; this does not promise replies in
+3–5 seconds or repair an unavailable network/provider.
+
+Gemini connections default to IPv4 (`GEMINI_FORCE_IPV4=true`) to avoid the
+observed hanging IPv6 route on this development computer. This is limited to the
+Gemini HTTP transport and does not change Windows/router networking. Set
+`GEMINI_FORCE_IPV4=false` to use the SDK's default transport, including environment
+proxy handling, on a different deployment.
+
+### Athlete-supplied lunge drill benchmarks
+
+`src/fencecoach/lunge_benchmarks.json` defines the current custom targets:
+front-foot lift to observed stable finish below 0.4 seconds is fast, 0.4–0.5 is
+normal, and above 0.5 is slow. Timing requires a visible lift and an observed
+stable hold; old action-start bookmarks are not substituted. Sampling allowances
+that cross a boundary produce a borderline result.
+
+Feet separation uses the median projected horizontal heel/toe-centre separation
+at the finish, divided by the starting rear leg's hip–knee plus knee–ankle segment
+length. The athlete's approximate guide is two leg lengths, with no pass/fail tolerance. This needs a side view and visible
+feet. Rear-foot displacement is also exposed in pixels and torso lengths, but its
+12-inch target remains unevaluated without physical distance calibration. Neither
+foot travel nor timing measures force or power. These targets are drill criteria,
+not universal technique standards or trained model labels. Capture profiles can
+override complete `timing`, `reach`, or `rear_foot` groups via `lunge_benchmarks`.
+
+### Reference-first coaching
+
+The main review and conversational coach compare matching phases with the latest
+submitted reference set. The current agreed set is reps 1 and 4 of the reviewed
+home recording. Reference measurements are recomputed from the saved footage and
+corrected bookmarks, then cached by file modification time and review revision.
+Stated corrections on a reference rep exclude that aspect from positive targets.
+Self-comparisons are excluded. New clip labels are never copied from reference labels.
+
+Posture and normalized reach can be compared provisionally between supported side
+views. Timing comparisons across recordings require a matching declared camera
+setup, weapon and drill; force is not measured. The review shows phase-matched
+values and comparison cues, with fixed drill targets collapsed as optional details.
+This is example-based comparison, not newly trained classifier weights, and it has
+not established accuracy on an independent set of athletes or recordings.
+
+### Rep proposal refinement
+
+`guard-cycles-v3-local-drive-return` tracks a quiet starting guard separately for
+each action, uses one fixed body scale through that action, requires sustained
+leg separation and visible forward-foot travel, and closes the cycle on return
+to that starting stance with backward hip motion. Small stance resets are omitted.
+Knee-depth/asymmetry gates do not determine whether an imperfect lunge counts.
+Identity breaks and tracking gaps reset the detector. These are movement-detection
+heuristics, not trained gesture classifications or technique scores.
+
+Unsaved older analyses refresh these proposals from cached pose samples when
+opened, without uploading or processing the video again. Saved review intervals
+and submitted coach bookmarks retain their original timings.

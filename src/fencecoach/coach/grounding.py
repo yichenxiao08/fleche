@@ -94,6 +94,14 @@ def unsupported_claims(reply, metrics=()):
     sentences = re.split(r"(?<=[.!?])\s+|\n+|;|\b(?:but|however|so)\b", reply.lower())
     rules = (
         (
+            r"\byour (?:posture|torso|position|movement) (?:was|is|remained|looked|matches)\b.{0,50}\b(?:controlled|balanced|stable)\b",
+            "Pose geometry does not establish demonstrated control or balance.",
+        ),
+        (
+            r"\b(?:your|you|the rear arm|your rear arm)\b.{0,75}\b(?:maintaining balance|maintained balance|was balanced|is balanced|lost balance)\b",
+            "The supplied pose geometry does not establish observed balance.",
+        ),
+        (
             r"\b(?:knee|knees)\b.{0,90}\b(?:over[ -]?rotat\w*|under[ -]?rotat\w*|neutral range)\b",
             "A projected knee angle does not establish knee rotation or a neutral angle range.",
         ),
@@ -205,7 +213,7 @@ def assessment_issues(request, reply, metrics):
         )
         if finish:
             timestamps = [
-                f"{metric.start_ms / 1000:.2f}"
+                f"{metric.start_ms / 1000:.1f}"
                 for metric in metrics
                 if metric.metric_id in finish["evidence_ids"] and metric.start_ms is not None
             ]

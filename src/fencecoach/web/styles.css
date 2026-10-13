@@ -1,5 +1,7 @@
-@import url("./design-system.css?v=20261009-unified-guidance");
-@import url("./video.css?v=20261009-stable-coach");
+@import url("./athlete-review.css?v=20261012-movement-feedback-v3");
+@import url("./design-system.css?v=20261012-progress-dashboard-v1");
+@import url("./video.css?v=20261012-progress-dashboard-v1");
+@import url("./ui-polish.css?v=20261012-progress-dashboard-v1");
 
 .journal-entry {
   display: flex;
@@ -49,4 +51,315 @@
   justify-content: space-between;
   padding: 12px 0;
   border-bottom: 1px solid var(--line);
+}
+
+/* Progress history */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--line);
+}
+.activity-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.activity-main {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 0;
+  text-align: left;
+  background: transparent;
+}
+.activity-copy {
+  flex: 1;
+  min-width: 0;
+}
+.activity-copy strong {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  font-weight: 500;
+}
+.activity-copy small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 10px;
+}
+.activity-main > svg {
+  width: 15px;
+  height: 15px;
+  color: var(--muted);
+  flex: 0 0 auto;
+}
+.activity-main:hover strong {
+  color: var(--accent);
+}
+.activity-secondary {
+  flex: 0 0 auto;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--soft);
+  color: var(--text);
+  font-size: 10px;
+}
+.progress-layout {
+  grid-template-columns: minmax(0, 4fr) minmax(320px, 5fr);
+  align-items: start;
+  gap: clamp(24px, 4vw, 52px);
+}
+.progress-layout > section > .section-heading {
+  margin-top: 32px;
+}
+.progress-hero {
+  padding: 18px 22px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.progress-hero strong {
+  font-size: clamp(62px, 7vw, 82px);
+}
+.progress-hero p {
+  max-width: 32ch;
+  line-height: 1.5;
+}
+.progress-history {
+  min-width: 0;
+}
+.progress-log-form {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 24px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+}
+.progress-log-form[hidden] {
+  display: none !important;
+}
+.progress-log-form .field {
+  margin: 0;
+}
+.progress-log-form .field > span {
+  margin-bottom: 5px;
+}
+.progress-log-form .field input,
+.progress-log-form .field select,
+.progress-log-form .field textarea {
+  padding: 10px 11px;
+}
+.progress-log-form .form-row {
+  gap: 12px;
+}
+.progress-log-form > .primary-action {
+  width: auto;
+  justify-self: start;
+  margin-top: 2px;
+}
+.progress-log-form > .text-action {
+  justify-self: start;
+}
+.progress-history-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 29px 0 14px;
+}
+.progress-history-heading > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.progress-history-heading h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+.progress-history-heading > div > span {
+  display: inline-grid;
+  min-width: 26px;
+  height: 26px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 11px;
+}
+.progress-log-action {
+  width: auto;
+  min-height: 44px;
+  flex: 0 0 auto;
+  padding: 12px 16px;
+  font-size: 12px;
+}
+.view-all-sessions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+}
+.view-all-sessions svg {
+  width: 15px;
+  height: 15px;
+  transition: transform 160ms ease;
+}
+.view-all-sessions[aria-expanded="true"] svg {
+  transform: rotate(90deg);
+}
+.month-calendar {
+  margin-top: 18px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.month-goal-ring {
+  border-color: var(--line);
+  background: var(--soft);
+}
+.month-calendar-header {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) minmax(76px, 0.65fr) 34px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.month-step {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--bg);
+  color: var(--text);
+}
+.month-step svg {
+  width: 15px;
+  height: 15px;
+}
+.month-step:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+.month-picker,
+.month-picker select {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+.month-picker select {
+  min-height: 36px;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+}
+.month-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.month-weekday,
+.month-day {
+  display: grid;
+  min-width: 0;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 50%;
+}
+.month-weekday {
+  aspect-ratio: auto;
+  min-height: 22px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 600;
+}
+.month-day {
+  color: var(--text);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.month-day.done {
+  background: var(--success-soft);
+  color: var(--success);
+  font-weight: 700;
+}
+.month-day.today {
+  outline: 1px solid var(--accent);
+  outline-offset: -2px;
+}
+.month-day.empty {
+  visibility: hidden;
+}
+@media (max-width: 980px) {
+  .progress-layout {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 680px) {
+  .progress-layout {
+    gap: 24px;
+  }
+  .progress-hero {
+    padding: 16px;
+  }
+  .progress-hero strong {
+    font-size: 64px;
+  }
+  .progress-history-heading {
+    flex-wrap: wrap;
+  }
+  .progress-log-form {
+    padding: 13px;
+  }
+  .progress-log-form .form-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .month-calendar {
+    padding: 11px;
+  }
+  .month-calendar-header {
+    grid-template-columns: 32px minmax(0, 1fr) minmax(70px, 0.7fr) 32px;
+    gap: 5px;
+  }
+  .month-step {
+    width: 32px;
+    height: 32px;
+  }
+  .month-calendar-grid {
+    gap: 2px;
+  }
+  .progress-log-action {
+    min-height: 42px;
+    padding: 11px 13px;
+  }
+  .activity-entry {
+    gap: 7px;
+  }
+  .activity-copy strong {
+    font-size: 12px;
+  }
 }

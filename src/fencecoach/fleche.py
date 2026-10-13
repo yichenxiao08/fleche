@@ -5,14 +5,25 @@ import math
 
 def detect_fleche(frames, width, height, profile, guard):
     direction = {"left": -1, "right": 1}.get(profile.get("facing"))
-    if not direction or profile.get("camera_motion") != "fixed" or not guard:
+    moving = profile.get("camera_motion") == "moving"
+    if (
+        not direction
+        or not guard
+        or (moving and not profile.get("camera_translation_compensated"))
+    ):
         return []
-    valid = [f for f in frames if f.get("features") and len(f.get("landmarks", [])) == 33]
+    valid = [
+        f
+        for f in frames
+        if f.get("features")
+        and len(f.get("landmarks", [])) == 33
+        and (not moving or len(f.get("motion_landmarks", [])) == 33)
+    ]
     guarded = [f for f in valid if guard["start_ms"] <= f["time_ms"] <= guard["end_ms"]]
     if not guarded:
         return []
     ref = guarded[-1]
-    p = ref["landmarks"]
+    p = ref.get("motion_landmarks", ref["landmarks"])
     body_height = abs((p[27][1] + p[28][1]) / 2 - p[0][1]) * height
     if body_height < 30:
         return []
@@ -22,10 +33,12 @@ def detect_fleche(frames, width, height, profile, guard):
     for f in valid:
         if f["time_ms"] <= guard["end_ms"]:
             continue
-        q = f["landmarks"]
+        raw = f["landmarks"]
+        q = f.get("motion_landmarks", raw)
         required = (0, 11, 12, 23, 24, 27, 28)
         if any(
-            not (0.02 <= q[j][0] <= 0.98 and 0.02 <= q[j][1] <= 0.98) or q[j][3] < 0.5
+            not (0.02 <= raw[j][0] <= 0.98 and 0.02 <= raw[j][1] <= 0.98)
+            or q[j][3] < 0.5
             for j in required
         ):
             continue
@@ -132,7 +145,9 @@ def detect_fleche(frames, width, height, profile, guard):
                 "crossing_ms": times[2],
                 "label": "fleche",
                 "status": "beta",
-                "source": "fixed_side_view_rules_v1",
+                "source": "translation_compensated_side_view_rules_v1"
+                if moving
+                else "fixed_side_view_rules_v1",
                 "measurements": measurements,
                 "limits": [
                     "Not validated recognition.",

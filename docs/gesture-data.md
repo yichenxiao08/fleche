@@ -34,11 +34,19 @@ does not approve gesture labels. Provisional labels remain excluded independentl
 
 ## Footwork features
 
-`footwork-v2` uses hips, knees and ankles without requiring visible shoulders or wrists.
+`footwork-v3` uses hips, knees and ankles without requiring visible shoulders or wrists.
 Its 112 temporal features describe leg-normalized stance width, knee angles, relative foot
-motion and optional facing/camera motion channels. Fixed-camera absolute travel is masked
-when the camera is moving or unspecified. Directional predictions abstain when facing is unknown.
+motion and optional facing/camera motion channels. The video pipeline now estimates background
+translation from 64×36 thumbnails at roughly four samples per second. When it can track the background consistently during a
+pan, the derived motion track subtracts that translation so single-fencer travel proposals can
+continue. This does not compensate zoom, camera rotation, cuts, or parallax; an untrackable pan
+still withholds directional travel. Directional predictions abstain when facing is unknown.
 Missing lower-body landmarks, long gaps and abrupt scale changes reject a window.
+
+The reviewed footwork vocabulary now includes **ballestra** and **duck**, alongside advance,
+retreat, lunge, recovery, flèche, bounce, jumps, shuffle and en garde. Their presence in the
+label schema does not mean the detector recognizes them: each class still needs reviewed examples
+and held-out evaluation before a trained model can predict it.
 
 On the same four original solo clips, the new feature extractor retains **52/62** candidate
 750 ms windows versus **18/62** for the legacy upper-body-dependent extractor. This measures
@@ -98,10 +106,10 @@ data. No messages have been sent to authors or video creators.
 ## Recognition architecture and collection targets
 
 1. **Track and measure:** keep the pretrained pose extractor. Isolate one athlete for basic
-   footwork; for bouts, maintain both athlete identities through pans, cuts and occlusion. Camera
-   motion must be separated from athlete motion before interpreting translation as steps.
+   footwork. Background translation compensation now handles trackable pans for a single fencer;
+   cuts, zooms, rotation, parallax and two-athlete identity continuity remain unsupported.
 2. **Footwork model:** temporal pose features for en garde, advance, retreat, lunge, recovery,
-   jumps, bouncing and shuffles. The lower-body feature baseline is implemented; a learned
+   ballestras, ducks, jumps, bouncing and shuffles. The lower-body feature baseline is implemented; a learned
    sequence classifier and reliable multi-athlete tracking remain future work. Short steps need shorter temporal windows.
    The current linear baseline supports 500/750/1000/1500 ms windows; it is not yet trained.
 3. **Blade and tactical model:** a separate sequence model using both fencers, distance, weapon,
@@ -189,8 +197,9 @@ Existing complete stance cycles supply proposed expansion and return phases. Pha
 intervals require continuous usable tracking; a return completed through a tracking
 gap is not displayed as an observed recovery phase. The stance maximum is not a
 heel-strike, launch or touch detector. Model/pose movement disagreements are exposed
-for review. Translation proposals are restricted to fixed-camera detected practice
-sets and retain heuristic provenance.
+for review. Translation proposals require a fixed camera or a consistently tracked background
+pan, stay inside detected practice sets, and retain heuristic provenance. Zoom, rotation and cuts
+remain unsupported.
 
 The review screen provides seek buttons for movements and phases. Older saved
 analyses receive the timeline on read using their existing evidence; pose inference

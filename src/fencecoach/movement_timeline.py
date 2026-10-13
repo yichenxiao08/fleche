@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from statistics import mean
 
-VERSION = "movement-timeline-v1"
+VERSION = "movement-timeline-v2"
 
 
 def decode_gestures(windows, duration_ms, minimum_ms=200):
@@ -119,9 +119,15 @@ def build_movement_timeline(result):
                     )
                 )
 
-    # Translation proposals require a fixed camera. Restrict them to detected
-    # practice sets so walk-in footage is not relabeled as fencing footwork.
-    if result.get("capture_profile", {}).get("camera_motion") == "fixed":
+    # Translation proposals require a fixed or translation-compensated camera.
+    # Keep them inside detected practice sets so walk-in footage is not
+    # relabeled as fencing footwork.
+    profile = result.get("capture_profile", {})
+    camera = result.get("camera_evidence", {})
+    translation_usable = profile.get("camera_motion") == "fixed" or camera.get(
+        "translation_compensated", False
+    )
+    if translation_usable:
         for event in result.get("footwork_events", []):
             start, end = event["start_ms"], event["end_ms"]
             inside = any(

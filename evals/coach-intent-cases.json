@@ -1,0 +1,135 @@
+{
+  "schema": "coach-intent-cases-v1",
+  "purpose": "Evidence-routing contract cases. These prompts test intent, not coaching correctness.",
+  "cases": [
+    {
+      "id": "best-worst-explicit",
+      "question": "Which rep was the best and worst?",
+      "intent": "rep_comparison",
+      "needs_video_metrics": true,
+      "needs_technique_evaluation": true,
+      "selection": "all"
+    },
+    {
+      "id": "strongest-lunge",
+      "question": "Which lunge was my strongest?",
+      "intent": "rep_comparison",
+      "needs_video_metrics": true,
+      "needs_technique_evaluation": true,
+      "selection": "all"
+    },
+    {
+      "id": "best-worst-attempts",
+      "question": "Compare my strongest and weakest attempts.",
+      "intent": "rep_comparison",
+      "needs_video_metrics": true,
+      "needs_technique_evaluation": true,
+      "selection": "all"
+    },
+    {
+      "id": "contextual-which-one",
+      "question": "Which one was best?",
+      "intent": "rep_comparison",
+      "needs_video_metrics": true,
+      "needs_technique_evaluation": true,
+      "selection": "all"
+    },
+    {
+      "id": "all-five-reps",
+      "question": "Analyze all 5 reps.",
+      "intent": "all_reps",
+      "needs_video_metrics": true,
+      "needs_technique_evaluation": true,
+      "selection": "all"
+    },
+    {
+      "id": "last-rep",
+      "question": "What about my last rep?",
+      "intent": "last_rep",
+      "needs_video_metrics": true,
+      "needs_technique_evaluation": true,
+      "selection": "last"
+    },
+    {
+      "id": "first-rep",
+      "question": "Tell me about my first rep.",
+      "intent": "first_rep",
+      "needs_video_metrics": true,
+      "needs_technique_evaluation": true,
+      "selection": "first"
+    },
+    {
+      "id": "named-rep",
+      "question": "What was wrong with rep 3?",
+      "intent": "specific_rep",
+      "needs_video_metrics": true,
+      "needs_technique_evaluation": true,
+      "selection": "number",
+      "rep_number": 3
+    },
+    {
+      "id": "personal-lunge-assessment",
+      "question": "What's wrong with my lunge?",
+      "intent": "personal_assessment",
+      "needs_video_metrics": true,
+      "needs_technique_evaluation": true,
+      "selection": "all"
+    },
+    {
+      "id": "arm-extension-timing",
+      "question": "Did I extend my sword arm before the front foot landed?",
+      "intent": "personal_assessment",
+      "needs_video_metrics": true,
+      "needs_technique_evaluation": true,
+      "selection": "all"
+    },
+    {
+      "id": "rear-foot-movement",
+      "question": "Did my back foot move forward?",
+      "intent": "personal_assessment",
+      "needs_video_metrics": true,
+      "needs_technique_evaluation": true,
+      "selection": "all"
+    },
+    {
+      "id": "personal-lunge-speed",
+      "question": "How fast was my lunge?",
+      "intent": "personal_assessment",
+      "needs_video_metrics": true,
+      "needs_technique_evaluation": true,
+      "selection": "all"
+    },
+    {
+      "id": "fastest-rep",
+      "question": "Which rep was fastest?",
+      "intent": "rep_comparison",
+      "needs_video_metrics": true,
+      "needs_technique_evaluation": true,
+      "selection": "all"
+    },
+    {
+      "id": "general-arm-instruction",
+      "question": "At what angle should I extend my sword arm?",
+      "intent": "general_instruction",
+      "needs_video_metrics": true,
+      "needs_technique_evaluation": true,
+      "selection": "all"
+    },
+    {
+      "id": "cross-session-history",
+      "question": "Have I improved since my last session?",
+      "intent": "history",
+      "needs_video_metrics": false,
+      "needs_technique_evaluation": false,
+      "selection": "all"
+    },
+    {
+      "id": "simple-chat",
+      "question": "Thanks, that helps.",
+      "intent": "general_chat",
+      "needs_video_metrics": false,
+      "needs_technique_evaluation": false,
+      "selection": "all"
+    }
+  ]
+}

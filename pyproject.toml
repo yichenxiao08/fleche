@@ -32,7 +32,7 @@ video = ["mediapipe==1.0.1", "av==19.0.1", "pillow==12.3.0"]
 dataset = ["imageio-ffmpeg==0.6.0"]
 
 [tool.setuptools.package-data]
-fencecoach = ["web/*"]
+fencecoach = ["web/*", "lunge_benchmarks.json"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

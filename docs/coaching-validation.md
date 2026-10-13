@@ -6,7 +6,7 @@ The pipeline and the coach need separate validation. Recognizing a lunge is not 
 
 Use modern solo sport-fencing footage with a fixed side camera, full body visible throughout the action, declared weapon and lead side, and sufficient resolution. Inspect overlays against the actual joints and check complete onset/peak/return sequences. Discard ambiguous identity, occlusion, camera motion, and truncated actions.
 
-The current QA thresholds are conservative engineering rules, not calibrated accuracy probabilities. Validate accepted **and rejected** clips, so the gate is not made to look good by rejecting everything. Today, none of the eight golden clips passes. Clean supported footage is the first missing acceptance criterion.
+The current QA thresholds are conservative engineering rules, not calibrated accuracy probabilities. Validate accepted **and rejected** clips, so the gate is not made to look good by rejecting everything. The original eight golden clips were unsuitable for technique evaluation. Since then, the submitted solo recording and reviewed reference reps 1 and 4 have been connected to phase-specific comparisons. Additional footage is not required to fix chat relevance or use those accepted examples in a focused demo; independent recordings are needed to evaluate how broadly the measurements and corrections transfer.
 
 ## 2. Define what each observation can establish
 
@@ -44,4 +44,14 @@ Ship narrowly validated solo feedback first. Add flèche quality judgments, vari
 
 ## What can be automated now
 
-Clip preparation, QA, contact sheets, proposed intervals, evidence extraction, question generation, model comparisons, tracing, regression checks, and review forms are automated. Expert judgment and independent correctness references remain the essential external input. The current automatic output guards catch known failure patterns; they are not a complete semantic validator.
+Clip preparation, QA, contact sheets, proposed intervals, evidence extraction, question generation, model comparisons, tracing, regression checks, and review forms are automated. Expert judgment and independent correctness references remain the essential external input. Automatic output checks and model review reduce errors; passing them is not a substitute for independent technique validation.
+
+## General session-evidence workflow
+
+`src/fencecoach/coach/policy.py` defines the shared generation and answer-review contract. These are system-prompt instructions applied to each turn. The workflow resolves the question in the current session, inventories relevant features and phases, retrieves exact evidence, compares matching approved references, and distinguishes an observation from a supported correction. Movement benchmarks live in the session evidence, with their event definitions and provenance; numeric targets are not hardcoded in the motion policy.
+
+The canonical packet retains all reps, measured phases, units, sample information, reference identity, reviewer corrections and benchmark results. Cloud context uses a reversible table encoding; the local model starts with a smaller inventory of all reps/features and calls the same exact-evidence tools for detailed phase or reference rows. Tool filters use feature names, phase names and rep identities chosen by the agent, rather than a question-category gate. `compare_to_baseline` returns approved reference-rep comparisons as well as separately scoped scalar baseline deltas.
+
+Answer repair retains the complete conversation and retrieved tool results. Structured draft citations can be corrected by independent review before publication; checked final citations must refer to actual records. A new test verifies that a failed answer does not lose the evidence its tools retrieved. Tests also exercise unfamiliar feature names, more than 36 reps, phase/unit attribution, reviewer provenance and lossless packet reconstruction.
+
+Live validation on October 12, 2026 produced a reference-based correction for an eight-rep session using Gemini in 3.9 seconds. Further cloud requests reached the API quota. The local mixed-feature check did not pass answer validation during this pass; broad live quality and local latency remain unproven. This result is recorded in `evals/results/coach-general-workflow-2026-10-12.json` and the corresponding local diagnostic file.

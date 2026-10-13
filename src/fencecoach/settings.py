@@ -15,12 +15,16 @@ class Settings(BaseSettings):
     fencecoach_output_usd_per_million: float | None = None
     fencecoach_automatic_training: bool = False
     fencecoach_chat_provider: str = "local"
+    fencecoach_local_fallback: bool = True
     fencecoach_coaching_worker: bool = True
     fencecoach_coaching_concurrency: int = 1
     ollama_base_url: str = "http://127.0.0.1:11434"
     ollama_chat_model: str = "qwen2.5:3b"
     gemini_api_key: SecretStr = SecretStr("")
-    gemini_chat_model: str = "gemini-3.8-flash"
+    gemini_chat_model: str = "gemini-3.5-flash-lite"
+    gemini_fallback_model: str = "gemini-3.8-flash"
+    gemini_request_timeout_seconds: float = 12
+    gemini_force_ipv4: bool = True
     fencecoach_database_url: str = ""
     fencecoach_worker_concurrency: int = 1
     fencecoach_queue_limit: int = 100

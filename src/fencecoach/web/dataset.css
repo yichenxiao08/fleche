@@ -22,11 +22,13 @@
 }
 .workspace-heading {
   display: grid;
-  grid-template-columns: minmax(220px, 0.8fr) minmax(300px, 1.3fr) auto;
+  grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.4fr) auto;
+  grid-template-rows: auto auto;
   align-items: center;
-  gap: 16px;
+  gap: 5px 16px;
   min-width: 0;
 }
+.workspace-heading > div { grid-column: 1; grid-row: 1 / 3; min-width: 0; }
 .workspace-heading h1 {
   margin: 1px 0 0;
   font-family: var(--display);
@@ -35,6 +37,8 @@
 }
 .workspace-heading .eyebrow { font-size: 9px; }
 #dataset-status {
+  grid-column: 2;
+  grid-row: 1;
   min-width: 0;
   margin: 0;
   padding: 8px 11px;
@@ -45,20 +49,33 @@
   line-height: 1.35;
   font-size: 12px;
 }
+#automatic-training-status {
+  grid-column: 2;
+  grid-row: 2;
+  min-width: 0;
+  max-height: 2.7em;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
 .readiness-drawer {
   position: relative;
+  grid-column: 3;
+  grid-row: 1 / 3;
   justify-self: end;
   z-index: 4;
 }
 .readiness-drawer > summary {
   cursor: pointer;
-  white-space: nowrap;
-  padding: 9px 11px;
+  max-width: min(270px, 24vw);
+  padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 7px;
   background: var(--surface);
   font-size: 12px;
   font-weight: 700;
+  line-height: 1.35;
 }
 .readiness-drawer[open] > section {
   position: absolute;
@@ -253,7 +270,7 @@
   gap: 6px;
   margin: 0;
 }
-.video-controls button { min-height: 30px; padding: 6px 8px; }
+.video-controls button { min-height: 36px; padding: 6px 9px; }
 .video-controls label { color: var(--muted); font-size: 10px; }
 .video-controls select { width: auto; margin: 0; padding: 4px 6px; }
 #video-time { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--muted); font-size: 11px; }
@@ -270,7 +287,7 @@
 #footwork-summary { margin: 8px 0; }
 .review-annotation-column {
   display: grid;
-  grid-template-rows: minmax(200px, 0.84fr) minmax(250px, 1.16fr);
+  grid-template-rows: minmax(200px, 0.95fr) minmax(165px, 1.05fr);
   gap: 9px;
   overflow: hidden;
 }
@@ -299,7 +316,7 @@
 .editor-heading h3 { font-family: var(--display); font-size: 18px; }
 .queue-heading p { max-width: 390px; margin-top: 2px; color: var(--muted); font-size: 10px; line-height: 1.3; }
 .queue-tools { display: flex; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; gap: 4px; }
-.queue-tools button { min-height: 29px; padding: 5px 7px; font-size: 10px; }
+.queue-tools button { min-height: 34px; padding: 6px 8px; font-size: 10px; }
 #segment-list {
   flex: 1 1 auto;
   min-height: 0;
@@ -318,7 +335,7 @@
 .segment-review-state { flex: 0 0 auto; padding: 2px 6px; border-radius: 999px; background: #eceff3; color: #404750; font-size: 9px; font-weight: 700; }
 .dataset-segment.reviewed .segment-review-state { background: #e0f2e8; color: #176b43; }
 .segment-actions { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
-.segment-actions button { min-height: 27px; padding: 5px 7px; font-size: 10px; }
+.segment-actions button { min-height: 34px; padding: 6px 8px; font-size: 10px; }
 .segment-actions [data-edit] { background: var(--text); }
 .review-save-bar {
   position: relative;
@@ -334,7 +351,7 @@
   background: var(--surface);
 }
 .review-save-bar span { color: var(--muted); font-size: 9px; line-height: 1.25; }
-.review-save-bar button { flex: 0 0 auto; min-height: 29px; padding: 5px 8px; }
+.review-save-bar button { flex: 0 0 auto; min-height: 34px; padding: 6px 9px; }
 .interval-editor { padding-bottom: 6px; }
 .editor-heading { padding-block: 5px; }
 .editor-heading button { min-height: 27px; padding: 4px 8px; background: transparent; border: 1px solid var(--line); color: var(--text); }
@@ -359,7 +376,7 @@
 }
 #segment-form label { min-width: 0; font-size: 10px; }
 #segment-form input, #segment-form select { margin: 1px 0 2px; padding: 3px 7px; font-size: 11px; }
-#segment-form label button { min-height: 24px; padding: 3px 6px; font-size: 9px; }
+#segment-form label button { min-height: 32px; padding: 4px 7px; font-size: 9px; }
 #segment-form label:has(input[name="start"]),
 #segment-form label:has(input[name="end"]) { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
 #segment-form label:has(input[name="start"]) input,
@@ -375,7 +392,7 @@
 .exclusion-options { display: flex; flex-wrap: wrap; gap: 3px 8px; }
 .exclusion-options label { display: flex; align-items: center; gap: 3px; font-size: 9px !important; font-weight: 500 !important; }
 .exclusion-options input { width: auto !important; margin: 0 !important; }
-#apply-interval { flex: 0 0 auto; width: calc(100% - 18px); min-height: 32px; margin: 0 9px 3px; }
+#apply-interval { flex: 0 0 auto; width: calc(100% - 18px); min-height: 36px; margin: 0 9px 4px; }
 .keyboard-help { flex: 0 0 auto; padding: 4px 2px 0; }
 .keyboard-help p { margin-top: 5px; color: var(--muted); font-size: 10px; }
 #event-list { overflow: auto; }
@@ -405,21 +422,24 @@
 .readiness-table table { width: 100%; border-collapse: collapse; margin: 8px 0; }
 .readiness-table th, .readiness-table td { padding: 6px; text-align: left; border-bottom: 1px solid var(--line); }
 @media (max-width: 1120px) {
-  .workspace-heading { grid-template-columns: minmax(190px, 0.7fr) minmax(250px, 1.2fr) auto; gap: 9px; }
+  .workspace-heading { grid-template-columns: minmax(220px, 0.85fr) minmax(0, 1.2fr) auto; column-gap: 10px; }
   .dataset-layout { grid-template-columns: 210px minmax(0, 1fr); }
   .dataset-workspace .app-header { padding-inline: 16px; }
   .dataset-main { padding-inline: 10px; }
   .dataset-card { padding: 9px; }
   .review-workspace { grid-template-columns: minmax(240px, 0.78fr) minmax(330px, 1.22fr); gap: 8px; }
-  .review-annotation-column { grid-template-rows: minmax(185px, 0.82fr) minmax(250px, 1.18fr); }
+  .review-annotation-column { grid-template-rows: minmax(185px, 0.9fr) minmax(165px, 1.1fr); }
 }
 @media (max-width: 850px) {
   .dataset-workspace { height: auto; min-height: 100vh; overflow: auto; }
   .dataset-workspace .app-header { position: sticky; top: 0; z-index: 10; height: 58px; background: var(--bg); }
   .dataset-main { height: auto; min-height: calc(100vh - 58px); padding: 12px; display: block; }
-  .workspace-heading { display: grid; grid-template-columns: 1fr auto; margin-bottom: 10px; }
+  .workspace-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto auto; gap: 8px 12px; margin-bottom: 10px; }
+  .workspace-heading > div { grid-column: 1; grid-row: 1; }
   #dataset-status { grid-column: 1 / -1; grid-row: 2; }
+  #automatic-training-status { grid-column: 1 / -1; grid-row: 3; }
   .readiness-drawer { grid-column: 2; grid-row: 1; }
+  .readiness-drawer > summary { max-width: min(270px, 46vw); }
   .dataset-layout { display: grid; grid-template-columns: 1fr; }
   .source-panel { max-height: 360px; }
   #source-list { min-height: 150px; }
@@ -435,7 +455,7 @@
   .dataset-main { padding-inline: 8px; }
   .workspace-heading h1 { font-size: 26px; }
   .workspace-heading .eyebrow { font-size: 8px; }
-  .readiness-drawer > summary { max-width: 150px; overflow: hidden; text-overflow: ellipsis; font-size: 10px; }
+  .readiness-drawer > summary { max-width: min(190px, 46vw); font-size: 10px; }
   .review-panel-heading { align-items: flex-start; flex-direction: column; gap: 3px; }
   .review-panel { min-height: 1050px; }
   .queue-heading { align-items: flex-start; flex-direction: column; }

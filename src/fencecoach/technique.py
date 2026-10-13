@@ -7,9 +7,11 @@ classifier. Thresholds are explicit development heuristics with no accuracy clai
 import math
 from statistics import median
 
+from fencecoach.lunge_benchmarks import evaluate_benchmarks
+from fencecoach.phase_metrics import rep_phases
 from fencecoach.quality import assess_quality
 
-VERSION = "solo-lunge-rubric-v1"
+VERSION = "solo-lunge-rubric-v4-custom-benchmarks"
 RULES = {
     "torso_pitch_change": {
         "threshold": 20,
@@ -54,10 +56,12 @@ def evaluate_lunges(result, windows=None, profile=None):
         "rules": RULES,
         "reps": [],
         "findings": [],
+        "suppressed_findings": [],
         "limitations": [
             "2D image geometry; thresholds are unvalidated review triggers, not universal technique targets.",
             "No measured force, balance, ground contact, blade contact or injury diagnosis.",
             "Action timing depends on the selected phase anchors. Finish-to-guard includes any hold.",
+            "A flag requires agreement across neighboring pose samples. Agreement is not proof of landmark accuracy.",
         ],
     }
     qa = result.get("quality_gate") or assess_quality(result)
@@ -129,11 +133,14 @@ def evaluate_lunges(result, windows=None, profile=None):
             )
         )
 
-    anchors = [near(w["start_ms"], (11, 12, 23, 24, 27, 28)) for w in windows]
-    anchors = [f for f in anchors if f]
     # Multiple neighboring samples can support role inference even in a short
     # clip with one or two reps. They are not independent training examples.
-    anchor_times = [w["start_ms"] for w in windows]
+    anchor_times = [
+        t
+        for w in windows
+        for t in (w.get("onset_ms", w.get("movement_onset_ms")), w["start_ms"])
+        if t is not None
+    ]
     anchors = [
         f
         for f in frames
@@ -146,7 +153,7 @@ def evaluate_lunges(result, windows=None, profile=None):
             abs(point(f, 11)[0] - point(f, 12)[0]) / f["features"]["torso_pixels"]
             for f in anchors
             if f["features"].get("torso_pixels", 0) > 5
-            and f["features"].get("stance_ratio", 0) > 0.9
+            and f["features"].get("stance_ratio", 0) > 0.45
         ]
         if len(ratios) >= 3 and median(ratios) < 0.6:
             side_view = True
@@ -181,6 +188,22 @@ def evaluate_lunges(result, windows=None, profile=None):
     output["capture_requirements"].update(
         side_view_supported=side_view, front_leg=front, weapon_arm=arm, inferred=inferred
     )
+    if side_view and front in {"left", "right"} and facing in {"left", "right"}:
+        front_ankle, rear_ankle = (27, 28) if front == "left" else (28, 27)
+        offsets = [
+            (point(f, front_ankle)[0] - point(f, rear_ankle)[0])
+            * (-1 if facing == "left" else 1)
+            / f["features"]["torso_pixels"]
+            for f in anchors
+            if f["features"].get("torso_pixels", 0) > 5
+        ]
+        if len(offsets) >= 3 and sum(value < -0.4 for value in offsets) / len(offsets) >= 0.8:
+            output["capture_requirements"]["warning"] = (
+                "The declared front leg consistently leads opposite to the selected facing direction. "
+                "Confirm facing/lead leg or whether the recording is mirrored. Direction-dependent checks were withheld."
+            )
+            facing = "unknown"
+            output["capture_requirements"]["facing_used"] = "unknown"
     if inferred:
         output["limitations"].append(
             "Some capture roles were inferred geometrically; findings remain review flags, not verified corrections."
@@ -198,6 +221,7 @@ def evaluate_lunges(result, windows=None, profile=None):
             "action_start_ms": onset,
             "measurements": {},
             "findings": [],
+            "suppressed_findings": [],
             "unavailable": [],
         }
         local = [
@@ -218,17 +242,129 @@ def evaluate_lunges(result, windows=None, profile=None):
             output["reps"].append(rep)
             continue
         m = rep["measurements"]
+        phase_result = rep_phases(
+            frames,
+            window,
+            {**profile, "front_leg": front, "weapon_arm": arm, "facing": facing},
+            width,
+            height,
+        )
+        rep["phases"] = phase_result["phases"]
+        rep["hold_detected"] = phase_result["hold_detected"]
+        rep["drill_benchmarks"] = evaluate_benchmarks(
+            frames,
+            window,
+            rep["phases"],
+            {
+                **profile,
+                "camera_view": "side" if side_view else profile.get("camera_view"),
+                "front_leg": front,
+                "weapon_arm": arm,
+                "facing": facing,
+            },
+            width,
+            height,
+        )
+        finish_phase_name = "lunge_hold" if phase_result["hold_detected"] else "lunge_finish"
+        finish_phase = rep["phases"].get(finish_phase_name, {})
+        finish_anchor = finish_phase.get("representative_ms", start)
+        initial_phase = rep["phases"].get("starting_guard", {}).get("measurements", {})
+        if output["capture_requirements"].get("warning"):
+            rep["unavailable"].append(output["capture_requirements"]["warning"])
+
+        def phase_measurement(key):
+            phase_name = "returned_guard" if key == "guard_stance_change" else finish_phase_name
+            phase = rep["phases"].get(phase_name, {})
+            values = phase.get("measurements", {})
+            lookup = {
+                "forward_torso_pitch_change": "signed_torso_tilt",
+                "guard_stance_change": "stance_width",
+            }.get(key, key)
+            sample = values.get(lookup)
+            if not sample:
+                return None
+            sample = {**sample}
+            if key == "forward_torso_pitch_change":
+                if "signed_torso_tilt" not in initial_phase:
+                    return None
+                sample["value"] = (
+                    sample["value"] - initial_phase["signed_torso_tilt"]["value"]
+                ) * (-1 if facing == "left" else 1)
+            elif key == "guard_stance_change":
+                if "stance_width" not in initial_phase:
+                    return None
+                sample["value"] -= initial_phase["stance_width"]["value"]
+            return sample, phase, phase_name
 
         def add(key, value, unit, frame, note=""):
             if value is not None:
+                summary = phase_measurement(key)
                 m[key] = {
                     "value": round(value, 3),
                     "unit": unit,
                     "time_ms": frame["time_ms"] if frame else start,
                     "note": note,
                 }
+                if summary:
+                    sample, phase, phase_name = summary
+                    m[key].update(
+                        value=round(sample["value"], 3),
+                        time_ms=sample["representative_ms"],
+                        single_frame_value=round(value, 3),
+                        summary_method="phase_median",
+                        phase=phase_name,
+                        phase_start_ms=phase["start_ms"],
+                        phase_end_ms=phase["end_ms"],
+                        sample_count=sample["sample_count"],
+                        note=note
+                        + f" Median over {sample['sample_count']} visible samples in {phase_name.replace('_', ' ')}.",
+                    )
 
-        def flag(rule, observation, key):
+        def flag(rule, observation, key, ids, measure, predicate):
+            samples = [
+                f
+                for f in frames
+                if (
+                    m[key]["phase_start_ms"] <= f["time_ms"] <= m[key]["phase_end_ms"]
+                    if m[key].get("summary_method") == "phase_median"
+                    else abs(f["time_ms"] - m[key]["time_ms"]) <= 125
+                )
+                and usable(f, ids)
+                and f.get("track_epoch", 0) in epochs
+            ]
+            values = [(f["time_ms"], measure(f)) for f in samples]
+            values = [(t, value) for t, value in values if value is not None]
+            agreeing = [(t, value) for t, value in values if predicate(value)]
+            span = max((t for t, _ in values), default=0) - min((t for t, _ in values), default=0)
+            support = {
+                "sample_count": len(values),
+                "agreeing_samples": len(agreeing),
+                "span_ms": span,
+                "value_range": [
+                    round(min(v for _, v in values), 3),
+                    round(max(v for _, v in values), 3),
+                ]
+                if values
+                else None,
+                "timestamps_ms": [t for t, _ in values],
+                "note": "Temporal agreement of sampled 2D geometry, not an accuracy probability.",
+            }
+            m[key]["sample_support"] = support
+            if len(agreeing) < 2 or span < 60 or len(agreeing) / max(1, len(values)) < 2 / 3:
+                suppressed = {
+                    "rule": rule,
+                    "rep_number": number,
+                    "measurement_key": key,
+                    "evidence_ms": m[key]["time_ms"],
+                    "reason": "The selected frame's flag was not corroborated by enough neighboring samples.",
+                    "sample_support": support,
+                }
+                rep["suppressed_findings"].append(suppressed)
+                output["suppressed_findings"].append(suppressed)
+                rep["unavailable"].append(
+                    f"{rule.replace('_', ' ')}: neighboring samples do not agree enough for a correction."
+                )
+                return
             finding = {
                 "id": f"technique-rep-{number}-{rule}",
                 "rep_number": number,
@@ -238,6 +374,7 @@ def evaluate_lunges(result, windows=None, profile=None):
                 "cue": RULES[rule]["cue"],
                 "evidence_ms": m[key]["time_ms"],
                 "measurement": m[key],
+                "sample_support": support,
                 "basis": "basic solo-drill rubric; unvalidated heuristic",
             }
             rep["findings"].append(finding)
@@ -258,7 +395,7 @@ def evaluate_lunges(result, windows=None, profile=None):
             None,
             "Includes any hold at the lunge finish; not active recovery speed.",
         )
-        finish = near(start, (11, 12, 23, 24))
+        finish = near(finish_anchor, (11, 12, 23, 24))
         initial = near(onset, (11, 12, 23, 24)) if onset is not None else None
         if finish:
             rep["selected_frame_ms"] = finish["time_ms"]
@@ -270,7 +407,10 @@ def evaluate_lunges(result, windows=None, profile=None):
                 "Relative to image vertical, not spinal curvature or physical balance.",
             )
             if initial:
-                change = signed_torso(finish) - signed_torso(initial)
+                initial_pitch = initial_phase.get("signed_torso_tilt", {}).get(
+                    "value", signed_torso(initial)
+                )
+                change = signed_torso(finish) - initial_pitch
                 if facing == "left":
                     change = -change
                 add(
@@ -280,17 +420,27 @@ def evaluate_lunges(result, windows=None, profile=None):
                     finish,
                     "Change from action-start posture cancels a constant camera roll.",
                 )
+                change = m["forward_torso_pitch_change"]["value"]
                 if (
                     side_view
                     and facing in {"left", "right"}
                     and change > RULES["torso_pitch_change"]["threshold"]
-                    and finish["features"].get("torso_tilt", 0)
+                    and m["projected_torso_tilt"]["value"]
                     > RULES["torso_pitch_change"]["minimum_finish_tilt"]
                 ):
                     flag(
                         "torso_pitch_change",
                         "Your torso pitches farther forward than at the start of this rep.",
                         "forward_torso_pitch_change",
+                        (11, 12, 23, 24),
+                        lambda f: (
+                            (signed_torso(f) - initial_pitch) * (-1 if facing == "left" else 1)
+                        ),
+                        lambda value: (
+                            value > RULES["torso_pitch_change"]["threshold"]
+                            and abs(value + initial_pitch * (-1 if facing == "left" else 1))
+                            > RULES["torso_pitch_change"]["minimum_finish_tilt"]
+                        ),
                     )
         else:
             rep["unavailable"].append(
@@ -302,7 +452,7 @@ def evaluate_lunges(result, windows=None, profile=None):
             )
         if front in {"left", "right"}:
             hip, knee, ankle, toe = (23, 25, 27, 31) if front == "left" else (24, 26, 28, 32)
-            leg_frame = near(start, (hip, knee, ankle))
+            leg_frame = near(finish_anchor, (hip, knee, ankle))
             if leg_frame:
                 key = f"{front}_knee_angle"
                 add(
@@ -321,6 +471,9 @@ def evaluate_lunges(result, windows=None, profile=None):
                         "front_knee_shallow",
                         "The front leg remains comparatively straight at the selected lunge finish.",
                         "front_knee_angle",
+                        (hip, knee, ankle),
+                        lambda f: f["features"].get(key),
+                        lambda value: value > RULES["front_knee_shallow"]["threshold"],
                     )
                 if facing in {"left", "right"} and usable(leg_frame, (hip, knee, ankle, toe)):
                     torso = leg_frame["features"].get("torso_pixels", 0)
@@ -337,15 +490,26 @@ def evaluate_lunges(result, windows=None, profile=None):
                             leg_frame,
                             "Projected horizontal offset, independently measured from knee angle.",
                         )
-                        if side_view and distance > RULES["knee_past_toe"]["threshold"]:
+                        if (
+                            side_view
+                            and m["front_knee_ahead_of_toe"]["value"]
+                            > RULES["knee_past_toe"]["threshold"]
+                        ):
                             flag(
                                 "knee_past_toe",
                                 "The projected front knee is ahead of the toe at this selected frame.",
                                 "front_knee_ahead_of_toe",
+                                (hip, knee, ankle, toe),
+                                lambda f: (
+                                    (point(f, knee)[0] - point(f, toe)[0])
+                                    * (-1 if facing == "left" else 1)
+                                    / f["features"]["torso_pixels"]
+                                ),
+                                lambda value: value > RULES["knee_past_toe"]["threshold"],
                             )
             rear = "right" if front == "left" else "left"
             ids = (24, 26, 28) if rear == "right" else (23, 25, 27)
-            rear_frame = near(start, ids)
+            rear_frame = near(finish_anchor, ids)
             if rear_frame:
                 add(
                     "rear_knee_angle",
@@ -362,6 +526,9 @@ def evaluate_lunges(result, windows=None, profile=None):
                         "rear_knee_bent",
                         "The rear knee remains bent at the selected lunge finish.",
                         "rear_knee_angle",
+                        ids,
+                        lambda f: f["features"].get(f"{rear}_knee_angle"),
+                        lambda value: value < RULES["rear_knee_bent"]["threshold"],
                     )
         else:
             rep["unavailable"].append(
@@ -369,7 +536,7 @@ def evaluate_lunges(result, windows=None, profile=None):
             )
         if arm in {"left", "right"}:
             s, elbow, wrist = (11, 13, 15) if arm == "left" else (12, 14, 16)
-            arm_frame = near(start, (s, elbow, wrist))
+            arm_frame = near(finish_anchor, (s, elbow, wrist))
             if arm_frame:
                 a, b = point(arm_frame, s), point(arm_frame, wrist)
                 dx, dy = b[0] - a[0], a[1] - b[1]
@@ -381,6 +548,7 @@ def evaluate_lunges(result, windows=None, profile=None):
                     arm_frame,
                     "Shoulder-to-wrist direction relative to image horizontal; positive is upward. This is not elbow bend.",
                 )
+                direction = m["weapon_arm_direction"]["value"]
                 add(
                     "weapon_elbow_angle",
                     arm_frame["features"].get(f"{arm}_elbow_angle"),
@@ -394,6 +562,18 @@ def evaluate_lunges(result, windows=None, profile=None):
                         + ("upward" if direction > 0 else "downward")
                         + " relative to the image horizontal; check it against your intended target height.",
                         "weapon_arm_direction",
+                        (s, elbow, wrist),
+                        lambda f: math.degrees(
+                            math.atan2(
+                                point(f, s)[1] - point(f, wrist)[1],
+                                abs(point(f, wrist)[0] - point(f, s)[0]),
+                            )
+                        ),
+                        lambda value: (
+                            value > RULES["arm_direction"]["threshold"]
+                            if direction > 0
+                            else value < -RULES["arm_direction"]["threshold"]
+                        ),
                     )
         else:
             rep["unavailable"].append(
@@ -402,7 +582,10 @@ def evaluate_lunges(result, windows=None, profile=None):
         guard = near(end, (11, 12, 23, 24, 27, 28))
         initial_stance = near(onset, (11, 12, 23, 24, 27, 28)) if onset is not None else None
         if guard and initial_stance:
-            delta = guard["features"]["stance_ratio"] - initial_stance["features"]["stance_ratio"]
+            initial_width = initial_phase.get("stance_width", {}).get(
+                "value", initial_stance["features"]["stance_ratio"]
+            )
+            delta = guard["features"]["stance_ratio"] - initial_width
             add(
                 "guard_stance_change",
                 delta,
@@ -410,11 +593,17 @@ def evaluate_lunges(result, windows=None, profile=None):
                 guard,
                 "Stance width difference from this rep's starting position.",
             )
-            if side_view and delta > RULES["guard_not_restored"]["threshold"]:
+            if (
+                side_view
+                and m["guard_stance_change"]["value"] > RULES["guard_not_restored"]["threshold"]
+            ):
                 flag(
                     "guard_not_restored",
                     "Your stance is wider at the return bookmark than at this rep's start.",
                     "guard_stance_change",
+                    (11, 12, 23, 24, 27, 28),
+                    lambda f: f["features"]["stance_ratio"] - initial_width,
+                    lambda value: value > RULES["guard_not_restored"]["threshold"],
                 )
         if initial and finish and onset is not None:
             moving = [
@@ -437,46 +626,36 @@ def evaluate_lunges(result, windows=None, profile=None):
                     finish,
                     "Median horizontal image-plane hip speed; fixed initial torso scale, not m/s or measured explosiveness.",
                 )
-        if finish and guard and facing in {"left", "right"}:
-            recovering = [
-                f for f in frames if start <= f["time_ms"] <= end and usable(f, (11, 12, 23, 24))
-            ]
-            scale = finish["features"].get("torso_pixels", 0)
-            origin = sum(point(finish, i)[0] for i in (23, 24)) / 2
-            first = None
-            for a, b in zip(recovering, recovering[1:]):
-                if b["time_ms"] - a["time_ms"] > 125 or scale <= 5:
-                    continue
-                da = (
-                    (sum(point(a, i)[0] for i in (23, 24)) / 2 - origin)
-                    * (1 if facing == "left" else -1)
-                    / scale
-                )
-                db = (
-                    (sum(point(b, i)[0] for i in (23, 24)) / 2 - origin)
-                    * (1 if facing == "left" else -1)
-                    / scale
-                )
-                if da > 0.06 and db > 0.06:
-                    first = a
-                    break
-            if first:
-                add(
-                    "estimated_recovery_onset",
-                    first["time_ms"],
-                    "ms",
-                    first,
-                    "First two consecutive samples with a backward hip displacement above 0.06 initial torso lengths; an estimated movement onset, not a reviewed phase label.",
-                )
-                add(
-                    "estimated_active_recovery_time",
-                    max(0, end - first["time_ms"]),
-                    "ms",
-                    guard,
-                    "Estimated backward-motion onset to guard bookmark; sample resolution limits precision.",
-                )
+        recovery_onset = phase_result["recovery_onset_ms"]
+        if recovery_onset is not None and guard:
+            add(
+                "estimated_recovery_onset",
+                recovery_onset,
+                "ms",
+                None,
+                "First two consecutive samples with backward hip displacement above 0.06 initial torso lengths; estimated, not a reviewed phase label.",
+            )
+            add(
+                "estimated_active_recovery_time",
+                max(0, end - recovery_onset),
+                "ms",
+                guard,
+                "Estimated backward-motion onset to guard bookmark; excludes the preceding hold and is limited by pose sampling.",
+            )
+        geometry_keys = set(m) - {
+            "action_to_lunge_time",
+            "finish_to_guard_time",
+            "action_projected_hip_speed",
+            "estimated_recovery_onset",
+            "estimated_active_recovery_time",
+        }
+        rep["geometry_available"] = bool(geometry_keys)
         rep["status"] = (
-            "review_flags" if rep["findings"] else "measured_no_flags" if m else "unavailable"
+            "review_flags"
+            if rep["findings"]
+            else "measured_no_flags"
+            if geometry_keys
+            else "unavailable"
         )
         output["reps"].append(rep)
     times = [
@@ -493,6 +672,8 @@ def evaluate_lunges(result, windows=None, profile=None):
         "review_flags"
         if output["findings"]
         else "measured_no_flags"
+        if any(r.get("geometry_available") for r in output["reps"])
+        else "unavailable"
         if output["reps"]
         else "no_reps"
     )

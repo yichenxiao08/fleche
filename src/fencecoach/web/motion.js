@@ -1,3 +1,4 @@
+import { html } from "./html.js";
 import { e, icon, label } from "./ui.js";
 import { api, downloadJSON } from "./api-client.js";
 
@@ -11,7 +12,26 @@ const names = {
   right_arm_extension: "Right arm",
 };
 export function measurementCards(measurements = []) {
-  return `<div class="motion-metrics">${measurements.map((m) => `<article><span>${e(label(m.name))}</span><strong>${Number(m.value).toFixed(m.unit === "deg" ? 1 : 2)}<small> ${e(m.unit)}</small></strong><small>${Math.round(m.confidence * 100)}% landmark quality${m.coverage != null ? ` · ${Math.round(m.coverage * 100)}% coverage` : ""}</small></article>`).join("")}</div>`;
+  return html`<div class="motion-metrics">
+    ${measurements
+      .map(
+        (m) =>
+          html`<article>
+            <span>${e(label(m.name))}</span
+            ><strong
+              >${Number(m.value).toFixed(m.unit === "deg" ? 1 : 2)}<small>
+                ${e(m.unit)}</small
+              ></strong
+            ><small
+              >${Math.round(m.confidence * 100)}% landmark
+              quality${m.coverage != null
+                ? ` · ${Math.round(m.coverage * 100)}% coverage`
+                : ""}</small
+            >
+          </article>`,
+      )
+      .join("")}
+  </div>`;
 }
 function chart(result, view = "knees") {
   const keys =
@@ -47,35 +67,467 @@ function chart(result, view = "knees") {
         d += `${last != null && frame.time_ms - last <= 300 ? "L" : "M"}${(48 + (frame.time_ms / result.duration_ms) * 596).toFixed(1)} ${(174 - (value / high) * 140).toFixed(1)} `;
         last = frame.time_ms;
       }
-      return `<path d="${d}" stroke="${colors[i]}" stroke-width="2.5" fill="none"/>`;
+      return html`<path
+        d="${d}"
+        stroke="${colors[i]}"
+        stroke-width="2.5"
+        fill="none"
+      />`;
     })
     .join("");
-  return `<svg class="motion-chart" viewBox="0 0 680 210" role="img" aria-label="${e(view)} measurements over video time"><g stroke="var(--line)"><path d="M48 34H644M48 104H644M48 174H644"/></g><g fill="var(--muted)" font-size="12"><text x="6" y="38">${high}</text><text x="6" y="108">${high / 2}</text><text x="24" y="178">0</text><text x="48" y="202">0s</text><text x="598" y="202">${(result.duration_ms / 1000).toFixed(1)}s</text></g>${paths}</svg><p class="helper">${keys.map((k, i) => `<span style="color:${colors[i]}">${e(names[k])}</span>`).join(" · ")} · ${view === "arms" ? "extension ratio" : "degrees"}. Gaps indicate unavailable measurements.</p>`;
+  return html`<svg
+      class="motion-chart"
+      viewBox="0 0 680 210"
+      role="img"
+      aria-label="${e(view)} measurements over video time"
+    >
+      <g stroke="var(--line)"><path d="M48 34H644M48 104H644M48 174H644" /></g>
+      <g fill="var(--muted)" font-size="12">
+        <text x="6" y="38">${high}</text>
+        <text x="6" y="108">${high / 2}</text>
+        <text x="24" y="178">0</text>
+        <text x="48" y="202">0s</text>
+        <text x="598" y="202">${(result.duration_ms / 1000).toFixed(1)}s</text>
+      </g>
+      ${paths}
+    </svg>
+    <p class="helper">
+      ${keys
+        .map(
+          (k, i) =>
+            html`<span style="color:${colors[i]}">${e(names[k])}</span>`,
+        )
+        .join(" · ")}
+      · ${view === "arms" ? "extension ratio" : "degrees"}. Gaps indicate
+      unavailable measurements.
+    </p>`;
 }
 function gesturePredictions(result) {
   if (!result.gestures?.length) return "";
-  return `<details class="disclosure"><summary>Experimental movement classifier</summary><p class="helper">${e(result.gesture_model.version)} · Predictions need review. Model scores are not accuracy probabilities.</p>${result.gestures.map((gesture) => `<div class="annotation-row"><span>${e(label(gesture.label))} · ${(gesture.start_ms / 1000).toFixed(2)}–${(gesture.end_ms / 1000).toFixed(2)} s · Model score ${Math.round(gesture.model_score * 100)}%</span><button class="text-action" data-gesture-seek="${gesture.start_ms}">Watch ${icon("play")}</button></div>`).join("")}</details>`;
+  return html`<details class="disclosure">
+    <summary>Experimental movement classifier</summary>
+    <p class="helper">
+      ${e(result.gesture_model.version)} · Predictions need review. Model scores
+      are not accuracy probabilities.
+    </p>
+    ${result.gestures
+      .map(
+        (gesture) =>
+          html`<div class="annotation-row">
+            <span
+              >${e(label(gesture.label))} ·
+              ${(gesture.start_ms / 1000).toFixed(2)}–${(
+                gesture.end_ms / 1000
+              ).toFixed(2)}
+              s · Model score ${Math.round(gesture.model_score * 100)}%</span
+            ><button
+              class="text-action"
+              data-gesture-seek="${gesture.start_ms}"
+            >
+              Watch ${icon("play")}
+            </button>
+          </div>`,
+      )
+      .join("")}
+  </details>`;
 }
 function activityPredictions(result) {
   if (!result.activity_predictions?.length) return "";
-  return `<details class="disclosure"><summary>Experimental activity classifier</summary><p class="helper">${e(result.activity_model.version)} · phase scores need review and are not accuracy probabilities.</p>${result.activity_predictions.map((phase) => `<div class="annotation-row"><span>${e(label(phase.label))} · ${(phase.start_ms / 1000).toFixed(2)}–${(phase.end_ms / 1000).toFixed(2)} s · Model score ${Math.round(phase.model_score * 100)}%</span><button class="text-action" data-gesture-seek="${phase.start_ms}">Watch ${icon("play")}</button></div>`).join("")}</details>`;
+  return html`<details class="disclosure">
+    <summary>Experimental activity classifier</summary>
+    <p class="helper">
+      ${e(result.activity_model.version)} · phase scores need review and are not
+      accuracy probabilities.
+    </p>
+    ${result.activity_predictions
+      .map(
+        (phase) =>
+          html`<div class="annotation-row">
+            <span
+              >${e(label(phase.label))} ·
+              ${(phase.start_ms / 1000).toFixed(2)}–${(
+                phase.end_ms / 1000
+              ).toFixed(2)}
+              s · Model score ${Math.round(phase.model_score * 100)}%</span
+            ><button class="text-action" data-gesture-seek="${phase.start_ms}">
+              Watch ${icon("play")}
+            </button>
+          </div>`,
+      )
+      .join("")}
+  </details>`;
 }
 export function footworkPanel(result) {
   const summary = result.footwork_summary;
   if (!summary) return "";
-  return `<details class="disclosure"><summary>Footwork & rhythm</summary><div class="motion-metrics"><article><span>Lower body visible</span><strong>${Math.round(summary.visible_fraction * 100)}%</strong><small>${summary.visible_frames} / ${summary.sampled_frames} samples; wrists are optional</small></article>${summary.stance_width_range ? `<article><span>Stance width range</span><strong>${summary.stance_width_range.map((v) => Number(v).toFixed(2)).join("–")}</strong><small>image-plane leg lengths</small></article>` : ""}</div>${summary.rhythm_intervals?.length ? summary.rhythm_intervals.map((r) => `<p>${(r.start_ms / 1000).toFixed(2)}–${(r.end_ms / 1000).toFixed(2)} s · ${r.cycles_per_minute} vertical cycles/min · ${Math.round(r.interval_variation * 100)}% interval variation</p>`).join("") : `<p>No sustained, regular vertical rhythm was found in the visible samples.</p>`}<p class="helper">Rhythm describes changes in hip height relative to the feet. It is a motion estimate, not a verified bounce count or a technique score.</p></details>`;
+  return html`<details class="disclosure">
+    <summary>Footwork & rhythm</summary>
+    <div class="motion-metrics">
+      <article>
+        <span>Lower body visible</span
+        ><strong>${Math.round(summary.visible_fraction * 100)}%</strong
+        ><small
+          >${summary.visible_frames} / ${summary.sampled_frames} samples; wrists
+          are optional</small
+        >
+      </article>
+      ${summary.stance_width_range
+        ? html`<article>
+            <span>Stance width range</span
+            ><strong
+              >${summary.stance_width_range
+                .map((v) => Number(v).toFixed(2))
+                .join("–")}</strong
+            ><small>image-plane leg lengths</small>
+          </article>`
+        : ""}
+    </div>
+    ${summary.rhythm_intervals?.length
+      ? summary.rhythm_intervals
+          .map(
+            (r) =>
+              html`<p>
+                ${(r.start_ms / 1000).toFixed(2)}–${(r.end_ms / 1000).toFixed(
+                  2,
+                )}
+                s · ${r.cycles_per_minute} vertical cycles/min ·
+                ${Math.round(r.interval_variation * 100)}% interval variation
+              </p>`,
+          )
+          .join("")
+      : html`<p>
+          No sustained, regular vertical rhythm was found in the visible
+          samples.
+        </p>`}
+    <p class="helper">
+      Rhythm describes changes in hip height relative to the feet. It is a
+      motion estimate, not a verified bounce count or a technique score.
+    </p>
+  </details>`;
 }
 export function motionPanel(result) {
-  return techniquePanel(result.technique_evaluation) + movementPanel(result);
+  return (
+    techniquePanel(result.technique_evaluation) +
+    html`<details class="disclosure">
+      <summary>Whole-clip diagnostics and training labels</summary>
+      ${movementPanel(result)}
+    </details>`
+  );
 }
 function techniquePanel(evaluation) {
-  if (!evaluation) return '';
-  if (evaluation.status === 'unsupported') return `<section class="motion-panel"><h2>Technique review</h2><p class="helper">${e(evaluation.reason)}</p></section>`;
-  return `<section class="motion-panel"><h2>Per-rep technique review</h2><p class="helper">Basic-lunge drill checks · automatic review flags, not a trained correctness score.</p>${evaluation.reps.map(rep => `<details class="disclosure"><summary>Rep ${rep.rep_number} · ${rep.findings.length ? `${rep.findings.length} checks to review` : 'No available check triggered'}</summary><button class="secondary-action" data-activity-seek="${rep.selected_frame_ms ?? rep.lunge_ms}" data-activity-end="${Math.min(rep.guard_ms, (rep.selected_frame_ms ?? rep.lunge_ms) + 1000)}">View lunge frame</button>${rep.findings.map(f => `<p><strong>${e(f.observation)}</strong><br>${e(f.cue)} <small>At ${(f.evidence_ms/1000).toFixed(2)}s</small></p>`).join('')}<div class="motion-metrics">${Object.entries(rep.measurements).map(([key,m]) => `<article><span>${e(label(key))}</span><strong>${Number(m.value).toFixed(m.unit==='deg'?1:2)}<small> ${e(m.unit)}</small></strong><small>${e(m.note || '')}</small></article>`).join('')}</div>${rep.unavailable.map(note => `<p class="helper">${e(note)}</p>`).join('')}</details>`).join('')}<p class="helper">No flags does not mean correct technique. Timing comparisons are specific to the drill; finish-to-guard can include a pause. Rear-foot contact and physical balance are not measured.</p></section>`;
+  if (!evaluation) return "";
+  if (evaluation.status === "unsupported")
+    return html`<section class="motion-panel">
+      <h2>Technique review</h2>
+      <p class="helper">${e(evaluation.reason)}</p>
+    </section>`;
+  const names = {
+    starting_guard: "Starting guard",
+    lunge_drive: "Lunge drive",
+    lunge_hold: "Held lunge",
+    lunge_finish: "Lunge finish · no hold confirmed",
+    active_recovery: "Active recovery",
+    recovery_peak: "Deepest rear-knee bend during recovery",
+    returned_guard: "Returned guard",
+  };
+  const phaseCards = (phase) =>
+    html`<div class="motion-metrics">
+      ${Object.entries(phase.measurements)
+        .filter(([key]) => key !== "signed_torso_tilt")
+        .map(
+          ([key, m]) =>
+            html`<article>
+              <span>${e(label(key))}</span
+              ><strong
+                >${Number(m.value).toFixed(m.unit === "deg" ? 1 : 2)}<small>
+                  ${e(m.unit)}</small
+                ></strong
+              ><small>Phase median · ${m.sample_count} visible samples</small>
+            </article>`,
+        )
+        .join("")}
+    </div>`;
+  const reps = evaluation.reps
+    .map((rep) => {
+      const status =
+        rep.status === "unavailable"
+          ? "Joint measurements unavailable"
+          : rep.findings.length
+            ? `${rep.findings.length} checks to review`
+            : "No measured check triggered";
+      const phases = Object.entries(rep.phases || {})
+        .map(
+          ([name, phase]) =>
+            html`<details class="disclosure">
+              <summary>
+                ${e(names[name] || label(name))} ·
+                ${(phase.start_ms / 1000).toFixed(2)}–${(
+                  phase.end_ms / 1000
+                ).toFixed(2)}s
+              </summary>
+              <button
+                class="secondary-action"
+                data-activity-seek="${phase.start_ms}"
+                data-activity-end="${Math.max(
+                  phase.end_ms,
+                  phase.start_ms + 100,
+                )}"
+              >
+                Watch this phase</button
+              >${phaseCards(phase)}
+              <p class="helper">${e(phase.method)}</p>
+            </details>`,
+        )
+        .join("");
+      const findings = rep.findings
+        .map(
+          (f) =>
+            html`<p>
+              <strong>${e(f.observation)}</strong> ${e(f.cue)}
+              <small
+                >${f.sample_support
+                  ? `${f.sample_support.agreeing_samples} agreeing samples · `
+                  : ""}${(f.evidence_ms / 1000).toFixed(2)}s</small
+              >
+            </p>`,
+        )
+        .join("");
+      return html`<details class="disclosure">
+        <summary>Rep ${rep.rep_number} · ${status}</summary>
+        ${findings}${phases ||
+        '<p class="helper">Timing bookmarks alone cannot establish joint posture.</p>'}${rep.unavailable
+          .map((note) => html`<p class="helper">${e(note)}</p>`)
+          .join("")}
+        <details class="disclosure">
+          <summary>Timing and measurement details</summary>
+          <div class="motion-metrics">
+            ${Object.entries(rep.measurements)
+              .map(
+                ([key, m]) =>
+                  html`<article>
+                    <span>${e(label(key))}</span
+                    ><strong
+                      >${Number(m.value).toFixed(
+                        m.unit === "deg" ? 1 : 2,
+                      )}<small> ${e(m.unit)}</small></strong
+                    ><small>${e(m.note || "")}</small>
+                  </article>`,
+              )
+              .join("")}
+          </div>
+        </details>
+      </details>`;
+    })
+    .join("");
+  return html`<section class="motion-panel">
+    <h2>Per-rep phase review</h2>
+    <p class="helper">
+      Compare matching phases, not the average of the whole clip. Holds must be
+      visible; recovery peak means the deepest sampled rear-knee bend.
+    </p>
+    ${evaluation.capture_requirements?.warning
+      ? html`<p class="helper" role="status">
+          ${e(evaluation.capture_requirements.warning)}
+        </p>`
+      : ""}${reps ||
+    '<p class="helper">No complete movement cycle is available to summarize.</p>'}
+    <p class="helper">
+      These are 2D measurements and provisional review flags. Missing checks and
+      no flags do not establish correct technique.
+    </p>
+  </section>`;
 }
 function movementPanel(result) {
   if (!result.clip_measurements) return "";
-  return `<section class="motion-panel"><div class="section-heading"><h2>Your movement, measured.</h2></div><div class="range-control"><button data-motion-view="knees" class="active">Knees</button><button data-motion-view="arms">Arm extension</button><button data-motion-view="torso">Torso</button></div><div id="motion-chart">${chart(result)}</div><details class="disclosure"><summary>Whole-clip measurements ${icon("chevron")}</summary>${measurementCards(result.clip_measurements)}${result.initial_guard_measurements?.length ? `<h3>Initial guard / first 1.5 seconds</h3>${measurementCards(result.initial_guard_measurements)}` : ""}<p class="helper">These summaries include all visible phases. They are not en-garde-specific or technique scores. Arm sides refer to anatomical left/right, not screen position. Torso tilt cannot measure spinal straightness.</p></details>${result.footwork_events?.length ? `<details class="disclosure"><summary>Footwork movement proposals</summary>${result.footwork_events.map((event) => `<p>${e(label(event.label))} · ${(event.start_ms / 1000).toFixed(2)}–${(event.end_ms / 1000).toFixed(2)} s</p>`).join("")}<p class="helper">Based on hip translation near the initial stance. Review each interval; these are heuristic proposals.</p></details>` : ""}${footworkPanel(result)}${gesturePredictions(result)}${activityPredictions(result)}<details class="disclosure"><summary>Review labels & build training data ${icon("chevron")}</summary><p class="helper">The app can suggest reps and phases, but a suggestion is not a training label. Confirm each interval by watching the footage, then save it. Activity-phase models need reviewed examples across multiple clips before training.</p><div id="activity-suggestions">${(result.activity_segments || []).map((phase, i) => `<div class="annotation-row"><span>${e(label(phase.label))} · ${(phase.start_ms / 1000).toFixed(2)}–${(phase.end_ms / 1000).toFixed(2)} s</span><button class="text-action" data-activity-fill="${i}">Review these times</button></div>`).join("") || '<p class="empty-note">No phase suggestions yet.</p>'}</div><div id="activity-labels"></div><form id="activity-form"><label class="field"><span><input type="checkbox" name="domain_verified" id="activity-domain" /> This clip shows modern sport fencing or a fencing footwork drill</span></label><div class="form-row"><label class="field"><span>Start / seconds</span><input id="activity-start" name="start" type="number" min="0" max="${result.duration_ms / 1000}" step="0.001" value="0" required></label><label class="field"><span>End / seconds</span><input id="activity-end" name="end" type="number" min="0.001" max="${result.duration_ms / 1000}" step="0.001" value="1" required></label></div><label class="field"><span>What is happening?</span><select id="activity-phase" name="label">${["setup", "exercise", "between_reps", "rest", "exit"].map((v) => `<option value="${v}">${e(label(v))}</option>`).join("")}</select></label><button type="submit" class="secondary-action">Save reviewed phase ${icon("arrow")}</button></form><details class="disclosure"><summary>Gesture labels</summary><p class="helper">Label the movement itself to build the lunge, recovery and footwork classifier.</p><div id="gesture-labels"></div><form id="gesture-form"><label class="field"><span><input type="checkbox" name="domain_verified" id="gesture-domain" /> This clip shows modern sport fencing or a fencing footwork drill</span></label><div class="form-row"><label class="field"><span>Start / seconds</span><input name="start" type="number" min="0" max="${result.duration_ms / 1000}" step="0.001" value="0" required></label><label class="field"><span>End / seconds</span><input name="end" type="number" min="0.001" max="${result.duration_ms / 1000}" step="0.001" value="1" required></label></div><label class="field"><span>Movement you see</span><select name="label">${["en_garde", "advance", "retreat", "lunge", "recovery", "bounce", "jump_forward", "jump_back", "shuffle", "other"].map((v) => `<option value="${v}">${e(label(v))}</option>`).join("")}</select></label><button type="submit" class="secondary-action">Save gesture label ${icon("arrow")}</button></form><button class="text-action" data-dataset-export>Export labeled poses ${icon("arrow")}</button><p class="helper">Training splits by original video, so duplicate uploads cannot inflate the held-out score. More reviewed clips and independent evaluation are needed before model promotion.</p></details></details></section>`;
+  return html`<section class="motion-panel">
+    <div class="section-heading"><h2>Your movement, measured.</h2></div>
+    <div class="range-control">
+      <button data-motion-view="knees" class="active">Knees</button
+      ><button data-motion-view="arms">Arm extension</button
+      ><button data-motion-view="torso">Torso</button>
+    </div>
+    <div id="motion-chart">${chart(result)}</div>
+    <details class="disclosure">
+      <summary>Whole-clip measurements ${icon("chevron")}</summary>
+      ${measurementCards(result.clip_measurements)}${result
+        .initial_guard_measurements?.length
+        ? html`<h3>Initial guard / first 1.5 seconds</h3>
+            ${measurementCards(result.initial_guard_measurements)}`
+        : ""}
+      <p class="helper">
+        These summaries include all visible phases. They are not
+        en-garde-specific or technique scores. Arm sides refer to anatomical
+        left/right, not screen position. Torso tilt cannot measure spinal
+        straightness.
+      </p>
+    </details>
+    ${result.footwork_events?.length
+      ? html`<details class="disclosure">
+          <summary>Footwork movement proposals</summary>
+          ${result.footwork_events
+            .map(
+              (event) =>
+                `<p>${e(label(event.label))} · ${(event.start_ms / 1000).toFixed(2)}–${(event.end_ms / 1000).toFixed(2)} s</p>`,
+            )
+            .join("")}
+          <p class="helper">
+            Based on hip translation near the initial stance. Review each
+            interval; these are heuristic proposals.
+          </p>
+        </details>`
+      : ""}${footworkPanel(result)}${gesturePredictions(
+      result,
+    )}${activityPredictions(result)}
+    <details class="disclosure">
+      <summary>Review labels & build training data ${icon("chevron")}</summary>
+      <p class="helper">
+        The app can suggest reps and phases, but a suggestion is not a training
+        label. Confirm each interval by watching the footage, then save it.
+        Activity-phase models need reviewed examples across multiple clips
+        before training.
+      </p>
+      <div id="activity-suggestions">
+        ${(result.activity_segments || [])
+          .map(
+            (phase, i) =>
+              html`<div class="annotation-row">
+                <span
+                  >${e(label(phase.label))} ·
+                  ${(phase.start_ms / 1000).toFixed(2)}–${(
+                    phase.end_ms / 1000
+                  ).toFixed(2)}
+                  s</span
+                ><button class="text-action" data-activity-fill="${i}">
+                  Review these times
+                </button>
+              </div>`,
+          )
+          .join("") || '<p class="empty-note">No phase suggestions yet.</p>'}
+      </div>
+      <div id="activity-labels"></div>
+      <form id="activity-form">
+        <label class="field"
+          ><span
+            ><input
+              type="checkbox"
+              name="domain_verified"
+              id="activity-domain"
+            />
+            This clip shows modern sport fencing or a fencing footwork
+            drill</span
+          ></label
+        >
+        <div class="form-row">
+          <label class="field"
+            ><span>Start / seconds</span
+            ><input
+              id="activity-start"
+              name="start"
+              type="number"
+              min="0"
+              max="${result.duration_ms / 1000}"
+              step="0.001"
+              value="0"
+              required /></label
+          ><label class="field"
+            ><span>End / seconds</span
+            ><input
+              id="activity-end"
+              name="end"
+              type="number"
+              min="0.001"
+              max="${result.duration_ms / 1000}"
+              step="0.001"
+              value="1"
+              required
+          /></label>
+        </div>
+        <label class="field"
+          ><span>What is happening?</span
+          ><select id="activity-phase" name="label">
+            ${["setup", "exercise", "between_reps", "rest", "exit"]
+              .map((v) => html`<option value="${v}">${e(label(v))}</option>`)
+              .join("")}
+          </select></label
+        ><button type="submit" class="secondary-action">
+          Save reviewed phase ${icon("arrow")}
+        </button>
+      </form>
+      <details class="disclosure">
+        <summary>Gesture labels</summary>
+        <p class="helper">
+          Label the movement itself to build the lunge, recovery and footwork
+          classifier.
+        </p>
+        <div id="gesture-labels"></div>
+        <form id="gesture-form">
+          <label class="field"
+            ><span
+              ><input
+                type="checkbox"
+                name="domain_verified"
+                id="gesture-domain"
+              />
+              This clip shows modern sport fencing or a fencing footwork
+              drill</span
+            ></label
+          >
+          <div class="form-row">
+            <label class="field"
+              ><span>Start / seconds</span
+              ><input
+                name="start"
+                type="number"
+                min="0"
+                max="${result.duration_ms / 1000}"
+                step="0.001"
+                value="0"
+                required /></label
+            ><label class="field"
+              ><span>End / seconds</span
+              ><input
+                name="end"
+                type="number"
+                min="0.001"
+                max="${result.duration_ms / 1000}"
+                step="0.001"
+                value="1"
+                required
+            /></label>
+          </div>
+          <label class="field"
+            ><span>Movement you see</span
+            ><select name="label">
+              ${[
+                "en_garde",
+                "advance",
+                "retreat",
+                "lunge",
+                "recovery",
+                "bounce",
+                "jump_forward",
+                "jump_back",
+                "shuffle",
+                "other",
+              ]
+                .map((v) => html`<option value="${v}">${e(label(v))}</option>`)
+                .join("")}
+            </select></label
+          ><button type="submit" class="secondary-action">
+            Save gesture label ${icon("arrow")}
+          </button>
+        </form>
+        <button class="text-action" data-dataset-export>
+          Export labeled poses ${icon("arrow")}
+        </button>
+        <p class="helper">
+          Training splits by original video, so duplicate uploads cannot inflate
+          the held-out score. More reviewed clips and independent evaluation are
+          needed before model promotion.
+        </p>
+      </details>
+    </details>
+  </section>`;
 }
 export function repDetails(window, result) {
   const proposal = result.candidates.find(
@@ -88,16 +540,31 @@ export function repDetails(window, result) {
     (window.onset_ms != null && proposal.onset_ms !== window.onset_ms)
   )
     return "";
-  return `<details class="disclosure"><summary>Rep measurements ${icon("chevron")}</summary><p class="helper">Proposed movement onset ${(proposal.onset_ms / 1000).toFixed(3)} s. Review it against the footage.</p>${measurementCards(proposal.measurements)}</details>`;
+  return html`<details class="disclosure">
+    <summary>Rep measurements ${icon("chevron")}</summary>
+    <p class="helper">
+      Proposed movement onset ${(proposal.onset_ms / 1000).toFixed(3)} s. Review
+      it against the footage.
+    </p>
+    ${measurementCards(proposal.measurements)}
+  </details>`;
 }
 function labelRows(labels, removeAttribute, emptyMessage) {
   return (
     labels
       .map(
         (l, i) =>
-          `<div class="annotation-row"><span>${e(label(l.label))} · ${(l.start_ms / 1000).toFixed(2)}–${(l.end_ms / 1000).toFixed(2)} s</span><button class="text-action" ${removeAttribute}="${i}">Remove</button></div>`,
+          html`<div class="annotation-row">
+            <span
+              >${e(label(l.label))} ·
+              ${(l.start_ms / 1000).toFixed(2)}–${(l.end_ms / 1000).toFixed(2)}
+              s</span
+            ><button class="text-action" ${removeAttribute}="${i}">
+              Remove
+            </button>
+          </div>`,
       )
-      .join("") || `<p class="empty-note">${e(emptyMessage)}</p>`
+      .join("") || html`<p class="empty-note">${e(emptyMessage)}</p>`
   );
 }
 export function setupMotion({ state, notice }) {
@@ -107,7 +574,11 @@ export function setupMotion({ state, notice }) {
     state.annotations = await api(
       `/api/videos/${state.videoJob.job_id}/annotations`,
     );
-    root.innerHTML = labelRows(state.annotations.labels || [], "data-label-remove", "No human gesture labels saved.");
+    root.innerHTML = labelRows(
+      state.annotations.labels || [],
+      "data-label-remove",
+      "No human gesture labels saved.",
+    );
     const phases = document.getElementById("activity-labels");
     if (phases)
       phases.innerHTML = labelRows(
@@ -128,7 +599,9 @@ export function setupMotion({ state, notice }) {
         if (!["gesture-domain", "activity-domain"].includes(event.target.id))
           return;
         const otherId =
-          event.target.id === "gesture-domain" ? "activity-domain" : "gesture-domain";
+          event.target.id === "gesture-domain"
+            ? "activity-domain"
+            : "gesture-domain";
         const other = document.getElementById(otherId);
         if (other) other.checked = event.target.checked;
       });
@@ -141,9 +614,16 @@ export function setupMotion({ state, notice }) {
             video.currentTime = Number(b.dataset.gestureSeek) / 1000;
             video.play().catch(() => {});
           } else if (b.hasAttribute("data-activity-fill")) {
-            const phase = state.videoResult.activity_segments[Number(b.dataset.activityFill)];
-            document.getElementById("activity-start").value = (phase.start_ms / 1000).toFixed(3);
-            document.getElementById("activity-end").value = (phase.end_ms / 1000).toFixed(3);
+            const phase =
+              state.videoResult.activity_segments[
+                Number(b.dataset.activityFill)
+              ];
+            document.getElementById("activity-start").value = (
+              phase.start_ms / 1000
+            ).toFixed(3);
+            document.getElementById("activity-end").value = (
+              phase.end_ms / 1000
+            ).toFixed(3);
             document.getElementById("activity-phase").value = phase.label;
             document.getElementById("activity-phase").focus();
           } else if (b.dataset.motionView) {
@@ -173,9 +653,9 @@ export function setupMotion({ state, notice }) {
             await refresh();
           } else if (b.hasAttribute("data-activity-label-remove")) {
             b.disabled = true;
-            const activity_labels = (state.annotations.activity_labels || []).filter(
-              (_, i) => i !== Number(b.dataset.activityLabelRemove),
-            );
+            const activity_labels = (
+              state.annotations.activity_labels || []
+            ).filter((_, i) => i !== Number(b.dataset.activityLabelRemove));
             await api(`/api/videos/${state.videoJob.job_id}/annotations`, {
               method: "PUT",
               body: JSON.stringify({

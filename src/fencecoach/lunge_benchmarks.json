@@ -1,0 +1,19 @@
+{
+  "source": "Athlete-supplied solo-lunge drill benchmarks, 2026-10-10",
+  "timing": {
+    "start": "front-foot lift",
+    "end": "observed stable lunge finish",
+    "fast_below_seconds": 0.4,
+    "normal_through_seconds": 0.5
+  },
+  "reach": {
+    "target_feet_separation_leg_lengths": 2.0,
+    "interpretation": "Approximate reference only; no minimum, maximum or pass/fail tolerance is specified.",
+    "definition": "Horizontal separation of heel/toe foot centres divided by hip-knee plus knee-ankle segment length."
+  },
+  "rear_foot": {
+    "criterion": "whole rear foot moves forward during the lunge",
+    "minimum_forward_metres": 0.3048,
+    "interpretation": "Custom displacement criterion; does not measure force, power or explosiveness."
+  }
+}

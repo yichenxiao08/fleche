@@ -1,0 +1,24 @@
+{
+  "scope": "Live answer relevance, follow-up continuity, repetition coverage, selected numeric facts and presentation. Automated checks are not expert validation of fencing advice.",
+  "model": "gemini-3.5-flash-lite",
+  "passed": 0,
+  "total": 1,
+  "results": [
+    {
+      "scenario": "arm-followups",
+      "question": "what about my arm",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "answer": "The answer was cut off before completion. Given the latest session data, it looks like your front knee angle has been consistently higher compared to your reference reps, which suggests a tendency to extend your front leg more. This could be a result of a slight forward lean or a need to maintain balance. For the arm, the sword arm (the one holding the weapon) has been more forward toward the target, while the rear arm has been more behind you, which is typical in a lunge.\n\nTo improve, try to settle into a more balanced stance where both arms are more evenly distributed around your body. For the arm roles, ensure the sword arm is more directly aimed at the target and the rear arm is more behind you, maintaining the traditional lunge finish.\n\nIf you need a specific",
+      "issues": [
+        "Generic arm advice omitted available current-session observations."
+      ],
+      "status": "failed",
+      "latency_ms": 136416.35,
+      "pipeline_ms": 136464.62,
+      "model_calls": 1,
+      "review_corrections": [],
+      "actual_model": "qwen2.5:3b",
+      "actual_mode": "local"
+    }
+  ]
+}

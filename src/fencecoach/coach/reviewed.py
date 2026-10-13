@@ -6,15 +6,20 @@ import re
 from fencecoach.schemas import KnowledgeSource
 
 
-def select_feedback(request, limit=2):
+def select_feedback(request, limit=None):
     review = request.reviewed_feedback
     if review.get("status") != "submitted":
         return []
-    reps = review.get("reps", [])
+    reps = sorted(review.get("reps", []), key=lambda rep: rep["rep_number"])
     question = request.question.lower()
     named = re.search(r"\brep(?:etition)?\s*(\d+)\b", question)
     if named:
-        return [r for r in reps if r["rep_number"] == int(named[1])][:limit]
+        selected = [r for r in reps if r["rep_number"] == int(named[1])]
+        return selected[:limit] if limit is not None else selected
+    if re.search(r"\b(?:last|final)\s+(?:rep|lunge|one)\b|\bmy last\b", question):
+        return reps[-1:]
+    if re.search(r"\b(?:first|opening)\s+(?:rep|lunge|one)\b|\bmy first\b", question):
+        return reps[:1]
     topics = {
         "arm": ("arm", "hand", "sword", "target", "extension"),
         "knee": ("knee", "bend", "leg", "depth", "lower", "short"),
@@ -35,7 +40,16 @@ def select_feedback(request, limit=2):
             + bool(rep.get("main_issue"))
         )
 
-    return sorted(reps, key=score, reverse=True)[:limit]
+    if re.search(
+        (
+            r"\b(?:best|worst|strongest|weakest|compare|comparison)\b|"
+            r"\bwhich (?:rep|lunge)\b|\bwhich of my lunges\b"
+        ),
+        question,
+    ) and limit is None:
+        return reps
+    ranked = sorted(reps, key=score, reverse=True)
+    return ranked[: (2 if limit is None else limit)]
 
 
 def feedback_source(request, reps):
@@ -44,6 +58,7 @@ def feedback_source(request, reps):
         "reviewer": review.get("reviewer"),
         "role": review.get("reviewer_role"),
         "role_verified": False,
+        "provenance_policy": "These are submitted human observations for this source clip only. Statements about power, explosiveness or short distance are reviewer judgments, not measured force, speed or calibrated distance. Attribute them to the review; never transfer them to a different clip as observed facts.",
         "weapon": review.get("weapon"),
         "intended_drill": review.get("intended_drill"),
         "target_height": review.get("target_height"),
@@ -73,7 +88,7 @@ def reviewed_fallback(request):
         window = (request.reviewed_feedback.get("integration") or {}).get("corrected_windows", [])
         if len(window) >= rep["rep_number"]:
             when = window[rep["rep_number"] - 1]["start_ms"]
-    anchor = f" at {when / 1000:.2f}s" if when is not None else ""
+    anchor = f" at {when / 1000:.1f}s" if when is not None else ""
     issue = rep.get("main_issue") or rep.get("done_well") or "the reviewed movement"
     cue = (
         rep.get("cue") or "Repeat the intended drill and compare its finish with this reviewed rep."
@@ -84,7 +99,7 @@ def reviewed_fallback(request):
         if rep.get("intentional") == "yes"
         else ""
     )
-    return f"Your submitted review flags rep {rep['rep_number']}{anchor}: {issue.strip().rstrip('.')}. {intention}\n\nFor the next slow set, use this cue: {cue.strip()} Check the result against your review: {check.strip()}"
+    return f"{cue.strip()} {check.strip()}\n\nYour review flags {issue.strip().rstrip('.')} in rep {rep['rep_number']}{anchor}.{intention}"
 
 
 def reviewed_claim_issues(request, reply, metrics):

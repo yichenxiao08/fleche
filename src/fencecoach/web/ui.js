@@ -19,6 +19,7 @@ export const clock = (seconds) =>
   `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 export const label = (name) => name.replaceAll("_", " ");
 const paths = {
+  download: '<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>',
   target:
     '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/>',
   camera: '<path d="M4 6h4l2-3h4l2 3h4v14H4Z"/><circle cx="12" cy="12" r="4"/>',
@@ -63,8 +64,10 @@ export const mean = (metrics) =>
   metrics.reduce((sum, m) => sum + m.value, 0) / metrics.length;
 export function displayMetric(metric) {
   return metric.unit === "ms"
-    ? { value: pretty(metric.value / 1000), unit: "s" }
-    : { value: pretty(metric.value), unit: metric.unit };
+    ? { value: (metric.value / 1000).toFixed(1), unit: "s" }
+    : metric.unit === "s"
+      ? { value: Number(metric.value).toFixed(1), unit: "s" }
+      : { value: pretty(metric.value), unit: metric.unit };
 }
 export function dayKey(value) {
   const dt = new Date(

@@ -65,9 +65,15 @@ def assess_quality(result):
         )
     camera = result.get("camera_evidence", {})
     if profile.get("camera_motion") == "moving" or camera.get("moving"):
+        compensated = camera.get("translation_compensated", False)
         issue(
             "camera_motion",
-            "Put the camera on a fixed support; do not pan, zoom, or cut during the drill.",
+            (
+                "Camera panning was tracked. Translation-based movement is approximate; zoom, rotation, and cuts are not compensated."
+                if compensated
+                else "Keep the camera steady; this clip's camera motion could not be tracked well enough to compensate."
+            ),
+            reject=not compensated,
         )
     elif not camera.get("assessed"):
         issue(
@@ -105,12 +111,15 @@ def assess_quality(result):
 
 
 class CameraCheck:
-    """Background translation evidence from small thumbnails; fail visibly when texture is insufficient."""
+    """Estimate background translation from thumbnails; no zoom or rotation compensation."""
 
     def __init__(self):
         self.previous = None
         self.checked = 0
         self.moved = 0
+        self.translation_pairs = 0
+        self.cumulative_shift = [0.0, 0.0]
+        self.last_translation = None
 
     def observe(self, rgb):
         import numpy as np
@@ -119,31 +128,52 @@ class CameraCheck:
         h, w = gray.shape
         mask = np.ones((h, w), dtype=bool)
         mask[h // 5 : 4 * h // 5, w // 5 : 4 * w // 5] = False
+        self.last_translation = None
         if self.previous is not None and np.std(gray[mask]) >= 10:
             a = self.previous - self.previous[mask].mean()
             b = gray - gray[mask].mean()
             zero = np.mean(np.abs(a[mask] - b[mask]))
             best, shift = zero, (0, 0)
-            for dy in range(-3, 4):
-                for dx in range(-3, 4):
+            for dy in range(-4, 5):
+                for dx in range(-4, 5):
                     if not dx and not dy:
                         continue
-                    ys, xs = slice(3, h - 3), slice(3, w - 3)
+                    ys, xs = slice(4, h - 4), slice(4, w - 4)
                     use = mask[ys, xs]
                     error = np.mean(
-                        np.abs(a[ys, xs][use] - b[3 + dy : h - 3 + dy, 3 + dx : w - 3 + dx][use])
+                        np.abs(a[ys, xs][use] - b[4 + dy : h - 4 + dy, 4 + dx : w - 4 + dx][use])
                     )
                     if error < best:
                         best, shift = error, (dx, dy)
             self.checked += 1
-            self.moved += bool(shift != (0, 0) and zero > 5 and best < zero * 0.65)
+            confidence = max(0.0, 1 - best / zero) if zero > 2 else 0.0
+            if confidence >= 0.25:
+                self.translation_pairs += 1
+                self.cumulative_shift[0] += shift[0]
+                self.cumulative_shift[1] += shift[1]
+                self.last_translation = {"dx": shift[0], "dy": shift[1], "confidence": round(confidence, 3)}
+            self.moved += bool(shift != (0, 0) and zero > 5 and confidence >= 0.35)
         self.previous = gray
+        return {
+            "cumulative_dx": round(self.cumulative_shift[0] / w, 6),
+            "cumulative_dy": round(self.cumulative_shift[1] / h, 6),
+            "tracked": self.last_translation is not None,
+        }
 
     def summary(self):
         return {
-            "method": "background_translation_v1",
+            "method": "background_translation_v2",
             "assessed": self.checked >= 5,
             "checked_pairs": self.checked,
             "moving_pairs": self.moved,
+            "translation_tracked_pairs": self.translation_pairs,
+            "translation_coverage": round(self.translation_pairs / max(1, self.checked), 3),
             "moving": self.checked >= 5 and self.moved >= 3 and self.moved / self.checked > 0.20,
+            "translation_compensated": (
+                self.checked >= 5
+                and self.translation_pairs / max(1, self.checked) >= 0.8
+                and self.moved >= 3
+                and self.moved / self.checked > 0.20
+            ),
+            "compensation_scope": "background_translation_only",
         }

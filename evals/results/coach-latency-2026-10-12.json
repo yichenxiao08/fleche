@@ -1,0 +1,31 @@
+{
+  "model": "gemini-3.5-flash-lite",
+  "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+  "scope": "Two live coaching requests with saved evidence, including a conversational follow-up; no human correctness scoring or browser queue measurement.",
+  "results": [
+    {
+      "question": "what about my arm",
+      "answer": "Across your eight lunges, your right sword arm maintained a strong forward direction and solid extension at the finish, with elbow angles ranging from 145.7 degrees on rep 3 to 174.4 degrees on rep 5. In fencing, the sword arm reaches forward toward the target with the point aimed directly at it, rather than extending sideways for balance.",
+      "coaching_ms": 3307.55,
+      "including_context_ms": 3369.89,
+      "independent_review": true,
+      "context_chars": 83158,
+      "compact_context_chars": 58451,
+      "review_details": [
+        "Reviewed relevance and interpretation against actual session record IDs. Removed the false claim that the arm extension softened incorrectly near the finish and replaced it with actual session measurements showing strong extension across reps."
+      ]
+    },
+    {
+      "question": "should I extend it earlier?",
+      "error_type": "CoachAnswerError",
+      "details": "The coach couldn't verify this answer against the session. Your question is kept; try again."
+    }
+  ],
+  "followup_fix": {
+    "description": "Allow a reviewed explanation of missing timing evidence without requiring unrelated angle citations.",
+    "rechecked_question": "should I extend it earlier?",
+    "coaching_ms": 3246.57,
+    "independent_review": true,
+    "result": "Answered the sword-arm follow-up and distinguished missing session timing from general guidance."
+  }
+}

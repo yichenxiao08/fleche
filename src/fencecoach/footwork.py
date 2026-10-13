@@ -13,7 +13,7 @@ import numpy as np
 
 from fencecoach.motion import joint_angle
 
-VERSION = "footwork-v2"
+VERSION = "footwork-v3"
 LABELS = (
     "en_garde",
     "advance",
@@ -22,6 +22,8 @@ LABELS = (
     "fleche",
     "recovery",
     "bounce",
+    "ballestra",
+    "duck",
     "jump_forward",
     "jump_back",
     "shuffle",
@@ -88,12 +90,15 @@ def frame_evidence(landmarks, width, height, profile=None):
         quality=quality,
         facing=facing,
         camera_fixed=profile.get("camera_motion") == "fixed",
+        camera_motion_tracked=profile.get("camera_translation_compensated", False),
     )
 
 
 def enrich_frames(frames, width, height, profile=None):
     for frame in frames:
-        frame["footwork"] = frame_evidence(frame.get("landmarks", []), width, height, profile)
+        frame["footwork"] = frame_evidence(
+            frame.get("motion_landmarks", frame.get("landmarks", [])), width, height, profile
+        )
     return frames
 
 
@@ -117,7 +122,8 @@ def temporal_vector(frames, start, end):
     # Abrupt zoom/identity changes invalidate a temporal window.
     if max(r["leg_pixels"] for r in rows) / min(r["leg_pixels"] for r in rows) > 1.6:
         return None
-    fixed = all(r["camera_fixed"] for r in rows)
+    camera_fixed = all(r["camera_fixed"] for r in rows)
+    translation_usable = all(r["camera_fixed"] or r["camera_motion_tracked"] for r in rows)
     facing = rows[0]["facing"] if all(r["facing"] == rows[0]["facing"] for r in rows) else None
     vector, speeds = [], {}
     for key in CHANNELS:
@@ -126,7 +132,7 @@ def temporal_vector(frames, start, end):
             sign = facing if axis == 0 else -1
             values = (
                 [(r["hip_pixels"][axis] - rows[0]["hip_pixels"][axis]) / scale * sign for r in rows]
-                if fixed and sign
+                if translation_usable and sign
                 else [None] * len(rows)
             )
         else:
@@ -163,7 +169,12 @@ def temporal_vector(frames, start, end):
         else 0.0
     )
     vector.extend(
-        [len(valid) / len(selected), float(facing is not None), float(fixed), correlation]
+        [
+            len(valid) / len(selected),
+            float(facing is not None),
+            float(camera_fixed),
+            correlation,
+        ]
     )
     return vector if all(math.isfinite(v) for v in vector) else None
 

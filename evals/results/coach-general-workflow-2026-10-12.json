@@ -1,0 +1,39 @@
+{
+  "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+  "results": [
+    {
+      "question": "What would you change first across this set, and why?",
+      "answer": "Try settling into a lower finish on your lunges, bending your front leg more to match your reference examples. Across all eight repetitions, your front knee angle stays higher than the reference range at the finish.",
+      "seconds": 3.91,
+      "rep_count": 8,
+      "trace": [
+        {
+          "step": "assess_current_session",
+          "detail": "Checked active-session evidence against the exact question before general guidance."
+        },
+        {
+          "step": "get_technique_evaluation",
+          "detail": "Read per-rep geometry, action timing and explicit rubric findings."
+        },
+        {
+          "step": "search_coaching_library",
+          "detail": "Retrieved guidance for the current question and clarification topic."
+        },
+        {
+          "step": "conversation",
+          "detail": "Answered directly."
+        },
+        {
+          "step": "semantic_review",
+          "detail": "Reviewed relevance and interpretation against actual session record IDs. "
+        }
+      ]
+    },
+    {
+      "question": "How do my sword arm and rear leg compare with my approved examples at the finish?",
+      "error_type": "GoogleRateLimitError",
+      "validation_issues": [],
+      "error": "The AI provider's API quota has been reached. Your question is kept. Retry after the limit resets or check your provider's API usage."
+    }
+  ]
+}

@@ -9,6 +9,50 @@ from urllib.request import Request, urlopen
 from fencecoach.settings import settings
 
 
+def provider_failure(exc):
+    """Public, credential-free errors shared by direct and queued conversations."""
+    import httpx
+    from langchain_core.exceptions import ModelAPIError, ModelRateLimitError, ModelTimeoutError
+
+    if isinstance(exc, ModelRateLimitError):
+        return 429, "The AI provider's API quota has been reached. Your question is kept. Retry after the limit resets or check your provider's API usage."
+    if isinstance(exc, (ModelTimeoutError, httpx.TimeoutException, TimeoutError)):
+        return 504, "The coaching provider took too long to respond. Your question is kept; try again."
+    if isinstance(exc, ModelAPIError):
+        if "high demand" in str(exc).lower():
+            return 503, "Gemini's servers are busy right now. Your question is kept; try again shortly."
+        return 503, "The coaching provider is temporarily unavailable. Your question is kept; try again."
+    return None
+
+
+def gemini_transport():
+    """Bind Gemini connections to IPv4 without changing system networking.
+
+    LangChain forwards the same client_args to Google SDK sync and async
+    clients, so this transport implements both HTTPX interfaces.
+    """
+    import httpx
+
+    class IPv4Transport(httpx.BaseTransport, httpx.AsyncBaseTransport):
+        def __init__(self):
+            self.sync = httpx.HTTPTransport(local_address="0.0.0.0", retries=0)
+            self.async_ = httpx.AsyncHTTPTransport(local_address="0.0.0.0", retries=0)
+
+        def handle_request(self, request):
+            return self.sync.handle_request(request)
+
+        async def handle_async_request(self, request):
+            return await self.async_.handle_async_request(request)
+
+        def close(self):
+            self.sync.close()
+
+        async def aclose(self):
+            await self.async_.aclose()
+
+    return IPv4Transport()
+
+
 def warm_local_model():
     """Load the configured model without generating a reply; callers run this in the background."""
     if settings.fencecoach_chat_provider != "local":
@@ -69,7 +113,7 @@ def configured_model_id(mode):
     }.get(mode)
 
 
-def chat_model(mode):
+def chat_model(mode, model_id=None):
     if mode == "local":
         from langchain_ollama import ChatOllama
 
@@ -82,7 +126,7 @@ def chat_model(mode):
             base_url=settings.ollama_base_url,
             temperature=0,
             reasoning=False,
-            num_ctx=4096,
+            num_ctx=16384,
             # Structured coaching reports are short; avoid slow oversized local
             # generations on modest hardware.
             num_predict=240,
@@ -94,18 +138,28 @@ def chat_model(mode):
 
         if not settings.gemini_api_key.get_secret_value():
             raise RuntimeError("Save GEMINI_API_KEY in the server's .env file for Gemini coaching.")
+        selected_model = model_id or settings.gemini_chat_model
         options = (
-            {"thinking_level": "low"}
-            if "gemini-3" in settings.gemini_chat_model
+            {"thinking_level": "minimal" if selected_model == "gemini-3.5-flash-lite" else "low"}
+            if "gemini-3" in selected_model
             else {"thinking_budget": 0}
         )
+        timeout = max(10, settings.gemini_request_timeout_seconds)  # Google's request deadline has a 10-second minimum.
+        client_options = {"timeout": timeout}
+        if settings.gemini_force_ipv4:
+            client_options["transport"] = gemini_transport()
         return ChatGoogleGenerativeAI(
-            model=settings.gemini_chat_model,
+            model=selected_model,
             api_key=settings.gemini_api_key,
             vertexai=False,
-            temperature=1.0,
+            **(
+                {"temperature": 1.0}
+                if "gemini-3.6" not in selected_model and "gemini-3.5-flash-lite" not in selected_model
+                else {}
+            ),
             max_tokens=2048,
-            timeout=20,
+            timeout=timeout,
+            client_args=client_options,
             max_retries=0,
             include_thoughts=False,
             **options,

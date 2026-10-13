@@ -1,0 +1,16 @@
+{
+  "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+  "results": [
+    {
+      "question": "How do my sword arm and rear leg compare with my approved examples at the finish?",
+      "error_type": "CoachAnswerError",
+      "validation_issues": [
+        "Unrequested angle/ratio numbers belong in evidence details; give qualitative movement feedback in the reply.",
+        "The answer did not address the requested rear_leg topic.",
+        "The answer was cut off before completion.",
+        "The repaired answer was truncated."
+      ],
+      "error": "Live response validation failed."
+    }
+  ]
+}

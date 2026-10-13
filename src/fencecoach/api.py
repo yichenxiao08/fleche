@@ -163,6 +163,11 @@ def _report_or_error(request: CoachRequest, mode: str):
     except RuntimeError as exc:
         raise HTTPException(503, str(exc)) from exc
     except Exception as exc:
+        from fencecoach.coach.providers import provider_failure
+        known_failure = provider_failure(exc)
+        if known_failure:
+            code, message = known_failure
+            raise HTTPException(code, message) from exc
         logger.exception("Coaching provider failed")
         raise HTTPException(
             502,
@@ -194,10 +199,11 @@ def require_supported_session(session):
 def coaching_request(session, data):
     """Keep general conversation available without exposing rejected video evidence."""
     context = repository.coaching_context(session.session_id)
+    context["reviewed_feedback"] = context.get("reviewed_feedback") or {}
     evaluation = {}
     if session.video_job_id:
-        from fencecoach.technique import evaluate_lunges
         from fencecoach.feedback_learning import corrected_windows
+        from fencecoach.technique import evaluate_lunges
 
         path = video_jobs.directory / session.video_job_id / "result.json"
         if path.is_file():
@@ -207,6 +213,12 @@ def coaching_request(session, data):
             if context["reviewed_feedback"]:
                 windows = corrected_windows(context["reviewed_feedback"], windows)
             evaluation = evaluate_lunges(result, windows, session.capture_profile)
+            from fencecoach.reference_comparison import attach_reference_comparisons
+
+            evaluation = attach_reference_comparisons(
+                evaluation, {**job, "capture_profile": session.capture_profile},
+                video_jobs.directory, repository, video_jobs,
+            )
     try:
         require_supported_session(session)
     except HTTPException as exc:
@@ -225,6 +237,7 @@ def coaching_request(session, data):
             conversation_history=context["conversation_history"],
             reviewed_feedback=context["reviewed_feedback"],
             technique_evaluation=evaluation,
+            capture_profile=session.capture_profile,
             session_notes=(
                 "Whole-clip summaries were excluded, but selected reps have usable local geometry. Use only the per-rep evaluator findings for personal coaching; no whole-clip metrics were supplied."
                 if usable_reps
@@ -241,9 +254,10 @@ def coaching_request(session, data):
         session_id=session.session_id,
         question=data.question,
         skill_level=session.skill_level,
-        metrics=session.metrics,
+        metrics=[metric for metric in session.metrics if not metric.name.endswith("_median")],
         focus_metric_id=data.focus_metric_id,
-        session_notes=session.notes,
+        session_notes=session.notes
+        + "\nUse per-rep phase medians for posture analysis. Whole-clip medians are diagnostics and excluded from current-session coaching evidence.",
         capture_profile=session.capture_profile,
         technique_evaluation=evaluation,
         **context,
@@ -316,6 +330,14 @@ def queue_coaching(session_id: str, data: ReportRequest):
 @app.get("/api/coaching-jobs/{job_id}")
 def coaching_job(job_id: str):
     result = coaching_jobs.get(job_id)
+    if not result:
+        raise HTTPException(404, "Coaching request not found.")
+    return result
+
+
+@app.post("/api/coaching-jobs/{job_id}/cancel")
+def cancel_coaching_job(job_id: str):
+    result = coaching_jobs.cancel(job_id)
     if not result:
         raise HTTPException(404, "Coaching request not found.")
     return result

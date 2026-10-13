@@ -17,10 +17,16 @@ export const state = {
   run: null,
   screen: "train",
   drillId: "lunge",
+  reviewRepIndex: 0,
   metricIndex: 0,
   groupIndex: 0,
   sampleOverlay: true,
   progressRange: "week",
+  progressMonth: "",
+  progressShowAllSessions: false,
+  showLogForm: false,
+  openLogEditor: false,
+  reviewSavedSessionId: null,
   trendKey: "",
   libraryFilter: "all",
   mode: "local",
@@ -41,6 +47,10 @@ export const state = {
   videoJob: null,
   videoResult: null,
   videoWindows: [],
+  editingSavedTimes: false,
+  savedTimingDraft: null,
+  videoAnnotations: null,
+  pendingMissedRep: null,
   videoJobs: [],
   reviewResult: null,
   videoOverlay: true,
@@ -62,10 +72,7 @@ state.preferences = {
 let epoch = 0;
 export function savePreferences() {
   try {
-    localStorage.setItem(
-      "fencecoach.preferences",
-      JSON.stringify(state.preferences),
-    );
+    localStorage.setItem("fencecoach.preferences", JSON.stringify(state.preferences));
   } catch {
     throw new Error(
       "Your browser couldn’t save these preferences. Check available storage.",
@@ -116,9 +123,12 @@ export async function selectSession(id) {
       api(`${sessionPath(id)}/reports`),
     ]);
     if (ticket !== epoch) return false;
+    if (state.reviewSavedSessionId && id !== state.reviewSavedSessionId)
+      state.reviewSavedSessionId = null;
     state.session = session;
     state.runs = runs;
     state.run = runs[0] || null;
+    state.reviewRepIndex = 0;
     state.metricIndex = 0;
     state.groupIndex = 0;
     restoreRunFocus();
@@ -147,9 +157,7 @@ export function restoreRunFocus() {
   );
   if (group >= 0) {
     state.groupIndex = group;
-    state.metricIndex = all[group].findIndex(
-      (metric) => metric.metric_id === id,
-    );
+    state.metricIndex = all[group].findIndex((metric) => metric.metric_id === id);
   }
 }
 export async function loadSample() {
@@ -157,15 +165,6 @@ export async function loadSample() {
   const session = existing || (await api("/api/demo", { method: "POST" }));
   if (!existing) await refreshSessions();
   await selectSession(session.session_id);
-}
-export async function importSession(data) {
-  const session = await api("/api/sessions", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
-  await refreshSessions();
-  await selectSession(session.session_id);
-  return session;
 }
 export async function generateReport(question) {
   if (!state.session || state.generating) return;
@@ -190,7 +189,7 @@ export async function generateReport(question) {
     if (state.session?.session_id === id) {
       state.runs.unshift(run);
       state.run = run;
-      state.question = "";
+      if (state.question === question) state.question = "";
     }
     return run;
   } catch (error) {
@@ -203,8 +202,21 @@ export async function generateReport(question) {
 
 export async function waitForCoaching(id) {
   const started = Date.now();
-  while (Date.now() - started < 20 * 60 * 1000) {
-    const job = await api(`/api/coaching-jobs/${encodeURIComponent(id)}`);
+  const limit = state.mode === "local" ? 100000 : 55000;
+  while (Date.now() - started < limit) {
+    let job;
+    try {
+      job = await api(`/api/coaching-jobs/${encodeURIComponent(id)}`, {
+        signal: AbortSignal.timeout(8000),
+      });
+    } catch (error) {
+      try {
+        localStorage.removeItem("fencecoach.coachingJob");
+      } catch {}
+      throw new Error(
+        "Lost connection to FenceCoach. Your question is kept; reconnect and try again.",
+      );
+    }
     state.coachingJob = job;
     const stage = document.getElementById("coaching-stage");
     if (stage) stage.textContent = job.stage;
@@ -220,16 +232,29 @@ export async function waitForCoaching(id) {
       } catch {}
       return api(`/api/reports/${encodeURIComponent(job.run_id)}`);
     }
-    if (job.status === "failed") {
+    if (["failed", "cancelled"].includes(job.status)) {
       try {
         localStorage.removeItem("fencecoach.coachingJob");
       } catch {}
-      throw new Error(job.error || "Coaching request failed. Try again.");
+      throw new Error(
+        job.status === "cancelled"
+          ? "Reply stopped. You can edit your question and send it again."
+          : job.error || "Coaching request failed. Try again.",
+      );
     }
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, 750));
   }
+  try {
+    localStorage.removeItem("fencecoach.coachingJob");
+  } catch {}
+  try {
+    await api(`/api/coaching-jobs/${encodeURIComponent(id)}/cancel`, {
+      method: "POST",
+      signal: AbortSignal.timeout(5000),
+    });
+  } catch {}
   throw new Error(
-    "Your coaching request is still running. Reload to reconnect to its progress.",
+    "The coach took too long to respond. Your question is kept; try again.",
   );
 }
 
@@ -243,13 +268,16 @@ export async function resumeCoaching(onState = () => {}) {
   try {
     job = await api(`/api/coaching-jobs/${encodeURIComponent(id)}`);
   } catch (error) {
-    try { localStorage.removeItem("fencecoach.coachingJob"); } catch {}
+    try {
+      localStorage.removeItem("fencecoach.coachingJob");
+    } catch {}
     state.coachError = error.message;
     onState();
     return;
   }
-  if (state.session?.session_id !== job.session_id)
-    await selectSession(job.session_id);
+  if (state.session?.session_id !== job.session_id) await selectSession(job.session_id);
+  state.question = job.question || state.question;
+  state.mode = job.mode || state.mode;
   state.generating = true;
   onState();
   try {
@@ -265,4 +293,13 @@ export async function resumeCoaching(onState = () => {}) {
     state.generating = false;
     onState();
   }
+}
+
+export async function stopCoaching() {
+  const id = state.coachingJob?.job_id;
+  if (!id || !state.generating) return;
+  await api(`/api/coaching-jobs/${encodeURIComponent(id)}/cancel`, {
+    method: "POST",
+    signal: AbortSignal.timeout(8000),
+  });
 }

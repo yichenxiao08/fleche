@@ -157,19 +157,26 @@ class ConversationTests(unittest.TestCase):
             ],
             ["What does hand first mean?", "Why?"],
         )
-        self.assertEqual(run.report.observations, [])
-        self.assertEqual(run.sources, [])
+        self.assertTrue(any(e.step == "assess_current_session" for e in run.trace))
+        self.assertTrue(any(s.source_id == "current-session:chat-session" for s in run.sources))
+        self.assertFalse(any(e.step == "get_session_metrics" for e in run.trace))
         self.assertIsNone(run.report.next_drill)
 
-    def test_measurement_tool_returns_real_lunge_data_without_recovery_substitution(self):
+    def test_measurement_tool_uses_the_agents_explicit_feature_filter(self):
         model = ScriptedModel(
             [
                 AIMessage(
                     content="",
-                    tool_calls=[{"name": "get_session_metrics", "args": {}, "id": "measure"}],
+                    tool_calls=[
+                        {
+                            "name": "get_session_metrics",
+                            "args": {"metric_name": "knee"},
+                            "id": "measure",
+                        }
+                    ],
                 ),
                 AIMessage(
-                    content="I have a knee reading, but need the front-leg confirmation before interpreting it."
+                    content="At 2.0 seconds, the knee reading is 110 degrees. Check which leg is in front, then try a slow repeat so that you can compare the same finish."
                 ),
             ]
         )
@@ -177,8 +184,34 @@ class ConversationTests(unittest.TestCase):
         returned = next(message for message in model.inputs[1] if isinstance(message, ToolMessage))
         payload = json.loads(returned.content)
         self.assertEqual([item["metric_id"] for item in payload["measurements"]], ["rep-1-knee"])
-        self.assertEqual(run.report.observations[0].evidence[0].source_id, "rep-1-knee")
+        self.assertTrue(
+            any(
+                ref.source_id == "rep-1-knee"
+                for observation in run.report.observations
+                for ref in observation.evidence
+            )
+        )
         self.assertIsNone(run.report.next_drill)
+
+    def test_empty_metric_filter_does_not_silently_remove_other_session_features(self):
+        model = ScriptedModel(
+            [
+                AIMessage(
+                    content="",
+                    tool_calls=[{"name": "get_session_metrics", "args": {}, "id": "measure"}],
+                ),
+                AIMessage(
+                    content="At 2.0 seconds, the knee reading is 110 degrees. Check which leg is in front, then try a slow repeat so that you can compare the same finish."
+                ),
+            ]
+        )
+        run_coach(request("Analyze my lunge"), mode="local", model=model)
+        returned = next(message for message in model.inputs[1] if isinstance(message, ToolMessage))
+        payload = json.loads(returned.content)
+        self.assertEqual(
+            [item["metric_id"] for item in payload["measurements"]],
+            ["rep-1-knee", "rep-1-recovery"],
+        )
 
     def test_reviewed_timestamp_tool_does_not_claim_intervals_are_lunges(self):
         model = ScriptedModel(

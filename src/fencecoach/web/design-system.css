@@ -3,7 +3,7 @@
   box-sizing: border-box;
 }
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 body {
   margin: 0;
@@ -12,9 +12,6 @@ body {
   font-family: var(--body);
   font-size: 14px;
   line-height: 1.5;
-  transition:
-    background 0.18s,
-    color 0.18s;
 }
 button,
 input,
@@ -33,7 +30,10 @@ button {
 }
 button:disabled {
   opacity: 0.5;
-  cursor: wait;
+  cursor: default;
+}
+button[aria-busy="true"] {
+  cursor: progress;
 }
 a {
   color: inherit;
@@ -400,7 +400,7 @@ small {
   justify-content: space-between;
   align-items: center;
   gap: 14px;
-  margin: 29px 0 15px;
+  margin: 0 0 15px;
 }
 .section-heading h2 {
   font-size: 16px;
@@ -867,23 +867,27 @@ small {
   line-height: 1.8;
   margin-bottom: 20px;
 }
-.setup-checks {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+.setup-checklist {
+  display: grid;
+  gap: 10px;
+  list-style: none;
   margin: 22px 0 26px;
+  padding: 0;
 }
-.setup-checks label {
+.setup-checklist li {
   display: flex;
   align-items: center;
   gap: 10px;
+  /* color: var(--muted); */
   font-size: 12px;
 }
-.setup-checks input {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--accent);
-  margin: 0;
+.setup-checklist li::before {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: var(--accent-strong);
+  content: "";
 }
 .record-action {
   display: flex;
@@ -1398,13 +1402,13 @@ td .text-action {
   margin-bottom: 8px;
 }
 .chat-message.user {
-  margin: 20px 0 24px;
+  margin: 20px 0;
   background: var(--soft);
-  padding: 17px 20px;
+  padding: 12px 16px;
   border-radius: 8px;
 }
 .chat-message.user p {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.8;
   margin-top: 6px;
   white-space: pre-wrap;
@@ -1433,9 +1437,9 @@ td .text-action {
   height: 14px;
 }
 .report-summary {
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.9;
-  margin-bottom: 21px;
+  margin-bottom: 16px;
   overflow-wrap: anywhere;
 }
 .report-evidence {
@@ -1568,6 +1572,7 @@ td .text-action {
   gap: 24px;
   max-width: 960px;
   margin-inline: auto;
+  grid-template-columns: 2fr 1fr;
 }
 .coach-replay .replay-view {
   aspect-ratio: auto;
@@ -1924,8 +1929,12 @@ html.coach-page {
   line-height: 1.6;
   overflow-wrap: anywhere;
 }
-.coach-status p { margin: 8px 0; }
-.coach-status small { color: var(--muted); }
+.coach-status p {
+  margin: 8px 0;
+}
+.coach-status small {
+  color: var(--muted);
+}
 .coach-status-actions {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -2010,7 +2019,10 @@ html.coach-page {
 }
 .coach-general .coach-prompts button:disabled {
   opacity: 0.5;
-  cursor: wait;
+  cursor: default;
+}
+button[aria-busy="true"] {
+  cursor: progress;
 }
 .toast {
   position: fixed;
@@ -2104,11 +2116,7 @@ dialog::backdrop {
   margin: 13px 0;
   overflow-wrap: anywhere;
 }
-#session-json {
-  font-family: ui-monospace, monospace;
-  font-size: 11px;
-  line-height: 1.8;
-}
+
 .source-text {
   font-size: 13px;
   line-height: 1.9;
@@ -2565,10 +2573,10 @@ dialog h3 {
   .capture-info > p:not(.eyebrow):not(.subtle-note) {
     font-size: 12px;
   }
-  .setup-checks label {
+  .setup-checklist li {
     font-size: 11px;
   }
-  .setup-checks {
+  .setup-checklist {
     gap: 12px;
   }
   .record-action {
@@ -2888,5 +2896,9 @@ dialog h3 {
   }
 }
 
-.conversation-answer { white-space: pre-wrap; }
-.chat-message[hidden] { display: none; }
+.conversation-answer {
+  white-space: pre-wrap;
+}
+.chat-message[hidden] {
+  display: none;
+}

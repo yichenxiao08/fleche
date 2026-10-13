@@ -1,3 +1,4 @@
+import { html } from "./html.js";
 import { $, e, icon, clock } from "./ui.js";
 import { api, downloadJSON, downloadBlob } from "./api-client.js";
 import {
@@ -5,22 +6,27 @@ import {
   initStore,
   selectSession,
   loadSample,
-  importSession,
   generateReport,
   resumeCoaching,
+  stopCoaching,
   savePreferences,
-} from "./store.js";
+} from "./store.js?v=20261012-review-layout-v1";
 import { setupMotion } from "./motion.js";
-import { setupJournal } from "./journal.js";
-import { screens } from "./views.js";
-import { replayControls, mountReplayControls } from "./replay-player.js";
+import { setupJournal } from "./journal.js?v=20261012-review-layout-v1";
+import { screens } from "./views.js?v=20261012-review-layout-v1";
+import {
+  replayControls,
+  mountReplayControls,
+  mountFrameStepControls,
+} from "./replay-player.js?v=20261012-startup-fix-v1";
+import { updateReviewedRep } from "./athlete-review.js?v=20261012-movement-feedback-v3";
 import {
   setupVideoController,
   initVideo,
   mountPose,
   previewURL,
   posterURL,
-} from "./video.js";
+} from "./video.js?v=20261012-review-layout-v1";
 import { metricEvidence, selectedMetrics } from "./components.js";
 import { findDrill } from "./practice-library.js";
 import {
@@ -54,6 +60,7 @@ let toastTimer,
   finishPending = false;
 let stopOverlay = () => {};
 let stopPlayback = () => {};
+let stopFrameSteps = () => {};
 const motionController = setupMotion({ state, notice });
 motionController.setup();
 function notice(text = "") {
@@ -74,17 +81,20 @@ function route() {
 function render({ keepScroll = false, focus = false } = {}) {
   const scroll = window.scrollY;
   const coachVideo = document.querySelector(".coach-replay video");
-  const playback = coachVideo ? {
-    sessionId: coachVideo.dataset.sessionId,
-    time: coachVideo.currentTime,
-    paused: coachVideo.paused || coachVideo.ended,
-    volume: coachVideo.volume,
-    muted: coachVideo.muted,
-    rate: coachVideo.playbackRate,
-    aspect: coachVideo.videoWidth && coachVideo.videoHeight
-      ? coachVideo.videoWidth / coachVideo.videoHeight
-      : Number(coachVideo.parentElement.style.getPropertyValue("--video-aspect")),
-  } : null;
+  const playback = coachVideo
+    ? {
+        sessionId: coachVideo.dataset.sessionId,
+        time: coachVideo.currentTime,
+        paused: coachVideo.paused || coachVideo.ended,
+        volume: coachVideo.volume,
+        muted: coachVideo.muted,
+        rate: coachVideo.playbackRate,
+        aspect:
+          coachVideo.videoWidth && coachVideo.videoHeight
+            ? coachVideo.videoWidth / coachVideo.videoHeight
+            : Number(coachVideo.parentElement.style.getPropertyValue("--video-aspect")),
+      }
+    : null;
   const dark = ["review", "coach", "analysis"].includes(state.screen);
   document.body.className = dark ? "studio" : "piste";
   document.documentElement.classList.toggle("coach-page", state.screen === "coach");
@@ -101,7 +111,15 @@ function render({ keepScroll = false, focus = false } = {}) {
     $("" + id).innerHTML = navigation
       .map(
         ([name, symbol, title]) =>
-          `<button data-go="${name}" class="${active === name ? "active" : ""} ${name === "record" ? "record-nav" : ""}" ${active === name ? 'aria-current="page"' : ""}>${icon(symbol)}<span>${title}</span></button>`,
+          html`<button
+            data-go="${name}"
+            class="${active === name ? "active" : ""} ${name === "record"
+              ? "record-nav"
+              : ""}"
+            ${active === name ? 'aria-current="page"' : ""}
+          >
+            ${icon(symbol)}<span>${title}</span>
+          </button>`,
       )
       .join("");
   document
@@ -112,6 +130,16 @@ function render({ keepScroll = false, focus = false } = {}) {
         state.screen === "settings" ? "page" : "false",
       ),
     );
+  // Release the previous screen's decoder and frame listeners before replacing it.
+  stopOverlay();
+  stopPlayback();
+  stopFrameSteps();
+  for (const video of $("screen").querySelectorAll("video")) {
+    video.pause();
+    if (video.srcObject) continue;
+    video.removeAttribute("src");
+    video.load();
+  }
   $("screen").className = `screen screen-${state.screen}`;
   $("screen").innerHTML = state.loading
     ? '<div class="loading-state"><span class="spinner"></span><h1>Getting your training space ready.</h1><p>Loading your saved sessions…</p></div>'
@@ -120,11 +148,24 @@ function render({ keepScroll = false, focus = false } = {}) {
   mountMedia(playback);
   if (!keepScroll) window.scrollTo({ top: 0, behavior: "instant" });
   else window.scrollTo({ top: scroll, behavior: "instant" });
+  if (state.openLogEditor && state.screen === "progress") {
+    const editor = $("training-log-form");
+    state.openLogEditor = false;
+    if (editor) {
+      editor.hidden = false;
+      requestAnimationFrame(
+        () =>
+          editor.isConnected &&
+          editor.scrollIntoView({ behavior: "smooth", block: "center" }),
+      );
+    }
+  }
   if (focus) $("screen").focus({ preventScroll: true });
 }
 function mountMedia(playback = null) {
   stopOverlay();
   stopPlayback();
+  stopFrameSteps();
   if (state.screen === "analysis") {
     motionController.mount();
     stopOverlay = mountPose(
@@ -132,6 +173,11 @@ function mountMedia(playback = null) {
       $("analysis-overlay"),
       state.videoResult,
       state,
+    );
+    stopFrameSteps = mountFrameStepControls(
+      $("analysis-video"),
+      $("analysis-frame-controls"),
+      state.videoResult?.preview?.fps_hint || 30,
     );
   }
   if (state.screen === "record") {
@@ -146,33 +192,52 @@ function mountMedia(playback = null) {
     const video = $("replay-video");
     video.controls = true;
     if (state.reviewResult?.width > 0 && state.reviewResult?.height > 0)
-      video.parentElement.style.setProperty("--video-aspect", state.reviewResult.width / state.reviewResult.height);
+      video.parentElement.style.setProperty(
+        "--video-aspect",
+        state.reviewResult.width / state.reviewResult.height,
+      );
     else if (playback?.sessionId === video.dataset.sessionId && playback.aspect > 0)
       video.parentElement.style.setProperty("--video-aspect", playback.aspect);
-    video.parentElement.insertAdjacentHTML("afterend", replayControls(state));
+    if (
+      state.screen !== "review" ||
+      !state.reviewResult?.technique_evaluation?.reps?.length
+    )
+      video.parentElement.insertAdjacentHTML("afterend", replayControls(state));
     stopPlayback = mountReplayControls(video, $("replay-controls"));
+    stopFrameSteps = mountFrameStepControls(
+      video,
+      $("replay-frame-controls"),
+      state.reviewResult?.preview?.fps_hint || 30,
+    );
     video.src = state.session.video_job_id
       ? previewURL(state.session.video_job_id, state.reviewResult)
       : getClipURL();
     video.preload = "auto";
     if (state.session.video_job_id)
       video.poster = posterURL(state.session.video_job_id, state.reviewResult);
-    stopOverlay = mountPose(
-      video,
-      $("review-overlay"),
-      state.reviewResult,
-      state,
-    );
+    stopOverlay = mountPose(video, $("review-overlay"), state.reviewResult, state);
     video.onloadedmetadata = () => {
       if (!video.isConnected) return;
       if (state.screen === "coach") {
         if (playback?.sessionId === video.dataset.sessionId) {
-          video.currentTime = Math.min(playback.time, Math.max(0, video.duration - 0.01));
+          video.currentTime = Math.min(
+            playback.time,
+            Math.max(0, video.duration - 0.01),
+          );
           video.volume = playback.volume;
           video.muted = playback.muted;
           video.playbackRate = playback.rate;
           if (!playback.paused) video.play().catch(() => {});
         }
+        return;
+      }
+      const rep =
+        state.reviewResult?.technique_evaluation?.reps?.[state.reviewRepIndex || 0];
+      if (state.screen === "review" && rep) {
+        video.currentTime = Math.min(
+          (rep.action_start_ms ?? rep.lunge_ms) / 1000,
+          video.duration,
+        );
         return;
       }
       const metric = selectedMetrics(state).metric;
@@ -187,6 +252,8 @@ function mountMedia(playback = null) {
 }
 function go(screen) {
   if (!screens[screen]) return;
+  if (state.screen === "review" && screen !== "review")
+    state.reviewSavedSessionId = null;
   if (state.screen === "record" && capture.recording && screen !== "record") {
     toast("Finish your recording before leaving this practice.");
     return;
@@ -202,6 +269,7 @@ function go(screen) {
   }
 }
 window.addEventListener("hashchange", () => {
+  const previous = state.screen;
   const next = route();
   if (capture.recording && next !== "record") {
     history.replaceState(null, "", "#record");
@@ -212,6 +280,7 @@ window.addEventListener("hashchange", () => {
     cameraEpoch++;
     closeCamera();
   }
+  if (previous === "review" && next !== "review") state.reviewSavedSessionId = null;
   state.screen = next;
   render({ focus: true });
 });
@@ -261,8 +330,7 @@ async function sessionMedia(id) {
   }
   try {
     const clip = await loadClip(id);
-    if (ticket === mediaEpoch && state.session?.session_id === id)
-      setClip(clip);
+    if (ticket === mediaEpoch && state.session?.session_id === id) setClip(clip);
   } catch (error) {
     if (ticket === mediaEpoch) toast(error.message);
   }
@@ -271,9 +339,7 @@ function setDraft(blob) {
   if (draftURL) URL.revokeObjectURL(draftURL);
   state.draftClip = blob;
   draftPersistence = draftPersistence
-    .then(() =>
-      blob ? saveClip("pending-draft", blob) : deleteClip("pending-draft"),
-    )
+    .then(() => (blob ? saveClip("pending-draft", blob) : deleteClip("pending-draft")))
     .catch((error) => notice(error.message));
   draftURL = blob ? URL.createObjectURL(blob) : null;
 }
@@ -296,11 +362,6 @@ async function finish() {
   }
 }
 
-function openImport() {
-  const dialog = $("import-dialog");
-  dialog.innerHTML = `<form id="import-form"><div class="dialog-heading"><div><p class="eyebrow">YOUR PRACTICE</p><h2 id="import-title">Bring in a session.</h2></div><button class="icon-button" type="button" data-close="import-dialog" aria-label="Close import">${icon("close")}</button></div><p class="helper">Import measured values from your analysis tool. ${state.draftClip ? "Your recorded clip will be saved with this session on this device." : "You can attach a video after importing."}</p><label class="file-field">${icon("upload")}<span>Choose a session JSON file</span><input id="json-file" type="file" accept=".json,application/json" /></label><label class="field"><span>Session name</span><input name="title" id="import-name" maxlength="100" value="${e(findDrill(state.drillId).name + " / practice")}" required /></label><div class="form-row"><label class="field"><span>Skill level</span><select name="skill" id="import-skill"><option value="beginner" ${state.preferences.skill === "beginner" ? "selected" : ""}>Beginner</option><option value="intermediate" ${state.preferences.skill === "intermediate" ? "selected" : ""}>Intermediate</option></select></label><label class="field"><span>Practice notes</span><input id="import-notes" name="notes" maxlength="2000" placeholder="One focus from today…" /></label></div><label class="field"><span>Measurement JSON</span><textarea id="session-json" rows="7" required spellcheck="false" placeholder='[{"metric_id":"rep-01-recovery","name":"recovery_time","value":920,"unit":"ms","confidence":0.88}]'></textarea></label><p class="helper">Paste a measurements array or a complete session object. Use your own values and source confidence. Optional: baseline_value, start_ms, end_ms.</p><a class="text-action" href="/static/sample-session.json" download="sample-session.json">Download a synthetic format example ${icon("arrow")}</a><p class="form-error" id="import-error" role="alert"></p><button class="primary-action" id="save-session" type="submit">Save practice session ${icon("arrow")}</button></form>`;
-  dialog.showModal();
-}
 function showEvidence(type, id) {
   let body;
   if (type === "metric") {
@@ -310,10 +371,26 @@ function showEvidence(type, id) {
   } else {
     const source = state.run?.sources.find((s) => s.source_id === id);
     if (!source) return;
-    body = `<p class="eyebrow">RETRIEVED PRACTICE NOTE</p><h3>${e(source.source)}</h3><p class="source-text">${e(source.text)}</p><code>${e(source.source_id)}</code><p class="helper">Authored development notes. Review technique guidance with your fencing coach.</p>`;
+    body = html`<p class="eyebrow">RETRIEVED PRACTICE NOTE</p>
+      <h3>${e(source.source)}</h3>
+      <p class="source-text">${e(source.text)}</p>
+      <code>${e(source.source_id)}</code>
+      <p class="helper">
+        Authored development notes. Review technique guidance with your fencing coach.
+      </p>`;
   }
   const dialog = $("evidence-dialog");
-  dialog.innerHTML = `<div class="dialog-heading"><h2 id="evidence-title">Behind the cue.</h2><button class="icon-button" data-close="evidence-dialog" aria-label="Close evidence">${icon("close")}</button></div>${body}`;
+  dialog.innerHTML = html`<div class="dialog-heading">
+      <h2 id="evidence-title">Behind the cue.</h2>
+      <button
+        class="icon-button"
+        data-close="evidence-dialog"
+        aria-label="Close evidence"
+      >
+        ${icon("close")}
+      </button>
+    </div>
+    ${body}`;
   dialog.showModal();
 }
 function setMetric(index) {
@@ -333,7 +410,19 @@ document.addEventListener("click", async (event) => {
   try {
     if (button.dataset.close) $(button.dataset.close).close();
     else if (button.dataset.go) go(button.dataset.go);
-    else if (button.dataset.drill) {
+    else if (button.hasAttribute("data-review-seek")) {
+      const video = $("replay-video");
+      if (video && Number.isFinite(video.duration)) {
+        video.pause();
+        video.currentTime = Math.min(
+          Number(button.dataset.reviewSeek) / 1000,
+          video.duration,
+        );
+      }
+    } else if (button.hasAttribute("data-review-rep")) {
+      state.reviewRepIndex = Number(button.dataset.reviewRep);
+      updateReviewedRep(state);
+    } else if (button.dataset.drill) {
       state.drillId = button.dataset.drill;
       go("drill");
     } else if (button.hasAttribute("data-sample-coach"))
@@ -366,9 +455,7 @@ document.addEventListener("click", async (event) => {
         button.disabled = false;
       }
     } else if (button.dataset.planPractice) {
-      const plan = state.plans.find(
-        (p) => p.plan_id === button.dataset.planPractice,
-      );
+      const plan = state.plans.find((p) => p.plan_id === button.dataset.planPractice);
       state.editingLog = {
         focus: plan.name,
         drill_id: plan.plan_id,
@@ -376,7 +463,7 @@ document.addEventListener("click", async (event) => {
         notes: plan.success_criterion,
       };
       go("progress");
-    } else if (button.hasAttribute("data-import")) openImport();
+    } else if (button.hasAttribute("data-stop-coaching")) await stopCoaching();
     else if (button.hasAttribute("data-save-drill")) {
       const saved = state.preferences.saved,
         index = saved.indexOf(state.drillId);
@@ -394,6 +481,30 @@ document.addEventListener("click", async (event) => {
       render({ keepScroll: true });
     } else if (button.dataset.range) {
       state.progressRange = button.dataset.range;
+      state.progressShowAllSessions = false;
+      render({ keepScroll: true });
+    } else if (button.hasAttribute("data-toggle-sessions")) {
+      state.progressShowAllSessions = !state.progressShowAllSessions;
+      render({ keepScroll: true });
+    } else if (button.hasAttribute("data-progress-month-step")) {
+      const now = new Date(),
+        [year, month] = (
+          state.progressMonth ||
+          `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
+        )
+          .split("-")
+          .map(Number),
+        selected = new Date(
+          year,
+          month - 1 + Number(button.dataset.progressMonthStep),
+          1,
+        ),
+        maxMonth = new Date(now.getFullYear(), now.getMonth(), 1),
+        minYear = now.getFullYear() - 80;
+      if (selected > maxMonth) selected.setTime(maxMonth.getTime());
+      if (selected.getFullYear() < minYear) selected.setFullYear(minYear, 0, 1);
+      state.progressMonth = `${selected.getFullYear()}-${String(selected.getMonth() + 1).padStart(2, "0")}`;
+      state.progressShowAllSessions = false;
       render({ keepScroll: true });
     } else if (button.hasAttribute("data-metric"))
       setMetric(Number(button.dataset.metric));
@@ -405,7 +516,7 @@ document.addEventListener("click", async (event) => {
     else if (button.dataset.question) {
       state.question = button.dataset.question;
       $("question").value = button.dataset.question;
-      $("question").focus();
+      $("question").focus({ preventScroll: true });
     } else if (button.hasAttribute("data-export-session") && state.session)
       downloadJSON(state.session, `session-${state.session.session_id}.json`);
     else if (button.hasAttribute("data-export-report") && state.run)
@@ -421,12 +532,6 @@ document.addEventListener("click", async (event) => {
         button.disabled = false;
       }
     } else if (button.hasAttribute("data-start-recording")) {
-      if (document.querySelector(".setup-checks input:not(:checked)")) {
-        toast(
-          "Check your framing, fixed camera and clear space before recording.",
-        );
-        return;
-      }
       startRecording(
         (seconds) => {
           if ($("record-clock")) $("record-clock").textContent = clock(seconds);
@@ -440,8 +545,7 @@ document.addEventListener("click", async (event) => {
       render({ keepScroll: true });
     } else if (button.hasAttribute("data-finish-recording")) await finish();
     else if (button.hasAttribute("data-upload-draft")) $("draft-file").click();
-    else if (button.hasAttribute("data-attach-video"))
-      $("session-video-file").click();
+    else if (button.hasAttribute("data-attach-video")) $("session-video-file").click();
     else if (button.hasAttribute("data-download-clip") && getClip())
       downloadBlob(
         getClip(),
@@ -468,7 +572,18 @@ document.addEventListener("change", async (event) => {
         await select(target.value);
         render({ keepScroll: true });
       });
-    else if (target.id === "metric-group") {
+    else if (target.hasAttribute("data-review-phase-picker")) {
+      const video = $("replay-video");
+      if (target.value !== "" && video && Number.isFinite(video.duration)) {
+        video.pause();
+        video.currentTime = Math.min(Number(target.value) / 1000, video.duration);
+      }
+    } else if (target.hasAttribute("data-review-metric-picker"))
+      setMetric(Number(target.value));
+    else if (target.hasAttribute("data-review-rep-picker")) {
+      state.reviewRepIndex = Number(target.value);
+      updateReviewedRep(state);
+    } else if (target.id === "metric-group") {
       state.groupIndex = Number(target.value);
       state.metricIndex = 0;
       render({ keepScroll: true });
@@ -479,28 +594,23 @@ document.addEventListener("change", async (event) => {
     } else if (target.id === "trend-picker") {
       state.trendKey = target.value;
       render({ keepScroll: true });
-    } else if (target.id === "json-file") {
-      const file = target.files[0];
-      if (!file) return;
-      if (file.size > 1024 * 1024)
-        throw new Error("Choose a JSON file smaller than 1 MB.");
-      const data = JSON.parse(await file.text());
-      if (!data || (!Array.isArray(data) && !Array.isArray(data.metrics)))
-        throw new Error(
-          "This JSON file needs a measurements array or a session object with metrics.",
-        );
-      if (!Array.isArray(data)) {
-        if (data.title) $("import-name").value = data.title;
-        if (["beginner", "intermediate"].includes(data.skill_level))
-          $("import-skill").value = data.skill_level;
-        $("import-notes").value = data.notes || "";
-      }
-      $("session-json").value = JSON.stringify(
-        Array.isArray(data) ? data : data.metrics,
-        null,
-        2,
-      );
-      $("import-error").textContent = "";
+    } else if (target.id === "progress-month" || target.id === "progress-year") {
+      const now = new Date(),
+        [year, month] = (
+          state.progressMonth ||
+          `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
+        )
+          .split("-")
+          .map(Number),
+        selectedYear = target.id === "progress-year" ? Number(target.value) : year,
+        selectedMonth =
+          target.id === "progress-month" ? Number(target.value) : month - 1,
+        latestMonth = new Date(now.getFullYear(), now.getMonth(), 1),
+        requestedMonth = new Date(selectedYear, selectedMonth, 1),
+        selected = requestedMonth > latestMonth ? latestMonth : requestedMonth;
+      state.progressMonth = `${selected.getFullYear()}-${String(selected.getMonth() + 1).padStart(2, "0")}`;
+      state.progressShowAllSessions = false;
+      render({ keepScroll: true });
     } else if (target.id === "draft-file") {
       const file = target.files[0];
       if (!file) return;
@@ -522,9 +632,7 @@ document.addEventListener("change", async (event) => {
       toast("Video saved with this session on this device.");
     }
   } catch (error) {
-    if (target.id === "json-file")
-      $("import-error").textContent = error.message;
-    else notice(error.message);
+    notice(error.message);
   }
 });
 document.addEventListener("click", (event) => {
@@ -543,7 +651,12 @@ document.addEventListener("input", (event) => {
   if (event.target.id === "question") state.question = event.target.value;
 });
 document.addEventListener("keydown", (event) => {
-  if (event.target.id === "question" && event.key === "Enter" && !event.shiftKey && !event.isComposing) {
+  if (
+    event.target.id === "question" &&
+    event.key === "Enter" &&
+    !event.shiftKey &&
+    !event.isComposing
+  ) {
     event.preventDefault();
     if (!state.generating) event.target.form.requestSubmit();
   }
@@ -567,46 +680,6 @@ document.addEventListener("submit", async (event) => {
       const input = $("question");
       if (input) input.value = question;
       notice(error.message);
-    }
-  } else if (event.target.id === "import-form") {
-    event.preventDefault();
-    const button = $("save-session");
-    button.disabled = true;
-    $("import-error").textContent = "";
-    let saved = null;
-    try {
-      const parsed = JSON.parse($("session-json").value),
-        metrics = Array.isArray(parsed) ? parsed : parsed.metrics;
-      const draft = state.draftClip;
-      saved = await importSession({
-        title: $("import-name").value.trim(),
-        skill_level: $("import-skill").value,
-        notes: $("import-notes").value,
-        metrics,
-      });
-      if (draft) {
-        try {
-          await saveClip(saved.session_id, draft);
-          setDraft(null);
-        } catch (error) {
-          notice(error.message);
-          toast(
-            "Measurements saved. Download your video from Record to keep a copy.",
-          );
-        }
-      }
-      await sessionMedia(saved.session_id);
-      $("import-dialog").close();
-      go("review");
-      if (!state.error) toast("Practice saved. Your review is ready.");
-    } catch (error) {
-      if (saved) {
-        $("import-dialog").close();
-        notice(error.message);
-        go("review");
-      } else $("import-error").textContent = error.message;
-    } finally {
-      button.disabled = false;
     }
   } else if (event.target.id === "settings-form") {
     event.preventDefault();
@@ -639,9 +712,7 @@ async function init() {
   } catch (error) {
     state.loading = false;
     render();
-    notice(
-      `${error.message} Make sure the FenceCoach server is running, then reload.`,
-    );
+    notice(`${error.message} Make sure the FenceCoach server is running, then reload.`);
   }
 }
 setupJournal({ state, render, go, notice, toast });

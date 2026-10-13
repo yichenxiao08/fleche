@@ -29,7 +29,16 @@ POLICY = {
     "minimum_independent_groups_per_class": 3,
     "split_seed": 740,
 }
-CORE_CLASSES = ("en_garde", "advance", "retreat", "lunge", "recovery", "other")
+CORE_CLASSES = (
+    "en_garde",
+    "advance",
+    "retreat",
+    "lunge",
+    "recovery",
+    "ballestra",
+    "duck",
+    "other",
+)
 ISSUES = {
     "excluded_scope": "Saved footage is outside the single-fencer / single-bout MVP training scope.",
     "excluded_domain": "Source is excluded or modern fencing provenance is unconfirmed.",

@@ -1,0 +1,80 @@
+{
+  "scope": "Live answer relevance, follow-up continuity, repetition coverage, selected numeric facts and presentation. Automated checks are not expert validation of fencing advice.",
+  "model": "gemini-3.5-flash-lite",
+  "passed": 4,
+  "total": 5,
+  "results": [
+    {
+      "scenario": "arm-followups",
+      "question": "what about my arm",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "answer": "During your session, your right sword arm extends toward the target as you lunge while your left non-weapon arm moves back behind you. In fencing, the weapon arm reaches forward to keep the point aimed at the target rather than extending sideways, while the rear arm helps maintain posture and balance.",
+      "issues": [],
+      "status": "passed",
+      "latency_ms": 4203.03,
+      "pipeline_ms": 4509.89,
+      "model_calls": 2,
+      "review_corrections": [
+        "Reviewed relevance and interpretation against actual session record IDs. Included current-session evidence about the sword arm and non-weapon arm instead of answering with a purely general description."
+      ],
+      "actual_model": "gemini-3.5-flash-lite",
+      "actual_mode": "gemini"
+    },
+    {
+      "scenario": "arm-followups",
+      "question": "Which arm do you mean?",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "answer": "I mean your right sword arm, which holds the epee and extends forward toward the target as you lunge. Your left arm is the rear non-weapon arm, which extends back behind you during the finish.",
+      "issues": [],
+      "status": "passed",
+      "latency_ms": 3191.88,
+      "pipeline_ms": 3277.01,
+      "model_calls": 2,
+      "review_corrections": [
+        "Reviewed relevance and interpretation against actual session record IDs. "
+      ],
+      "actual_model": "gemini-3.5-flash-lite",
+      "actual_mode": "gemini"
+    },
+    {
+      "scenario": "arm-followups",
+      "question": "Was I extending it before my foot landed?",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "answer": "Your video capture records the overall movement and finish of your lunge, but it does not track the precise timing of your arm extension relative to when your front foot lands. To check this on your next reps, focus on getting your sword arm fully extended before your front heel strikes the floor.",
+      "issues": [],
+      "status": "passed",
+      "latency_ms": 2439.65,
+      "pipeline_ms": 2515.59,
+      "model_calls": 2,
+      "review_corrections": [
+        "Reviewed relevance and interpretation against actual session record IDs. "
+      ],
+      "actual_model": "gemini-3.5-flash-lite",
+      "actual_mode": "gemini"
+    },
+    {
+      "scenario": "torso-followups",
+      "question": "How was my torso?",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "answer": "In your session, your torso tilt at the finish ranged between 5.4 and 9.8 degrees across your reps, which is actually more upright than your reference range. Since projected torso tilt measures the magnitude of lean away from vertical\u2014where smaller means more upright\u2014your position matches a controlled upright posture.",
+      "issues": [],
+      "status": "passed",
+      "latency_ms": 2803.14,
+      "pipeline_ms": 2859.35,
+      "model_calls": 2,
+      "review_corrections": [
+        "Reviewed relevance and interpretation against actual session record IDs. Corrected draft claim that torso tilt was lower than reference reps and that the athlete was leaning forward too much"
+      ],
+      "actual_model": "gemini-3.5-flash-lite",
+      "actual_mode": "gemini"
+    },
+    {
+      "scenario": "torso-followups",
+      "question": "And on the last one?",
+      "session_id": "7bbb26f13ea5467384bc7a1772c399ae",
+      "status": "error",
+      "error_type": "GoogleRateLimitError",
+      "details": "Error calling model 'gemini-3.5-flash-lite' (RESOURCE_EXHAUSTED): 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 250000, model: g"
+    }
+  ]
+}
