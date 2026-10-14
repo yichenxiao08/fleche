@@ -87,8 +87,13 @@ def main():
                 page.locator('[data-go="record"]').first.click()
                 page.locator("[data-enable-camera]").click()
                 expect(page.locator("[data-start-recording]")).to_be_visible()
-                for name in ("body", "fixed", "space"):
-                    page.locator("#check-" + name).check()
+                expect(page.locator(".setup-checklist li")).to_have_text(
+                    [
+                        "Whole body visible",
+                        "Camera stays still",
+                        "Space to move safely",
+                    ]
+                )
                 page.locator("[data-start-recording]").click()
                 time.sleep(1)
                 page.locator("[data-finish-recording]").click()
