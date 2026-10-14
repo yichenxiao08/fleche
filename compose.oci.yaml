@@ -1,0 +1,79 @@
+services:
+  ollama:
+    image: ollama/ollama:0.35.1
+    volumes:
+      - ollama-models:/root/.ollama
+    healthcheck:
+      test: [CMD, ollama, list]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+  model-init:
+    image: ollama/ollama:0.35.1
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: [ollama, pull, "qwen2.5:3b"]
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: "no"
+
+  fencecoach:
+    build:
+      context: .
+      args:
+        VIDEO: "true"
+    image: fencecoach:oci
+    expose:
+      - "8000"
+    environment:
+      FENCECOACH_DATABASE_URL: ""
+      FENCECOACH_DB_PATH: /app/data/fencecoach.sqlite3
+      FENCECOACH_VIDEO_DIR: /app/data/videos
+      FENCECOACH_POSE_MODEL: /app/models/pose_landmarker_full.task
+      FENCECOACH_VIDEO_WORKER: "true"
+      FENCECOACH_COACHING_WORKER: "true"
+      FENCECOACH_AUTOMATIC_TRAINING: "false"
+      FENCECOACH_SEED_EXAMPLES: "true"
+      FENCECOACH_EXAMPLES_DIR: /app/examples/video
+      FENCECOACH_CHAT_PROVIDER: gemini
+      FENCECOACH_LOCAL_FALLBACK: "true"
+      FENCECOACH_VERIFIED_DIALOGUE: "true"
+      FENCECOACH_PROVIDER_COOLDOWN_SECONDS: "60"
+      FENCECOACH_LOCAL_TIMEOUT_SECONDS: "20"
+      FENCECOACH_FAST_REPLY_TOKENS: "112"
+      GEMINI_API_KEY: ${GEMINI_API_KEY:?Set GEMINI_API_KEY in .env.oci}
+      GEMINI_CHAT_MODEL: ${GEMINI_CHAT_MODEL:-gemini-3.5-flash-lite}
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_CHAT_MODEL: qwen2.5:3b
+      FENCECOACH_PHOENIX_ENDPOINT: ""
+    volumes:
+      - fencecoach-data:/app/data
+    depends_on:
+      model-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    environment:
+      FENCECOACH_DOMAIN: ${FENCECOACH_DOMAIN:?Set FENCECOACH_DOMAIN in .env.oci}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile.oci:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - fencecoach
+    restart: unless-stopped
+
+volumes:
+  fencecoach-data:
+  ollama-models:
+  caddy-data:
+  caddy-config:

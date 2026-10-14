@@ -19,6 +19,8 @@ from fencecoach.video_preview import build_preview
 
 
 def fixture_result(job, directory):
+    from fencecoach.video_pipeline import PROPOSAL_VERSION
+
     points = [[0.5, 0.5, 0, 0.95, 0.95] for _ in range(33)]
     for j in (0,):
         points[j][1] = 0.15
@@ -55,6 +57,7 @@ def fixture_result(job, directory):
         "job_id": job["job_id"],
         "fixture": True,
         "pipeline_version": "TEST-FIXTURE-NOT-INFERENCE",
+        "proposal_version": PROPOSAL_VERSION,
         "model_sha256": "fixture",
         "duration_ms": 3000,
         "width": 1280,

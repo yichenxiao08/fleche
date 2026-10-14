@@ -1,0 +1,4 @@
+{$FENCECOACH_DOMAIN} {
+    encode zstd gzip
+    reverse_proxy fencecoach:8000
+}
