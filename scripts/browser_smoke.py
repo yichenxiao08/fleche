@@ -113,9 +113,9 @@ def main():
                     page.locator("[data-rep-review-seek]").first.click()
                     page.locator("[data-video-accept]").click()
                     # Wait for acceptance and session loading to finish before navigating.
-                    coach_link = page.locator('.review-actions [data-go="coach"]')
-                    expect(coach_link).to_be_visible(timeout=15000)
-                    coach_link.click()
+                    ask_coach = page.get_by_role("button", name="Ask the coach")
+                    expect(ask_coach).to_be_visible(timeout=15000)
+                    ask_coach.click()
                     page.locator("#question").fill("What can you tell me about my lunge?")
                     page.locator('#coach-form button[type="submit"]').click()
                     expect(page.locator(".chat-message.coach").last).to_contain_text(
