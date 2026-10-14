@@ -613,6 +613,11 @@ ${e(state.question)}</textarea
 export function progress(state) {
   const stats = practiceStats(state.sessions, state.logs),
     now = new Date(),
+    currentDayEnd = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1,
+    ),
     currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`,
     selectedMonth = /^\d{4}-\d{2}$/.test(state.progressMonth || "")
       ? state.progressMonth
@@ -626,7 +631,7 @@ export function progress(state) {
         state.progressRange === "month"
           ? new Date(selectedYear, monthIndex + 1, 1).getTime()
           : Infinity,
-        now.getTime() + 1,
+        currentDayEnd.getTime(),
       ),
     ),
     showAllSessions = Boolean(state.progressShowAllSessions),

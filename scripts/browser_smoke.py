@@ -168,12 +168,12 @@ def main():
                         f"Persistent fixture {name}"
                     )
                     page.locator('#training-log-form button[type="submit"]').click()
-                    expect(page.locator(".journal-list")).to_contain_text(
+                    expect(page.locator(".activity-list")).to_contain_text(
                         f"Persistent fixture {name}"
                     )
                     page.reload()
                     page.locator('[data-go="progress"]').first.click()
-                    expect(page.locator(".journal-list")).to_contain_text(
+                    expect(page.locator(".activity-list")).to_contain_text(
                         f"Persistent fixture {name}"
                     )
                     page.locator('[data-go="record"]').first.click()
