@@ -1049,7 +1049,12 @@ async function openJob(job) {
     state.videoResult = result;
     state.videoAnnotations = await api(`${videoPath(job.job_id)}/annotations`);
     state.pendingMissedRep = null;
-    state.videoWindows = (job.reviewed_windows || result.candidates).map((w) => ({
+    // New jobs carry an empty review list; seed the editor from pose suggestions.
+    const reviewedWindows = Array.isArray(job.reviewed_windows)
+      ? job.reviewed_windows
+      : [];
+    const windows = reviewedWindows.length ? reviewedWindows : result.candidates || [];
+    state.videoWindows = windows.map((w) => ({
       start_ms: w.start_ms,
       end_ms: w.end_ms,
       candidate_id: w.candidate_id,
