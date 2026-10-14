@@ -15,15 +15,15 @@ import httpx
 from playwright.sync_api import expect, sync_playwright
 
 
-def make_clip(path, color):
+def make_clip(path, color, width=1280, height=720):
     import av
     import numpy as np
 
     with av.open(str(path), "w") as container:
         stream = container.add_stream("libx264", rate=10)
-        stream.width, stream.height, stream.pix_fmt = 1280, 720, "yuv420p"
+        stream.width, stream.height, stream.pix_fmt = width, height, "yuv420p"
         for i in range(30):
-            pixels = np.zeros((720, 1280, 3), dtype=np.uint8)
+            pixels = np.zeros((height, width, 3), dtype=np.uint8)
             pixels[:, :, color] = 40 + i
             frame = av.VideoFrame.from_ndarray(pixels, format="rgb24")
             frame.pts, frame.time_base = i, Fraction(1, 10)
@@ -35,7 +35,7 @@ def make_clip(path, color):
 
 def main():
     project = Path(__file__).resolve().parents[1]
-    output = project / "data/evals/browser"
+    output = Path(os.environ.get("FENCECOACH_BROWSER_SMOKE_OUTPUT", project / "data/evals/browser"))
     output.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory() as temporary:
         temp = Path(temporary)
@@ -74,6 +74,7 @@ def main():
                 raise RuntimeError("Fixture server did not become ready")
             for name, color in [("one", 0), ("two", 1)]:
                 make_clip(temp / f"{name}.mp4", color)
+            make_clip(temp / "unsupported.mp4", 2, width=640, height=360)
             errors = []
             with sync_playwright() as p:
                 browser = p.chromium.launch(
@@ -179,7 +180,7 @@ def main():
                     page.locator('[data-go="record"]').first.click()
                     if page.locator("[data-clear-draft]").count():
                         page.locator("[data-clear-draft]").click()
-                page.locator("#draft-file").set_input_files(str(temp / "one.mp4"))
+                page.locator("#draft-file").set_input_files(str(temp / "unsupported.mp4"))
                 page.locator("#video-title").fill("Unsupported fixture")
                 page.locator("[data-video-upload]").click()
                 expect(page.locator("[data-video-accept]")).to_be_disabled(timeout=30000)

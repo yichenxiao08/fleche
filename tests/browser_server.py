@@ -90,7 +90,9 @@ def fixture_result(job, directory):
     }
     result["preview"] = build_preview(directory / "source.video", directory)
     if "unsupported" in job["title"].lower():
-        result["height"] = 240
+        result["width"], result["height"] = 640, 360
+        # No usable rep means the UI should explain the quality gate and block saving.
+        result["candidates"] = []
     result["quality_gate"] = assess_quality(result)
     return result
 
