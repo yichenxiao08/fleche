@@ -183,6 +183,7 @@ def bounded_turn(payload, timeout_seconds, *, worker_command=None):
     token = uuid4().hex
     request_path = ROOT / "tmp" / f"coach-eval-request-{token}.json"
     output_path = ROOT / "tmp" / f"coach-eval-result-{token}.json"
+    request_path.parent.mkdir(parents=True, exist_ok=True)
     request_path.write_text(json.dumps(payload), encoding="utf-8")
     command = worker_command or [
         sys.executable,
@@ -269,6 +270,7 @@ def score_result(row, result, request):
 
 
 def save_artifact(output, artifact):
+    output.parent.mkdir(parents=True, exist_ok=True)
     pending = output.with_suffix(".pending.json")
     pending.write_text(json.dumps(artifact, indent=2), encoding="utf-8")
     pending.replace(output)
