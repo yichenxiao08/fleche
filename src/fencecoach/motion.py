@@ -125,12 +125,11 @@ def enrich_candidates(frames, candidates, baseline, profile=None):
         candidate["lunge_cues"] = cues
         candidate["lunge_cue_count"] = cue_count
         evidence = candidate.get("detection_evidence", {})
-        directional_drive_supported = (
-            evidence.get("front_foot_forward_travel_torso_lengths") is not None
-            and (
-                (profile or {}).get("camera_motion") != "moving"
-                or (profile or {}).get("camera_translation_compensated")
-            )
+        directional_drive_supported = evidence.get(
+            "front_foot_forward_travel_torso_lengths"
+        ) is not None and (
+            (profile or {}).get("camera_motion") != "moving"
+            or (profile or {}).get("camera_translation_compensated")
         )
         cycle_supported = (
             candidate.get("detection_method") == "local-guard-drive-return-v3"
@@ -199,15 +198,7 @@ def window_measurements(frames, start_ms, end_ms, candidate=None, profile=None):
             points_a = a.get("motion_landmarks", a["landmarks"])
             points_b = b.get("motion_landmarks", b["landmarks"])
             # Fix scale to the first frame in the interval to avoid motion from changing normalization.
-            dx = abs(
-                (
-                    points_b[23][0]
-                    + points_b[24][0]
-                    - points_a[23][0]
-                    - points_a[24][0]
-                )
-                / 2
-            )
+            dx = abs((points_b[23][0] + points_b[24][0] - points_a[23][0] - points_a[24][0]) / 2)
             # hip_x_torso is only used to recover the image width / fixed torso scale.
             # The raw image coordinate and torso-normalized feature recover
             # frame-width / torso-pixel scale even after translation correction.

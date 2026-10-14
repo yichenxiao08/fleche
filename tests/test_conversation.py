@@ -19,6 +19,7 @@ from fencecoach.schemas import (
     MetricObservation,
     SessionCreate,
 )
+from fencecoach.settings import settings
 
 
 def request(question="What do you mean?"):
@@ -63,6 +64,8 @@ class ScriptedModel:
         return next(self.replies)
 
 
+# ScriptedModel fixtures test the retained legacy tool loop and free-prose writer.
+@patch.object(settings, "fencecoach_verified_dialogue", False)
 class ConversationTests(unittest.TestCase):
     def test_invented_angle_is_blocked_and_fallback_is_concrete(self):
         data = request("What is wrong with my lunge?")

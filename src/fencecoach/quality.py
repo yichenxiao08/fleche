@@ -151,7 +151,11 @@ class CameraCheck:
                 self.translation_pairs += 1
                 self.cumulative_shift[0] += shift[0]
                 self.cumulative_shift[1] += shift[1]
-                self.last_translation = {"dx": shift[0], "dy": shift[1], "confidence": round(confidence, 3)}
+                self.last_translation = {
+                    "dx": shift[0],
+                    "dy": shift[1],
+                    "confidence": round(confidence, 3),
+                }
             self.moved += bool(shift != (0, 0) and zero > 5 and confidence >= 0.35)
         self.previous = gray
         return {

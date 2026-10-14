@@ -3,6 +3,31 @@
 import re
 from difflib import SequenceMatcher
 
+_SUBJECT_LABELS = {
+    "recovery": "recovery",
+    "speed": "movement speed",
+    "distance": "lunge distance",
+    "rear_leg": "back leg",
+    "front_leg": "front leg",
+    "torso": "torso",
+    "arm": "arm",
+    "lunge": "lunge",
+}
+
+
+def _subject_label(topic, question):
+    if topic != "arm":
+        return _SUBJECT_LABELS[topic]
+    from fencecoach.coach.intent import arm_roles
+
+    labels = {
+        "weapon": "sword arm",
+        "non_weapon": "non-sword arm",
+        "left": "left arm",
+        "right": "right arm",
+    }
+    return " and ".join(labels[role] for role in arm_roles(question)) or "arm"
+
 
 def _normal(text):
     return " ".join(re.findall(r"[a-z0-9]+", text.lower()))
@@ -36,7 +61,8 @@ def general_instruction(question):
         return False
     return bool(
         re.search(
-            r"\b(?:should|supposed to|proper|ideal|recommended|generally|usually|in general|how to)\b|\bhow (?:do|can) (?:i|you|we) (?:extend|hold|position|perform|do|recover|advance|retreat|lunge|stand)\b",
+            r"\b(?:should|supposed to|proper|ideal|recommended|generally|usually|in general|how to)\b|\bhow (?:do|can) (?:i|you|we) (?:extend|hold|position|perform|do|recover|advance|retreat|lunge|stand)\b|"
+            r"\bwhat (?:is|does) (?:a |the )?(?:recovery|lunge|en garde|advance|retreat|fleche|flèche)\b",
             question,
             re.I,
         )
@@ -46,18 +72,99 @@ def general_instruction(question):
 def contextual_question(request):
     """Carry only the immediately active rep into a follow-up, preserving its subject."""
     question = request.question.strip()
+    from fencecoach.coach.intent import corrected_subject, question_topics
+
+    # Keep an explicit correction intact; topic extraction will take its subject
+    # from the corrected clause and ignore the rejected topic before it.
+    if corrected_subject(question) != question:
+        return question
+
     # Resolve an elliptical subject before rep selection, using the latest
     # athlete question rather than trusting an earlier assistant's claims.
     users = [m.content for m in request.conversation_history if m.role == "user"]
+    from fencecoach.coach.answer_style import requests_numbers
+    from fencecoach.coach.intent import mentioned_rep_numbers, question_phases
+
+    # Numerical follow-ups request more evidence about the active subject; they
+    # do not change the subject or ask for every measurement in the recording.
+    if requests_numbers(question) and not question_topics(question):
+        for previous in reversed(users):
+            previous = corrected_subject(previous)
+            topics = question_topics(previous)
+            if topics:
+                subject = " and ".join(_subject_label(topic, previous) for topic in topics)
+                phase_names = question_phases(previous)
+                phase = (
+                    " at the recovery peak"
+                    if phase_names == {"recovery_peak"}
+                    else " during active recovery"
+                    if phase_names == {"active_recovery"}
+                    else " when you returned to guard"
+                    if phase_names == {"returned_guard"}
+                    else " in starting guard"
+                    if phase_names == {"starting_guard"}
+                    else " at the lunge finish"
+                    if phase_names == {"finish", "lunge_finish", "lunge_hold"}
+                    else ""
+                )
+                reps = mentioned_rep_numbers(previous)
+                rep_scope = (
+                    " in rep " + ", ".join(map(str, sorted(reps)))
+                    if reps
+                    else " in your last rep"
+                    if re.search(r"\b(?:last|final)\s+(?:rep|lunge)\b", previous, re.I)
+                    else " in your first rep"
+                    if re.search(r"\bfirst\s+(?:rep|lunge)\b", previous, re.I)
+                    else ""
+                )
+                return f"Regarding your {subject}{phase}{rep_scope} in this session: {question}"
+            if re.search(
+                r"\b(?:all|every|each)\b.*\breps?\b|\b(?:whole session|overall|entire drill)\b",
+                previous,
+                re.I,
+            ):
+                break
+        return f"Regarding this practice session: {question}"
     if users and re.search(r"^(?:and|what about|how about)\b", question, re.I):
         from fencecoach.coach.intent import question_topic
 
         if question_topic(question) is None and not re.search(
             r"\b(?:shoulder|hip|ankle|wrist|shin|head|blade|weapon)\b", question, re.I
         ):
-            topic = question_topic(users[-1])
-            if topic:
-                question = f"Regarding {topic} in this session: {question}"
+            previous_subject = next(
+                (
+                    (topics[0], previous)
+                    for previous in reversed(users)
+                    if (topics := question_topics(previous))
+                ),
+                None,
+            )
+            if previous_subject:
+                topic, previous = previous_subject
+                question = (
+                    f"Regarding your {_subject_label(topic, previous)} in this session: {question}"
+                )
+
+    # Short verdict follow-ups inherit the latest explicit athlete-requested
+    # subject. Assistant wording is never used to decide what "they" refers to.
+    if not question_topics(question) and re.search(
+        r"^(?:so\s+)?(?:are|were|is|was)\s+(?:they|those|these|my reps|the reps)\b|"
+        r"^(?:so\s+)?(?:are they|were they|is it|was it)\s+(?:good|bad|okay|better|worse)\b",
+        question,
+        re.I,
+    ):
+        previous_subject = next(
+            (
+                (topics[0], previous)
+                for previous in reversed(users)
+                if (topics := question_topics(previous))
+            ),
+            None,
+        )
+        if previous_subject:
+            topic, previous = previous_subject
+            subject = f"your {_subject_label(topic, previous)}"
+            question = f"Regarding {subject} in this session: {question}"
     followup = bool(
         re.search(
             r"^(?:so\s+)?(?:what should i do|what (?:do i|should i) (?:do|change|fix|work on)|"
@@ -121,6 +228,8 @@ def general_guidance_query(request):
 
 
 def conversation_issues(request, reply, partial=False):
+    from fencecoach.coach.answer_style import requests_numbers
+
     issues = []
     previous = _normal(last_answer(request))
     current = _normal(reply)
@@ -140,6 +249,19 @@ def conversation_issues(request, reply, partial=False):
         r"repeat (?:that|it|your answer) (?:exactly|verbatim)|say (?:that|it) again",
         request.question,
         re.I,
+    )
+    previous_question = next(
+        (
+            message.content
+            for message in reversed(request.conversation_history)
+            if message.role == "user"
+        ),
+        "",
+    )
+    # Repeating a request for a measured value can legitimately return the same
+    # stable fact. Relevance and grounding checks still enforce the current scope.
+    repeat_requested = repeat_requested or (
+        requests_numbers(request.question) and requests_numbers(previous_question)
     )
     if (
         not repeat_requested

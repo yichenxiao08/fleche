@@ -64,13 +64,17 @@ def rep_phases(frames, window, profile, width, height):
             if visible(frame, rear_ids):
                 values["rear_knee_angle"] = f.get(f"{rear}_knee_angle")
         if arm in {"left", "right"}:
-            shoulder, elbow, wrist = (11, 13, 15) if arm == "left" else (12, 14, 16)
-            if visible(frame, (shoulder, elbow, wrist)):
-                a, b = point(frame, shoulder), point(frame, wrist)
-                values["weapon_arm_direction"] = math.degrees(
-                    math.atan2(a[1] - b[1], abs(b[0] - a[0]))
-                )
-                values["weapon_elbow_angle"] = f.get(f"{arm}_elbow_angle")
+            for role, side in (
+                ("weapon", arm),
+                ("non_weapon", "right" if arm == "left" else "left"),
+            ):
+                shoulder, elbow, wrist = (11, 13, 15) if side == "left" else (12, 14, 16)
+                if visible(frame, (shoulder, elbow, wrist)):
+                    a, b = point(frame, shoulder), point(frame, wrist)
+                    values[f"{role}_arm_direction"] = math.degrees(
+                        math.atan2(a[1] - b[1], abs(b[0] - a[0]))
+                    )
+                    values[f"{role}_elbow_angle"] = f.get(f"{side}_elbow_angle")
         return {k: v for k, v in values.items() if v is not None and math.isfinite(v)}
 
     samples = sorted((f for f in frames if f.get("features")), key=lambda f: f["time_ms"])

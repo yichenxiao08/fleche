@@ -6,11 +6,7 @@ import math
 def detect_fleche(frames, width, height, profile, guard):
     direction = {"left": -1, "right": 1}.get(profile.get("facing"))
     moving = profile.get("camera_motion") == "moving"
-    if (
-        not direction
-        or not guard
-        or (moving and not profile.get("camera_translation_compensated"))
-    ):
+    if not direction or not guard or (moving and not profile.get("camera_translation_compensated")):
         return []
     valid = [
         f
@@ -37,8 +33,7 @@ def detect_fleche(frames, width, height, profile, guard):
         q = f.get("motion_landmarks", raw)
         required = (0, 11, 12, 23, 24, 27, 28)
         if any(
-            not (0.02 <= raw[j][0] <= 0.98 and 0.02 <= raw[j][1] <= 0.98)
-            or q[j][3] < 0.5
+            not (0.02 <= raw[j][0] <= 0.98 and 0.02 <= raw[j][1] <= 0.98) or q[j][3] < 0.5
             for j in required
         ):
             continue

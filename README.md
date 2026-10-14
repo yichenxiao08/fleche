@@ -16,7 +16,13 @@ Open [FenceCoach](http://127.0.0.1:8000) and [Phoenix traces](http://127.0.0.1:6
 
 The three MIT examples demonstrate QA, overlays, and rep proposals. They are low resolution and **unsupported for personal coaching**. They are not quietly upgraded or assigned synthetic measurements. The separate **Try synthetic sample review** demonstrates the evidence/report workflow without claiming video accuracy. Select **Local AI** there for a real model conversation; **Sample report** is deterministic and makes no LLM calls.
 
-All services bind to localhost. Sessions, clips, model downloads, and Phoenix data persist in named volumes. `docker compose down` stops the stack without deleting those volumes. Authentication and cloud deployment are deferred.
+All services bind to localhost. Sessions, clips, model downloads, and Phoenix data persist in named volumes. `docker compose down` stops the stack without deleting those volumes. Authentication is not included.
+
+## Full hosted demo (Render)
+
+The [`render.yaml`](render.yaml) Blueprint deploys the full web app as one Docker service: browser UI, API, video-analysis worker, coaching worker, SQLite session history, uploaded clips, and the packaged example sessions. It enables the optional video dependencies and checksum-pinned pose model during the image build. Set `GEMINI_API_KEY` in Render when prompted; keep the key out of Git and the Docker image.
+
+Video inference needs a paid `2c-4g` service and a 10 GB persistent disk. The disk keeps uploads and sessions between restarts, but the single-instance SQLite demo cannot be horizontally scaled, and Render briefly stops it during deploys. Render shows the current charge before the service is created. The Blueprint is ready for a connected GitHub repository, but a hosted build and live smoke test are still required before sharing its URL.
 
 ## Run with Python
 
@@ -35,6 +41,25 @@ $env:FENCECOACH_SEED_EXAMPLES='true'
 Start Ollama first if its desktop service is not running. On this development computer `scripts/start_local.ps1` also supports the existing portable runtime. Copy `.env.example` to `.env` for optional settings. Saved sessions/reviews and logs live in SQLite; unsent camera drafts live in browser IndexedDB. Clearing browser storage deletes unsent drafts, not saved server sessions.
 
 ## Gemini coaching
+
+The conversational path now resolves topic, phase and repetition in application-owned
+state, retrieves session evidence before the model call, and streams only validated
+phrasing. Gemini is primary; Qwen takes over after quota, timeout or transient provider
+errors. A cooldown respects Retry-After and permits one recovery probe. Invalid request
+and authentication errors are surfaced without silently switching providers.
+
+Every observation keeps its feature, phase, rep, units and source together. The model
+chooses among supported phrasings and cannot add new measurements or drills. Replies
+use shorter coaching language; explicit measurement limits remain honest. Library
+guidance is retrieved and attributed, and general advice is labeled only when relevant
+session and library evidence are absent. Bedrock and the legacy writer remain available;
+set `FENCECOACH_VERIFIED_DIALOGUE=false` to exercise the retained legacy path.
+
+The audit, measured results and remaining limits are in [the audit](docs/coach_audit.md)
+and [the evaluation report](docs/coach_audit_results.md). Replay saved-session cases with
+`python scripts/eval_coach.py --phase after --providers gemini local --run-id my-run`.
+`--offline` checks the protocol and evidence without claiming model quality or latency;
+`--forced-switch` verifies the 429/cooldown conversation independently of real quota.
 
 Create a key in [Google AI Studio](https://aistudio.google.com/api-keys), then save `GEMINI_API_KEY` in the ignored server `.env` file. Never put it in browser code or commit it. Install the project dependencies, then run `python scripts/configure_gemini.py`: it lists available models, makes one generic coaching request, and selects Gemini as the default only after success. Restart the server and refresh the app; choose **Gemini AI** in the coach. API usage is subject to Google quotas and billing settings. The setup command does not enable billing.
 
@@ -116,7 +141,7 @@ python scripts/coach_review.py
 
 ## Optional cloud and scaling paths
 
-The separate `compose.scale.yaml` retains PostgreSQL and independent workers. It requires explicit password configuration, model setup, and shared storage; it is experimental and not the default demo. Private S3 adapters and Bedrock providers are implemented, but cloud deployment and throughput claims are unverified. Bedrock model IDs and normal AWS credentials are required; configured IDs alone do not prove access. Never place credentials in the repository or image. No LangGraph/LangChain account is required.
+The separate `compose.scale.yaml` retains PostgreSQL and independent workers. It requires explicit password configuration, model setup, and shared storage; it is experimental and not the default demo. Private S3 adapters and Bedrock providers are implemented, but scalable cloud deployment and throughput claims are unverified. Bedrock model IDs and normal AWS credentials are required; configured IDs alone do not prove access. Never place credentials in the repository or image. No LangGraph/LangChain account is required.
 
 ## What failed and what changed
 

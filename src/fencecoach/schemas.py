@@ -74,6 +74,19 @@ class ConversationMessage(BaseModel):
     content: str = Field(min_length=1, max_length=6000)
 
 
+class DialogueState(BaseModel):
+    """Application-owned scope, persisted with a run and shared by all providers."""
+
+    session_id: str
+    subject: str = ""
+    topics: list[str] = Field(default_factory=list)
+    phases: list[str] = Field(default_factory=list)
+    arm_roles: list[str] = Field(default_factory=list)
+    scope: Literal["session", "general", "history"] = "session"
+    rep_numbers: list[int] = Field(default_factory=list)
+    last_cited_evidence: list[str] = Field(default_factory=list)
+
+
 class CoachRequest(MetricSet):
     # General conversation can run without supplying rejected video measurements.
     # Saved sessions still require at least one measurement through MetricSet.
@@ -91,6 +104,7 @@ class CoachRequest(MetricSet):
     conversation_history: list[ConversationMessage] = Field(default_factory=list, max_length=12)
     reviewed_feedback: dict = Field(default_factory=dict)
     technique_evaluation: dict = Field(default_factory=dict)
+    dialogue_state: DialogueState | None = None
 
     @model_validator(mode="after")
     def focus_is_in_session(self):
@@ -118,7 +132,7 @@ class SessionRecord(SessionCreate):
 
 class ReportRequest(BaseModel):
     question: str = Field(min_length=1, max_length=1500)
-    mode: Literal["demo", "bedrock", "local", "gemini"] = "local"
+    mode: Literal["demo", "bedrock", "local", "gemini"] = "gemini"
     focus_metric_id: str | None = Field(default=None, min_length=1, max_length=120)
 
 
@@ -136,6 +150,11 @@ class TraceEvent(BaseModel):
 
 
 class RunRecord(BaseModel):
+    dialogue_state: DialogueState | None = None
+    first_token_ms: float | None = None
+    first_visible_ms: float | None = None
+    fallback_reason: str | None = None
+    answer_contract: dict = Field(default_factory=dict)
     trace_id: str | None = None
     cost_usd: float | None = None
     token_usage_available: bool = False

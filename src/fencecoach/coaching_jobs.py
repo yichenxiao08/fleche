@@ -18,15 +18,23 @@ from fencecoach.settings import settings
 
 
 class CoachingJobs:
+    """Versioned queue: workers using the legacy protocol cannot claim new jobs."""
+
     def __init__(self, repository):
         self.repository = repository
         with closing(repository._connect()) as db, db:
+            db.execute(
+                "CREATE TABLE IF NOT EXISTS coaching_jobs_v2 (id TEXT PRIMARY KEY, status TEXT NOT NULL, created_at TEXT NOT NULL, payload TEXT NOT NULL)"
+            )
+            # Retain old request records for polling/history. New workers never
+            # claim this queue; old in-memory application versions only know it.
             db.execute(
                 "CREATE TABLE IF NOT EXISTS coaching_jobs (id TEXT PRIMARY KEY, status TEXT NOT NULL, created_at TEXT NOT NULL, payload TEXT NOT NULL)"
             )
 
     def create(self, request: CoachRequest, mode):
         job = dict(
+            queue_version=2,
             job_id=uuid4().hex,
             session_id=request.session_id,
             status="queued",
@@ -42,39 +50,57 @@ class CoachingJobs:
             db.execute("BEGIN IMMEDIATE")
             if (
                 db.execute(
-                    "SELECT count(*) FROM coaching_jobs WHERE status IN ('queued','running')"
+                    "SELECT count(*) FROM coaching_jobs_v2 WHERE status IN ('queued','running')"
                 ).fetchone()[0]
                 >= 50
             ):
                 raise ValueError("Coaching queue is full. Try again shortly.")
             db.execute(
-                "INSERT INTO coaching_jobs VALUES (?,?,?,?)",
+                "INSERT INTO coaching_jobs_v2 VALUES (?,?,?,?)",
                 (job["job_id"], job["status"], job["created_at"], json.dumps(job)),
             )
         return self.public(job)
 
     @staticmethod
     def public(job):
-        result = {k: v for k, v in job.items() if k not in {"request", "owner", "lease_until"}}
+        result = {
+            k: v
+            for k, v in job.items()
+            if k not in {"request", "owner", "lease_until", "failure_detail"}
+        }
         result["question"] = job.get("request", {}).get("question", "")
         return result
 
     def get(self, job_id):
         with closing(self.repository._connect()) as db:
-            row = db.execute("SELECT payload FROM coaching_jobs WHERE id=?", (job_id,)).fetchone()
+            row = db.execute(
+                "SELECT payload FROM coaching_jobs_v2 WHERE id=?", (job_id,)
+            ).fetchone()
+            if not row:
+                row = db.execute(
+                    "SELECT payload FROM coaching_jobs WHERE id=?", (job_id,)
+                ).fetchone()
             return self.public(json.loads(row[0])) if row else None
 
     def cancel(self, job_id):
         with closing(self.repository._connect()) as db, db:
             db.execute("BEGIN IMMEDIATE")
-            row = db.execute("SELECT payload FROM coaching_jobs WHERE id=?", (job_id,)).fetchone()
+            table = "coaching_jobs_v2"
+            row = db.execute(
+                "SELECT payload FROM coaching_jobs_v2 WHERE id=?", (job_id,)
+            ).fetchone()
+            if not row:
+                table = "coaching_jobs"
+                row = db.execute(
+                    "SELECT payload FROM coaching_jobs WHERE id=?", (job_id,)
+                ).fetchone()
             if not row:
                 return None
             job = json.loads(row[0])
             if job["status"] in {"queued", "running"}:
                 job.update(status="cancelled", stage="Stopped", error=None)
                 db.execute(
-                    "UPDATE coaching_jobs SET status='cancelled',payload=? WHERE id=?",
+                    f"UPDATE {table} SET status='cancelled',payload=? WHERE id=?",
                     (json.dumps(job), job_id),
                 )
             return self.public(job)
@@ -83,7 +109,7 @@ class CoachingJobs:
         with closing(self.repository._connect()) as db, db:
             db.execute("BEGIN IMMEDIATE")
             for row in db.execute(
-                "SELECT id,payload FROM coaching_jobs WHERE status='running'"
+                "SELECT id,payload FROM coaching_jobs_v2 WHERE status='running'"
             ).fetchall():
                 stale = json.loads(row[1])
                 if stale.get("lease_until", 0) < time.time():
@@ -93,11 +119,11 @@ class CoachingJobs:
                         stage="Interrupted",
                     )
                     db.execute(
-                        "UPDATE coaching_jobs SET status='failed',payload=? WHERE id=?",
+                        "UPDATE coaching_jobs_v2 SET status='failed',payload=? WHERE id=?",
                         (json.dumps(stale), row[0]),
                     )
             row = db.execute(
-                "SELECT id,payload FROM coaching_jobs WHERE status='queued' ORDER BY created_at LIMIT 1"
+                "SELECT id,payload FROM coaching_jobs_v2 WHERE status='queued' ORDER BY created_at LIMIT 1"
             ).fetchone()
             if not row:
                 return None
@@ -110,7 +136,7 @@ class CoachingJobs:
                 lease_until=time.time() + 45,
             )
             db.execute(
-                "UPDATE coaching_jobs SET status='running',payload=? WHERE id=?",
+                "UPDATE coaching_jobs_v2 SET status='running',payload=? WHERE id=?",
                 (json.dumps(job), row[0]),
             )
             return job
@@ -118,13 +144,15 @@ class CoachingJobs:
     def update(self, job_id, owner, **fields):
         with closing(self.repository._connect()) as db, db:
             db.execute("BEGIN IMMEDIATE")
-            row = db.execute("SELECT payload FROM coaching_jobs WHERE id=?", (job_id,)).fetchone()
+            row = db.execute(
+                "SELECT payload FROM coaching_jobs_v2 WHERE id=?", (job_id,)
+            ).fetchone()
             job = json.loads(row[0])
             if job["status"] != "running" or job.get("owner") != owner:
                 return False
             job.update(fields, lease_until=time.time() + 45)
             db.execute(
-                "UPDATE coaching_jobs SET status=?,payload=? WHERE id=?",
+                "UPDATE coaching_jobs_v2 SET status=?,payload=? WHERE id=?",
                 (job["status"], json.dumps(job), job_id),
             )
             return True
@@ -167,7 +195,8 @@ class CoachingWorker:
                 "evidence_check": "Checking video availability",
                 "gather_metrics": "Reading session evidence",
                 "retrieve": "Finding relevant practice notes",
-                "agent": "Coach is replying",
+                "agent": "Coach is thinking",
+                "local_fallback": "Gemini is unavailable; local coach is thinking",
                 "grounding": "Checking that the advice matches your evidence",
                 "tools": "Checking measurements and training history",
                 "format_report": "Writing your coaching review",
@@ -186,7 +215,7 @@ class CoachingWorker:
                 db.execute("BEGIN IMMEDIATE")
                 current = json.loads(
                     db.execute(
-                        "SELECT payload FROM coaching_jobs WHERE id=?", (job["job_id"],)
+                        "SELECT payload FROM coaching_jobs_v2 WHERE id=?", (job["job_id"],)
                     ).fetchone()[0]
                 )
                 if current["status"] != "running" or current.get("owner") != owner:
@@ -197,7 +226,7 @@ class CoachingWorker:
                 )
                 current.update(status="completed", stage="Review ready", run_id=run.run_id)
                 db.execute(
-                    "UPDATE coaching_jobs SET status='completed',payload=? WHERE id=?",
+                    "UPDATE coaching_jobs_v2 SET status='completed',payload=? WHERE id=?",
                     (json.dumps(current), job["job_id"]),
                 )
         except Exception as exc:
@@ -213,7 +242,7 @@ class CoachingWorker:
                 message = (
                     str(exc)[:400]
                     if isinstance(exc, (EvidenceValidationError, RuntimeError))
-                    else "The coaching provider couldn't answer. Your question is kept; try again."
+                    else "FenceCoach hit an internal error while answering. Your question is kept; try again."
                 )
             self.jobs.update(
                 job["job_id"],
@@ -221,6 +250,10 @@ class CoachingWorker:
                 status="failed",
                 stage="Review interrupted",
                 error=message,
+                failure_detail={
+                    "exception_type": type(exc).__name__,
+                    "exception_module": type(exc).__module__,
+                },
             )
 
     def supervise(self):
@@ -236,7 +269,7 @@ class CoachingWorker:
                         elif time.monotonic() - lease_renewed >= 15:
                             with closing(self.jobs.repository._connect()) as db:
                                 row = db.execute(
-                                    "SELECT payload FROM coaching_jobs WHERE id=?", (job_id,)
+                                    "SELECT payload FROM coaching_jobs_v2 WHERE id=?", (job_id,)
                                 ).fetchone()
                             current = json.loads(row[0]) if row else {}
                             limit = 90 if current.get("mode") == "local" else 45

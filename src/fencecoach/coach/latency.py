@@ -3,6 +3,7 @@
 import json
 import re
 
+from fencecoach.coach.intent import arm_sides
 from fencecoach.coach.intent import wants_all_reps as _wants_all_reps
 from fencecoach.coach.intent import wants_rep_comparison as _wants_rep_comparison
 
@@ -127,6 +128,113 @@ def compact_session_context(snapshot: str) -> str:
         "named list in record_schemas. All original records are retained."
     )
     return json.dumps(compact, separators=(",", ":"))
+
+
+def coaching_session_context(snapshot: str) -> str:
+    """Present complete session evidence as explicit records with stable IDs.
+
+    The table-interned representation in ``compact_session_context`` is lossless,
+    but forcing the model to reconstruct table schemas makes evidence selection
+    and citation fragile. This projection removes repeated wrapper fields while
+    keeping each measurement, phase summary, reference comparison, and evidence
+    ID directly readable.
+    """
+    packet = json.loads(snapshot)
+    top_level = (
+        "current_session_id",
+        "session_notes",
+        "current_clip_reps_detected",
+        "session_measurement_count",
+        "reference_baselines",
+        "measured_features_available",
+        "capture_context",
+        "submitted_feedback",
+        "supported_current_observations",
+        "session_measurements",
+        "per_rep_reference_findings",
+        "question_relevant_focus",
+        "recurring_reference_comparison",
+        "evidence_gap",
+        "measurement_policy",
+        "feature_meanings",
+        "requested_scope",
+        "representative_support",
+        "answer_affordances",
+    )
+    result = {key: packet.get(key) for key in top_level if key in packet}
+    reps = []
+    for rep in packet.get("per_rep_measurements", []):
+        phases = []
+        for name, phase in rep.get("phases", {}).items():
+            values = []
+            units = phase.get("units", {})
+            ranges = phase.get("ranges", {})
+            for feature, value in phase.get("values", {}).items():
+                values.append(
+                    {
+                        "feature": feature,
+                        "value": value,
+                        "unit": units.get(feature),
+                        **({"range": ranges[feature]} if feature in ranges else {}),
+                    }
+                )
+            phases.append(
+                {
+                    "evidence_id": phase.get("evidence_id"),
+                    "rep": rep.get("rep"),
+                    "phase": name,
+                    "interval_seconds": phase.get("interval_seconds"),
+                    "samples": phase.get("samples"),
+                    "method": phase.get("method"),
+                    "values": values,
+                }
+            )
+        reps.append(
+            {
+                "rep": rep.get("rep"),
+                "finish_seconds": rep.get("finish_seconds"),
+                "measurements": list(rep.get("measures", {}).values()),
+                "phases": phases,
+                "reference_comparisons": rep.get("reference_comparisons", []),
+                "reference_context": rep.get("reference_context", {}),
+                "drill_benchmarks": rep.get("drill_benchmarks", {}),
+                "review_checks": rep.get("review_checks", []),
+            }
+        )
+    result["per_rep_measurements"] = reps
+
+    def normalize_measurements(value):
+        if isinstance(value, dict):
+            normalized = {}
+            for key, item in value.items():
+                if (
+                    key in {"value", "current", "reference_median"}
+                    and isinstance(item, (int, float))
+                    and not isinstance(item, bool)
+                ):
+                    normalized[key] = float(item)
+                elif key in {"reference_range", "current_range", "range"} and isinstance(
+                    item, list
+                ):
+                    normalized[key] = [
+                        float(number) if isinstance(number, (int, float)) else number
+                        for number in item
+                    ]
+                else:
+                    normalized[key] = normalize_measurements(item)
+            return normalized
+        if isinstance(value, list):
+            return [normalize_measurements(item) for item in value]
+        return value
+
+    result = normalize_measurements(result)
+    result["evidence_encoding"] = (
+        "Each evidence_id identifies the exact measurement, phase record, or reference comparison. "
+        "Phase values are explicit feature/value/unit records. All detected reps and supplied "
+        "evidence are included; an absent measurement is not implied by an omitted summary."
+        " Measurement values use consistent numeric formatting; 180 and 180.0 mean the same value."
+    )
+    return json.dumps(result, separators=(",", ":"))
 
 
 def expand_session_context(snapshot: str) -> dict:
@@ -270,7 +378,9 @@ def compact_measurements(rows, question, profile, focus_id=None, limit=6, prefer
     """Keep actual source IDs and extrema; never invent an aggregate measurement."""
     question = question.lower()
     if "arm" in question or "hand" in question:
-        terms, side = ("arm_extension", "elbow_angle"), profile.get("weapon_arm")
+        terms, side = ("arm_extension", "elbow_angle", "wrist_height"), None
+        sides = arm_sides(question, profile)
+        rows = [r for r in rows if any(r["name"].startswith(s + "_") for s in sides)]
     elif "knee" in question or "leg" in question:
         terms, side = ("knee_angle", "knee_flexion"), profile.get("front_leg")
     elif "recover" in question or "return" in question:

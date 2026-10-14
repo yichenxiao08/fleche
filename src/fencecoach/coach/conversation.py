@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import operator
 import re
 import time
@@ -25,6 +26,7 @@ from fencecoach.coach.analysis import _rep_key, build_coaching_brief
 from fencecoach.coach.answer_review import (
     AnswerDraft,
     AnswerReview,
+    cited_subject_issues,
     evidence_ids,
     review_issues,
     review_messages,
@@ -33,6 +35,8 @@ from fencecoach.coach.answer_style import (
     ADVICE_FIRST_POLICY,
     format_answer,
     format_timings,
+    requests_numbers,
+    response_evidence_issues,
     style_issues,
 )
 from fencecoach.coach.grounding import (
@@ -40,11 +44,17 @@ from fencecoach.coach.grounding import (
     evidence_summary,
     unsupported_claims,
 )
-from fencecoach.coach.intent import classify_coach_question, mentioned_rep_numbers
+from fencecoach.coach.intent import (
+    arm_sides,
+    classify_coach_question,
+    corrected_subject,
+    mentioned_rep_numbers,
+    question_phases,
+    question_topics,
+)
 from fencecoach.coach.latency import (
+    coaching_session_context,
     compact_guidance,
-    compact_session_context,
-    local_overview_context,
     wants_detail,
     wants_rep_comparison,
 )
@@ -56,22 +66,23 @@ from fencecoach.coach.reviewed import (
     select_feedback,
 )
 from fencecoach.coach.technique_evidence import (
-    _TOPIC_MEASUREMENTS,
     MOTION_POLICY,
-    all_reps_fallback,
     baseline_context,
     current_session_context,
     evaluation_issues,
     evaluation_source,
-    rep_comparison_fallback,
+    question_scoped_session_context,
     rep_comparison_result,
+    requested_feature_names,
     session_evidence_context,
 )
 from fencecoach.coach.turns import (
     clarification,
     contextual_question,
     conversation_issues,
+    general_guidance_fallback,
     general_guidance_query,
+    general_instruction,
 )
 from fencecoach.comparisons import comparable_capture
 from fencecoach.rag.knowledge import search_knowledge
@@ -129,6 +140,10 @@ def _needs_measurements(question):
 def run_conversation(
     request: CoachRequest, mode: str, model=None, on_step=None, on_text=None
 ) -> RunRecord:
+    if settings.fencecoach_verified_dialogue and mode in {"gemini", "local"}:
+        from fencecoach.coach.verified_dialogue import run_verified_conversation
+
+        return run_verified_conversation(request, mode, model, on_step, on_text)
     started = time.perf_counter()
     try:
         return _run_conversation(request, mode, model, on_step, on_text)
@@ -171,17 +186,26 @@ def _run_conversation(
     original_question = request.question
     request = request.model_copy(update={"question": contextual_question(request)})
     intent = classify_coach_question(request.question)
-    ambiguous_followup = bool(
-        re.search(r"^(?:and|how about|what about (?:it|that|this))\b", original_question, re.I)
+    corrected_turn = corrected_subject(original_question) != original_question
+    current_topics = set(question_topics(request.question))
+    prior_topic_question = next(
+        (
+            item.content
+            for item in reversed(request.conversation_history)
+            if item.role == "user" and current_topics.intersection(question_topics(item.content))
+        ),
+        "",
     )
-    evidence_reply = (
-        None
-        if ambiguous_followup
-        else all_reps_fallback(request)
-        if intent.kind == "all_reps"
-        else rep_comparison_fallback(request)
-        if intent.kind == "rep_comparison"
-        else None
+    prior_topic_intent = (
+        classify_coach_question(prior_topic_question) if prior_topic_question else None
+    )
+    all_reps_requested = intent.kind == "all_reps" or bool(
+        corrected_turn
+        and prior_topic_intent
+        and prior_topic_intent.kind in {"all_reps", "rep_comparison"}
+    )
+    assessment_question = (
+        prior_topic_question if corrected_turn and prior_topic_question else request.question
     )
     provider_fallback = False
     failover_used = False
@@ -192,9 +216,9 @@ def _run_conversation(
             publish_text(format_answer(text))
 
         on_text = publish_formatted
-    # Deterministic rep operations do not need a provider configured or an LLM
-    # invocation; this keeps evidence-supported counts and rankings reliable.
-    model = model if model is not None else (None if evidence_reply else chat_model(mode))
+    # Every user-facing answer is authored by the model. Tools and evaluators
+    # return evidence only; they never short-circuit the conversational writer.
+    model = model if model is not None else chat_model(mode)
     sources = {}
     consulted = {}
     plan = None
@@ -205,6 +229,7 @@ def _run_conversation(
     ):
         review_context = False
         reviewed_reps = []
+    scoped_feedback_source = feedback_source(request, reviewed_reps) if reviewed_reps else None
     session_evaluation_available = bool(request.technique_evaluation.get("reps")) and (
         not review_context
         or request.technique_evaluation.get("coaching_mode") == "reference_comparison"
@@ -249,7 +274,7 @@ def _run_conversation(
                 issues.append(
                     "A best/worst rep question must name both reps supported by the supplied comparison."
                 )
-        if intent.kind == "all_reps":
+        if all_reps_requested:
             expected_reps = [
                 rep.get("rep_number")
                 for rep in request.technique_evaluation.get("reps", [])
@@ -268,16 +293,74 @@ def _run_conversation(
         topic_patterns = {
             "arm": r"\b(arm|hand|elbow|sword)\b",
             "front_leg": r"\b(knee|front[- ]leg|front foot|stance)\b",
-            "rear_leg": r"\b(rear|back foot|heel)\b",
+            "rear_leg": r"\b(rear|back[- ](?:leg|knee|foot)|heel)\b",
             "torso": r"\b(torso|trunk|upright|posture|chest)\b",
-            "recovery": r"\b(recover|recovery|return|guard)\b",
+            "recovery": r"\b(recover(?:y|ies|ing)?|return(?:ed|ing)?|guard)\b",
             "speed": r"\b(speed|fast|slow|quick|pace|timing)\b",
             "distance": r"\b(distance|stride|reach|feet|travel|spacing|stance)\b",
             "lunge": r"\b(lunge|finish|knee|leg)\b",
         }
-        topic_pattern = topic_patterns.get(intent.topic)
-        if topic_pattern and not re.search(topic_pattern, reply, re.I):
-            issues.append(f"The answer did not address the requested {intent.topic} topic.")
+        requested_topics = question_topics(request.question) or (
+            [intent.topic] if intent.topic else []
+        )
+        for topic in requested_topics:
+            topic_pattern = topic_patterns.get(topic)
+            if topic_pattern and not re.search(topic_pattern, reply, re.I):
+                issues.append(f"The answer did not address the requested {topic} topic.")
+        allowed_features = requested_feature_names(request)
+        feature_phrases = {
+            "front_knee_angle": r"\bfront[- ](?:leg|knee)|\blead knee\b",
+            "front_knee_ahead_of_toe": r"\bfront[- ](?:leg|knee)|\blead knee\b",
+            "front_foot_lift_to_stable_finish": r"\bfront foot|\blead foot\b",
+            "rear_knee_angle": r"\b(?:rear|back)[- ]knee|\b(?:rear|back) leg\b",
+            "rear_foot_displacement_inches": r"\b(?:rear|back) foot|\bheel\b",
+            "rear_foot_displacement_leg_lengths": r"\b(?:rear|back) foot|\bheel\b",
+            "rear_heel_grounded": r"\b(?:rear|back) foot|\bheel\b",
+            "projected_torso_tilt": r"\btorso|\btrunk|\bchest\b|\bupright posture\b",
+            "forward_torso_pitch_change": r"\btorso|\btrunk|\bchest\b|\bupright posture\b",
+            "weapon_arm_direction": r"(?<!non-)(?<!non )\b(?:sword|weapon) (?:arm|hand)",
+            "non_weapon_arm_direction": r"\bnon[- ](?:sword|weapon) (?:arm|hand)",
+            "feet_separation_leg_lengths": r"\bfeet separation|\bstance length|\bstride length|\bdistance between (?:the )?feet",
+        }
+        phrase_features = {}
+        for feature, pattern in feature_phrases.items():
+            phrase_features.setdefault(pattern, set()).add(feature)
+        for pattern, features in phrase_features.items():
+            if (
+                requested_topics
+                and "lunge" not in requested_topics
+                and not features.intersection(allowed_features)
+                and re.search(pattern, reply, re.I)
+            ):
+                issues.append(
+                    "The answer introduced feedback about an unrequested body part; stay within the athlete's requested feature and phase."
+                )
+        asks_for_assessment = bool(
+            re.search(
+                r"\b(?:how (?:was|were|did)\b|good or bad|good/bad|"
+                r"(?:is|are|was|were) (?:it|they|those|these) (?:good|bad|correct|right)|"
+                r"did i do (?:well|that right))\b",
+                assessment_question,
+                re.I,
+            )
+        )
+        if asks_for_assessment and requested_topics and relevant_reference_available:
+            assessment_pattern = re.compile(
+                r"\b(?:match(?:es|ed)?|overlap(?:s|ped)?|within|outside|similar|aligned|"
+                r"differ(?:s|ed|ent)?|straighter|more bent|less|on target|off target|"
+                r"consistent|varied|closer|further|than|compared|good|bad|mixed|"
+                r"better|worse|stronger|weaker|matched)\b",
+                re.I,
+            )
+            if not assessment_pattern.search(reply):
+                issues.append(
+                    "The athlete asked for an assessment; say directly how the requested movement compares with its reference."
+                )
+            first_sentence = re.split(r"(?<=[.!?])\s+", reply.strip(), maxsplit=1)[0]
+            if not assessment_pattern.search(first_sentence):
+                issues.append(
+                    "Lead with the direct assessment, not a generic coaching cue, when the athlete asks how the reps were."
+                )
         if request.technique_evaluation.get("reps") and re.search(
             r"\b(?:no|not|isn't|aren't)\b.{0,45}\b(?:rep breakdown|rep data|repetition data)\b|"
             r"\brep breakdown\b.{0,35}\b(?:not (?:available|detailed)|missing|unavailable)\b",
@@ -287,6 +370,11 @@ def _run_conversation(
             issues.append(
                 "The current session has per-rep evidence; do not claim the breakdown is missing."
             )
+        issues += response_evidence_issues(
+            request.question,
+            reply,
+            available=relevant_evidence_available and not general_instruction(request.question),
+        )
         return issues
 
     def measured(items):
@@ -352,6 +440,16 @@ def _run_conversation(
             for metric in request.metrics
             if not needle or any(term in metric.name.lower() for term in terms)
         ]
+        if "arm" in question_topics(needle):
+            sides = arm_sides(needle, request.capture_profile)
+            items = [
+                metric
+                for metric in request.metrics
+                if metric.name.startswith(tuple(side + "_" for side in sides))
+                and any(
+                    term in metric.name for term in ("arm_extension", "elbow_angle", "wrist_height")
+                )
+            ]
         if rep_number:
             items = [
                 m
@@ -582,17 +680,12 @@ def _run_conversation(
             prepare_practice_plan,
         )
     }
-    all_reps_requested = intent.kind == "all_reps"
     detailed = wants_detail(request.question)
     advertised = list(available.values())
-    needs_tools = not bool(evidence_reply)
-    with_tools = (
-        model.bind_tools(advertised) if needs_tools and hasattr(model, "bind_tools") else model
-    )
+    needs_tools = True
+    with_tools = model.bind_tools(advertised) if hasattr(model, "bind_tools") else model
     plain_model = model
-    structured_dialogue = (
-        mode == "gemini" and not evidence_reply and hasattr(model, "with_structured_output")
-    )
+    structured_dialogue = mode == "gemini" and hasattr(model, "with_structured_output")
     if structured_dialogue:
         output_options = {
             "response_mime_type": "application/json",
@@ -628,19 +721,39 @@ def _run_conversation(
         + MOTION_POLICY
         + "\nAnswer presentation:\n"
         + ADVICE_FIRST_POLICY
+        + "\nThe active-session packet is scoped to the request when a feature or phase is clear; its inventory shows what else the session contains. Treat it as the authority for personal feedback. Read-only tools return evidence data; you are the only component that writes the conversational answer. Call the coaching-library tool only when general technique knowledge is needed, and do not retrieve or repeat it by default."
         + directive
     )
+    corrected_scope = corrected_subject(original_question)
+    if corrected_scope != original_question:
+        policy += (
+            "\nThe athlete is correcting the previous answer. The corrected subject is: "
+            + corrected_scope
+            + ". Treat that as authoritative, discard the previous off-topic feature, "
+            "and answer only the corrected subject unless the athlete asks for more."
+        )
     if structured_dialogue:
         policy += (
             "\nReturn the supplied JSON schema. Cite exact packet evidence IDs for every "
             "personal observation and comparison in session_evidence_ids; keep IDs out "
             "of the conversational answer. Check the whole packet before declaring an "
-            "aspect unavailable. Use tools when the supplied evidence cannot answer it."
+            "aspect unavailable. Use tools when the supplied evidence cannot answer it. "
+            "For ordinary analysis, write a brief qualitative assessment in answer and "
+            "one representative rep/statistic in supporting_example. The interface joins "
+            "them as one compact reply. For an explicit numerical question, give the "
+            "numbers directly in answer; for an all-reps request, cover all requested reps."
         )
     if all_reps_requested:
         policy += (
             "\nThe athlete requests every repetition: give one concise, distinct line "
             "per supplied rep in order, then the overall pattern and useful supported cue."
+        )
+    if requests_numbers(request.question):
+        policy += (
+            "\nThe latest request asks for numerical support. Give an actual value with units "
+            "for the active feature, phase and rep, and briefly relate it to the observation "
+            "or matching reference. One example is enough unless all values were requested. "
+            "Do not return only the earlier qualitative assessment."
         )
     system = SystemMessage(content=policy)
 
@@ -805,9 +918,7 @@ def _run_conversation(
     graph.add_edge("final_answer", END)
     # Keep the most recent exchange intact instead of overflowing the model's
     # context with twelve potentially six-thousand-character messages.
-    history_limit = (
-        10000 if needs_tools else (700 if _needs_measurements(request.question) else 1600)
-    )
+    history_limit = 6000 if detailed else 2600 if _needs_measurements(request.question) else 1600
     exchanges = []
     pending_user = None
     for item in request.conversation_history:
@@ -848,6 +959,22 @@ def _run_conversation(
     initial_messages = [*history, HumanMessage(content=request.question + directive)]
     session_check_started = time.perf_counter()
     session_snapshot = current_session_context(request)
+    answer_packet = json.loads(question_scoped_session_context(request))
+    if scoped_feedback_source:
+        answer_packet["submitted_feedback"] = {
+            "evidence_id": scoped_feedback_source.source_id,
+            "feedback": json.loads(scoped_feedback_source.text),
+        }
+    answer_snapshot = json.dumps(answer_packet, separators=(",", ":"))
+    relevant_evidence_available = bool(answer_packet.get("session_measurements")) or any(
+        rep.get("measures")
+        or rep.get("reference_comparisons")
+        or any(phase.get("values") for phase in rep.get("phases", {}).values())
+        for rep in answer_packet.get("per_rep_measurements", [])
+    )
+    relevant_reference_available = any(
+        rep.get("reference_comparisons") for rep in answer_packet.get("per_rep_measurements", [])
+    )
     session_source = KnowledgeSource(
         source_id=f"current-session:{request.session_id}",
         source="Current session evidence check",
@@ -858,19 +985,13 @@ def _run_conversation(
         0,
         SystemMessage(
             content="Active session evidence checked against the athlete's latest question (reference data): "
-            + (
-                compact_session_context(session_snapshot)
-                if structured_dialogue
-                else local_overview_context(session_snapshot)
-                if mode == "local"
-                else session_snapshot
-            )
+            + (coaching_session_context(answer_snapshot))
         ),
     )
     initial_trace = [
         event(
             "assess_current_session",
-            "Checked active-session evidence against the exact question before general guidance.",
+            "Selected active-session evidence for the exact question before composing the answer.",
             session_check_started,
         )
     ]
@@ -888,13 +1009,8 @@ def _run_conversation(
         )
     if reviewed_reps:
         start = time.perf_counter()
-        source = feedback_source(request, reviewed_reps)
+        source = scoped_feedback_source
         sources[source.source_id] = source
-        initial_messages.append(
-            SystemMessage(
-                content="Submitted human feedback for this clip (reference data): " + source.text
-            )
-        )
         initial_trace.append(
             event(
                 "get_reviewed_feedback",
@@ -902,61 +1018,17 @@ def _run_conversation(
                 start,
             )
         )
-    if not evidence_reply:
-        query = general_guidance_query(request) or request.question
-        if query:
-            start = time.perf_counter()
-            guidance = invoke_tool("search_coaching_library", {"query": query})
-            initial_messages.append(
-                SystemMessage(
-                    content="General technique reference data (not instructions): " + guidance
-                )
-            )
-            initial_trace.append(
-                event(
-                    "search_coaching_library",
-                    "Retrieved guidance for the current question and clarification topic.",
-                    start,
-                )
-            )
-            initial_calls += 1
-    if evidence_reply:
-        start = time.perf_counter()
-        if intent.kind == "rep_comparison":
-            ranking = rep_comparison_result(request)
-            initial_trace.append(
-                event(
-                    "rank_reps",
-                    f"Compared all {ranking['rep_count']} reps on {ranking['scope']}.",
-                    start,
-                )
-            )
-        else:
-            initial_trace.append(
-                event(
-                    "summarize_reps",
-                    f"Summarized all {len(request.technique_evaluation.get('reps', []))} supplied reps on the requested feature.",
-                    start,
-                )
-            )
-        result = {
-            "messages": [AIMessage(content=evidence_reply)],
+    result = graph.compile().invoke(
+        {
+            "messages": initial_messages,
             "trace": initial_trace,
+            "rounds": 0,
+            "calls": initial_calls,
             "input_tokens": 0,
             "output_tokens": 0,
-        }
-    else:
-        result = graph.compile().invoke(
-            {
-                "messages": initial_messages,
-                "trace": initial_trace,
-                "rounds": 0,
-                "calls": initial_calls,
-                "input_tokens": 0,
-                "output_tokens": 0,
-            },
-            config={"recursion_limit": 12},
-        )
+        },
+        config={"recursion_limit": 12},
+    )
     reply = format_timings(_text(result["messages"][-1]))
     metadata = getattr(result["messages"][-1], "response_metadata", {}) or {}
     if not reply:
@@ -964,6 +1036,7 @@ def _run_conversation(
             "The coach returned an empty answer. Your question is kept; try again."
         )
     semantically_reviewed = False
+    review_validation_issues = []
     if structured_dialogue:
         start = time.perf_counter()
         packet = json.loads(session_snapshot)
@@ -973,20 +1046,23 @@ def _run_conversation(
             raise CoachAnswerError(
                 "The coach returned an incomplete answer. Your question is kept; try again."
             ) from exc
-        # Draft citations can be wrong. The independent reviewer sees the complete
-        # packet and may repair them; only the checked final citations are accepted.
+        # The independent reviewer judges the writer's answer and evidence IDs;
+        # it cannot replace the conversational answer with its own prose.
         reviewer = model.with_structured_output(
             AnswerReview, method="json_schema", include_raw=True
         )
         reviews = []
         # Review independently against the full active session. Restricting this
         # to the draft's citations lets a generic/wrong-topic draft hide evidence.
-        review_packet = json.loads(compact_session_context(session_snapshot))
+        review_packet = json.loads(coaching_session_context(answer_snapshot))
         reviewed = invoke_dialogue_model(
             reviewer,
             review_messages(
                 request.question,
-                draft.answer,
+                {
+                    "answer": draft.conversational_text,
+                    "writer_evidence_ids": draft.session_evidence_ids,
+                },
                 review_packet,
                 [
                     {"id": doc.source_id, "text": doc.text}
@@ -1003,37 +1079,13 @@ def _run_conversation(
             response_schema=AnswerReview,
         )
         decision = reviewed.get("parsed")
-        requested_features = _TOPIC_MEASUREMENTS.get(intent.topic, ())
-        mentioned_topics = [
-            topic
-            for topic, pattern in {
-                "arm": r"\b(?:arms?|hands?|elbows?|extend|extension|extending)\b",
-                "torso": r"\b(?:torso|trunk|upright|lean|posture|upper body)\b",
-                "front_leg": r"\b(?:front|lead)\s+(?:knee|leg|foot)\b",
-                "rear_leg": r"\b(?:back|rear)\s+(?:knee|leg|foot|heel)\b",
-                "recovery": r"\b(?:recovery|recover|returned guard)\b",
-                "speed": r"\b(?:speed|fast|slow|explosive|power|duration|interval)\b",
-                "distance": r"\b(?:distance|stride|reach|feet separation)\b",
-            }.items()
-            if re.search(pattern, request.question, re.I)
-        ]
-        if mentioned_topics:
-            requested_features = set().union(
-                *(_TOPIC_MEASUREMENTS[topic] for topic in mentioned_topics)
-            )
-        requested_phases = (
-            {"recovery_peak", "active_recovery"}
-            if re.search(r"peak recovery|deepest.*recover", request.question, re.I)
-            else {"starting_guard"}
-            if re.search(r"starting guard|initial guard|before the lunge", request.question, re.I)
-            else {"returned_guard"}
-            if re.search(r"return(?:ed)? to guard|back in guard", request.question, re.I)
-            else {"finish", "lunge_finish", "lunge_hold"}
-            if re.search(r"at (?:the )?(?:lunge )?finish", request.question, re.I)
-            else ()
-        )
+        requested_features = requested_feature_names(request)
+        requested_phases = question_phases(request.question)
         requested_rep = intent.rep_number
+        requested_reps = intent.rep_numbers
         numbers = [r["rep"] for r in packet.get("per_rep_measurements", [])]
+        if all_reps_requested or intent.kind == "rep_comparison":
+            requested_reps = tuple(numbers)
         if numbers and intent.kind in {"first_rep", "last_rep"}:
             requested_rep = min(numbers) if intent.kind == "first_rep" else max(numbers)
         timing_gap = (
@@ -1044,9 +1096,7 @@ def _run_conversation(
             and "arm_extension_timing" not in packet.get("measured_features_available", [])
         )
         require_session = bool(
-            set(requested_features).intersection(packet.get("measured_features_available", []))
-            and not clarification(request)
-            and not timing_gap
+            relevant_evidence_available and not clarification(request) and not timing_gap
         )
         validation = review_issues(
             decision,
@@ -1055,83 +1105,57 @@ def _run_conversation(
             requested_rep,
             require_session,
             requested_phases,
+            requested_reps,
+            draft.conversational_text,
+        )
+        if not set(draft.session_evidence_ids).issubset(evidence_ids(packet)):
+            validation.append("The writer cited an evidence ID absent from the current session.")
+        validation += cited_subject_issues(
+            packet,
+            draft.session_evidence_ids,
+            requested_features if not clarification(request) else (),
+            requested_rep,
+            requested_phases,
+            requested_reps,
         )
         if isinstance(decision, AnswerReview):
             validation += style_issues(
-                request.question, decision.final_answer, personal=bool(evidence_ids(packet))
+                request.question, draft.conversational_text, personal=bool(evidence_ids(packet))
             )
         if validation:
-            repair_messages = review_messages(
-                request.question,
-                draft.answer,
-                review_packet,
-                [
-                    {"id": doc.source_id, "text": doc.text}
-                    for doc in sources.values()
-                    if "#chunk-" in doc.source_id
-                ],
-                [
-                    {"role": item.role, "content": item.content}
-                    for item in request.conversation_history[-4:]
-                ],
-            ) + [
-                HumanMessage(
-                    content="The previous review failed these local acceptance checks: "
-                    + json.dumps(validation)
-                    + ". Correct them against the actual supplied records. Give a measured observation if a correction is unsupported; do not ignore valid session evidence or invent a fault. Return the same review schema."
-                )
-            ]
-            reviewed = invoke_dialogue_model(
-                reviewer, repair_messages, True, reviews, response_schema=AnswerReview
+            logging.getLogger(__name__).warning(
+                "Coach response review rejected the draft: %s", validation
             )
-            decision = reviewed.get("parsed")
-            validation = review_issues(
-                decision,
-                packet,
-                requested_features if not clarification(request) else (),
-                requested_rep,
-                require_session,
-                requested_phases,
-            )
-            if isinstance(decision, AnswerReview):
-                validation += style_issues(
-                    request.question, decision.final_answer, personal=bool(evidence_ids(packet))
-                )
+            review_validation_issues = validation
+            reply = format_timings(draft.conversational_text)
+            usage = getattr(reviewed.get("raw"), "usage_metadata", None) or {}
+            result["input_tokens"] += int(usage.get("input_tokens", 0))
+            result["output_tokens"] += int(usage.get("output_tokens", 0))
+            result["trace"].extend(reviews)
+        else:
+            semantically_reviewed = True
+            reply = format_timings(draft.conversational_text)
+            usage = getattr(reviewed.get("raw"), "usage_metadata", None) or {}
+            result["input_tokens"] += int(usage.get("input_tokens", 0))
+            result["output_tokens"] += int(usage.get("output_tokens", 0))
+            result["trace"].extend(reviews)
             result["trace"].append(
                 event(
-                    "semantic_repair",
-                    "Rechecked the exact question against session records after failed acceptance checks.",
+                    "semantic_review",
+                    "Reviewed relevance and interpretation against actual session record IDs. "
+                    + " ".join(decision.corrections),
                     start,
                 )
             )
-        if validation:
-            raise CoachAnswerError(
-                "The coach couldn't verify this answer against the session. Your question is kept; try again.",
-                validation,
-            )
-        semantically_reviewed = True
-        reply = format_timings(decision.final_answer)
-        usage = getattr(reviewed.get("raw"), "usage_metadata", None) or {}
-        result["input_tokens"] += int(usage.get("input_tokens", 0))
-        result["output_tokens"] += int(usage.get("output_tokens", 0))
-        result["trace"].extend(reviews)
-        result["trace"].append(
-            event(
-                "semantic_review",
-                "Reviewed relevance and interpretation against actual session record IDs. "
-                + " ".join(decision.corrections),
-                start,
-            )
-        )
-    issues = (
-        []
-        if semantically_reviewed
-        else list(
-            dict.fromkeys(
-                conversation_issues(request, reply)
-                + answer_issues(reply, request.metrics)
-                + claim_issues(reply, request.metrics)
-            )
+    # Semantic review validates evidence identity, while local checks validate
+    # the conversational scope and prevent a reviewed draft from repeating a
+    # rejected prior answer or switching body parts.
+    issues = list(
+        dict.fromkeys(
+            conversation_issues(request, reply)
+            + answer_issues(reply, request.metrics)
+            + claim_issues(reply, request.metrics)
+            + review_validation_issues
         )
     )
     if (
@@ -1140,31 +1164,129 @@ def _run_conversation(
         and reply[-1] not in ".!?"
     ):
         issues.append("The answer was cut off before completion.")
-    if issues and not evidence_reply:
+    if issues:
         start = time.perf_counter()
         if on_step:
             on_step("grounding")
         repairs = []
-        repaired = invoke_dialogue_model(
-            plain_model,
-            [
-                system,
-                *result["messages"],
-                HumanMessage(
-                    content=(
-                        "Repair the preceding draft while answering the SAME original question: "
-                        + original_question
-                        + ". Keep the requested subject and use the same active-session packet. "
-                        "Do not substitute a different body part, generic drill or a canned reply. "
-                        "Resolve these validation issues and return only the corrected conversational answer: "
-                        + json.dumps(issues)
-                    )
-                ),
-            ],
-            True,
-            repairs,
+        repair_instruction = HumanMessage(
+            content=(
+                "Repair the preceding draft while answering the SAME original question: "
+                + original_question
+                + ". Keep the corrected subject, active-session evidence and conversation. "
+                "Do not substitute a different body part, generic drill or a canned reply. "
+                "Resolve these validation issues: " + json.dumps(issues)
+            )
         )
-        reply = format_timings(_text(repaired))
+        if structured_dialogue:
+            # The conversational writer remains the only component that can
+            # author the reply. The separate reviewer can accept or flag it,
+            # then the writer gets one bounded chance to correct the same answer.
+            writer = model.with_structured_output(
+                AnswerDraft, method="json_schema", include_raw=True
+            )
+            rewritten = invoke_dialogue_model(
+                writer,
+                [system, *result["messages"], repair_instruction],
+                True,
+                repairs,
+                response_schema=AnswerDraft,
+            )
+            repaired_draft = rewritten.get("parsed")
+            if not isinstance(repaired_draft, AnswerDraft):
+                raise CoachAnswerError(
+                    "The coach couldn't complete a corrected answer. Your question is kept; try again.",
+                    issues,
+                )
+            reply = format_timings(repaired_draft.conversational_text)
+            repaired = rewritten.get("raw")
+            reviewer = model.with_structured_output(
+                AnswerReview, method="json_schema", include_raw=True
+            )
+            reviewed_repair = invoke_dialogue_model(
+                reviewer,
+                review_messages(
+                    request.question,
+                    {
+                        "answer": reply,
+                        "writer_evidence_ids": repaired_draft.session_evidence_ids,
+                    },
+                    review_packet,
+                    [
+                        {"id": doc.source_id, "text": doc.text}
+                        for doc in sources.values()
+                        if "#chunk-" in doc.source_id
+                    ],
+                    [
+                        {"role": item.role, "content": item.content}
+                        for item in request.conversation_history[-4:]
+                    ],
+                ),
+                True,
+                repairs,
+                response_schema=AnswerReview,
+            )
+            decision = reviewed_repair.get("parsed")
+            if not isinstance(decision, AnswerReview):
+                raise CoachAnswerError(
+                    "The coach couldn't verify a corrected answer. Your question is kept; try again.",
+                    issues,
+                )
+            remaining_review_issues = review_issues(
+                decision,
+                packet,
+                requested_features if not clarification(request) else (),
+                requested_rep,
+                require_session,
+                requested_phases,
+                requested_reps,
+                reply,
+            )
+            if not set(repaired_draft.session_evidence_ids).issubset(evidence_ids(packet)):
+                remaining_review_issues.append(
+                    "The corrected writer cited an evidence ID absent from the current session."
+                )
+            remaining_review_issues += cited_subject_issues(
+                packet,
+                repaired_draft.session_evidence_ids,
+                requested_features if not clarification(request) else (),
+                requested_rep,
+                requested_phases,
+                requested_reps,
+            )
+            remaining_issues = list(
+                dict.fromkeys(
+                    remaining_review_issues
+                    + style_issues(
+                        request.question,
+                        reply,
+                        personal=bool(evidence_ids(packet)),
+                    )
+                    + conversation_issues(request, reply)
+                    + answer_issues(reply, request.metrics)
+                    + claim_issues(reply, request.metrics)
+                )
+            )
+            if remaining_issues:
+                logging.getLogger(__name__).warning(
+                    "Coach corrected answer rejected: %s", remaining_issues
+                )
+                raise CoachAnswerError(
+                    "The coach couldn't verify a corrected answer. Your question is kept; try again.",
+                    remaining_issues,
+                )
+            semantically_reviewed = True
+            review_usage = getattr(reviewed_repair.get("raw"), "usage_metadata", None) or {}
+            result["input_tokens"] += int(review_usage.get("input_tokens", 0))
+            result["output_tokens"] += int(review_usage.get("output_tokens", 0))
+        else:
+            repaired = invoke_dialogue_model(
+                plain_model,
+                [system, *result["messages"], repair_instruction],
+                True,
+                repairs,
+            )
+            reply = format_timings(_text(repaired))
         repaired_metadata = getattr(repaired, "response_metadata", {}) or {}
         if repaired_metadata.get("done_reason") == "length" and reply and reply[-1] not in ".!?":
             raise CoachAnswerError(
@@ -1183,14 +1305,45 @@ def _run_conversation(
             )
         )
         plan = None
-        remaining_issues = list(
-            dict.fromkeys(
-                conversation_issues(request, reply)
-                + answer_issues(reply, request.metrics)
-                + claim_issues(reply, request.metrics)
+        if not structured_dialogue:
+            remaining_issues = list(
+                dict.fromkeys(
+                    conversation_issues(request, reply)
+                    + answer_issues(reply, request.metrics)
+                    + claim_issues(reply, request.metrics)
+                )
             )
-        )
-        if not reply or remaining_issues:
+        if (
+            (not reply or remaining_issues)
+            and not structured_dialogue
+            and not relevant_evidence_available
+            and (clarification(request) or general_instruction(request.question))
+        ):
+            # Only authored library guidance can rescue a failed vocabulary
+            # or technique explanation. This never substitutes a session
+            # assessment or fabricates a correction from pose geometry.
+            query = general_guidance_query(request)
+            if query:
+                docs = search_knowledge(query, limit=3, use_embeddings=(mode == "bedrock"))
+                sources.update({doc.source_id: doc for doc in docs})
+                guidance = general_guidance_fallback(request, docs)
+                if guidance:
+                    candidate = "From the coaching library: " + guidance
+                    checks = conversation_issues(request, candidate) + claim_issues(candidate, ())
+                    if not checks:
+                        reply, remaining_issues = candidate, []
+                        result["trace"].append(
+                            event(
+                                "library_guidance_fallback",
+                                "Used retrieved authored guidance after the bounded writer repair failed; no session verdict was inferred.",
+                                start,
+                            )
+                        )
+        if not reply or (not structured_dialogue and remaining_issues):
+            logging.getLogger(__name__).warning(
+                "Coach answer repair failed local checks: %s",
+                remaining_issues or ["The repaired answer was empty."],
+            )
             raise CoachAnswerError(
                 "The coach couldn't produce a supported answer to this question. Your question is kept; try again.",
                 remaining_issues or ["The repaired answer was empty."],
@@ -1303,10 +1456,6 @@ def _run_conversation(
             )
             + " (provider failover)"
             if provider_fallback
-            else "evidence-ranked rep comparison"
-            if intent.kind == "rep_comparison" and evidence_reply
-            else "evidence-guided rep summary"
-            if intent.kind == "all_reps" and evidence_reply
             else getattr(model, "model", None)
             or getattr(model, "model_id", None)
             or configured_model_id(mode)

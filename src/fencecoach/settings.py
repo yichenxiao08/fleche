@@ -14,7 +14,10 @@ class Settings(BaseSettings):
     fencecoach_input_usd_per_million: float | None = None
     fencecoach_output_usd_per_million: float | None = None
     fencecoach_automatic_training: bool = False
-    fencecoach_chat_provider: str = "local"
+    fencecoach_chat_provider: str = "gemini"
+    fencecoach_provider_cooldown_seconds: float = 60
+    fencecoach_local_timeout_seconds: float = 20
+    fencecoach_verified_dialogue: bool = True
     fencecoach_local_fallback: bool = True
     fencecoach_coaching_worker: bool = True
     fencecoach_coaching_concurrency: int = 1

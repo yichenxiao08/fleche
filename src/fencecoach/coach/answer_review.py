@@ -20,38 +20,83 @@ class PersonalChange(BaseModel):
 
 class AnswerDraft(BaseModel):
     answer: str = Field(
-        description="Natural conversational answer; do not include internal evidence IDs in the prose."
+        description="Direct natural conversational answer. For ordinary analysis, INTERPRET the observed movement in plain language (for example bent versus straight, position matching versus differing), rather than merely reporting a measurement. Give a short qualitative assessment or supported cue and place its one numerical example ONLY in supporting_example. Lack of an approved reference prevents a correctness verdict, not an observation of measured shape. For explicit numerical questions or an all-reps breakdown, answer the requested detail here. No internal evidence IDs."
+    )
+    supporting_example: str = Field(
+        default="",
+        description="For ordinary personal analysis, exactly one concise sentence about ONE representative rep or statistic that supports the main assessment, with units/reference comparison if useful. Choose the rep illustrating the stated difference. No second rep/example, no list, and no internal IDs. Empty when the answer already supplies explicitly requested numbers or a full breakdown, or evidence is unavailable.",
     )
     session_evidence_ids: list[str] = Field(
         default_factory=list,
         description="Exact evidence_id values supporting all current-session observations and comparisons. Cite the requested rep/phase; empty for entirely general answers.",
     )
 
+    @property
+    def conversational_text(self):
+        def facts(text):
+            return {
+                (
+                    float(number),
+                    "deg" if unit.lower() in {"deg", "degree", "degrees", "°"} else unit.lower(),
+                )
+                for number, unit in re.findall(
+                    r"(-?\d+(?:\.\d+)?)\s*(degrees?|deg\b|°|seconds?|%|leg lengths?)", text, re.I
+                )
+            }
+
+        def reps(text):
+            return set(re.findall(r"\brep(?:s|etition(?:s)?)?\s*#?\s*(\d+)\b", text, re.I))
+
+        support_facts = facts(self.supporting_example)
+        # Adding a playback timestamp does not make a repeated angle a new
+        # statistical example. Keep genuinely new reference values or timing
+        # measurements; omit duplicate geometry even when only its bookmark is new.
+        geometry_facts = {fact for fact in support_facts if not fact[1].startswith("second")}
+        if geometry_facts:
+            support_facts = geometry_facts
+        support_parts = set(
+            re.findall(
+                r"\b(?:torso|knee|elbow|arm|hip|foot|leg)\b", self.supporting_example.lower()
+            )
+        )
+        answer_parts = set(
+            re.findall(r"\b(?:torso|knee|elbow|arm|hip|foot|leg)\b", self.answer.lower())
+        )
+        if (
+            support_facts
+            and support_facts.issubset(facts(self.answer))
+            and reps(self.supporting_example).issubset(reps(self.answer))
+            and support_parts.issubset(answer_parts)
+        ):
+            # Both model-written fields can contain the same example. Preserve
+            # its complete answer once instead of repeating the measured value.
+            return self.answer.strip()
+        return " ".join(
+            part.strip() for part in (self.answer, self.supporting_example) if part.strip()
+        )
+
 
 class AnswerReview(BaseModel):
     session_evidence_relevant: bool = Field(
         default=False,
-        description="Independently inspect ALL active-session records against the question and recent conversation. True when any record answers part of the question, even if the draft omitted it or the user did not explicitly mention the session. A relevant record must be used in the final answer.",
+        description="Independently inspect all supplied question-scoped active-session records against the question and recent conversation. True when any record answers part of the question, even if the draft omitted it or the user did not explicitly mention the session.",
     )
     addresses_question: bool = Field(
-        description="The final answer directly addresses every part of the current question."
+        description="The candidate answer directly addresses every part of the current question."
     )
     grounded: bool = Field(
-        description="Every personal observation or correction in the final answer is supported by relevant supplied evidence; general guidance is not presented as a detected fault."
+        description="Every personal observation or correction in the candidate answer is supported by relevant supplied evidence; general guidance is not presented as a detected fault."
     )
     uses_session_evidence: bool = Field(
-        description="The final answer makes at least one observation or comparison about the current session."
-    )
-    final_answer: str = Field(
-        description="A concise natural answer, corrected if necessary. Lead with a useful cue or qualitative current-session observation; do not list angles or durations unless requested. No review commentary or internal IDs."
+        description="The candidate answer makes at least one observation or comparison about the current session."
     )
     session_evidence_ids: list[str] = Field(
         default_factory=list,
-        description="Exact evidence_id values supporting the personal claims in the final answer. Empty when the answer is entirely general.",
+        description="Exact evidence_id values supporting the personal claims in the candidate answer. Empty when the answer is entirely general.",
     )
     personal_changes: list[PersonalChange] = Field(
         default_factory=list,
-        description="Every correction of the athlete's current technique in the final answer. A matching feature needs no correction. General instructions and clearly optional experiments are not detected faults.",
+        description="Every correction of the athlete's current technique in the candidate answer. A matching feature needs no correction. General instructions and clearly optional experiments are not detected faults.",
     )
     corrections: list[str] = Field(
         default_factory=list,
@@ -121,19 +166,22 @@ def focused_packet(packet, selected_ids):
 
 
 def cited_subject_issues(
-    packet, selected_ids, requested_features=(), rep_number=None, requested_phases=()
+    packet,
+    selected_ids,
+    requested_features=(),
+    rep_number=None,
+    requested_phases=(),
+    rep_numbers=(),
 ):
     """Reject wrong-feature/rep citations before the single-call answer is released."""
     records = focused_packet(packet, selected_ids)["cited_evidence_records"]
     issues = []
     if requested_features and records:
-        available = set(packet.get("measured_features_available", []))
-        wanted = set(requested_features) & available
         features = set()
         for record in records:
             features.update(record.get("values", {}))
             features.add(record.get("feature") or record.get("metric") or record.get("name"))
-        if wanted and not features.intersection(wanted):
+        if features - {None} and not features.intersection(requested_features):
             issues.append("The cited records omit the requested measured feature.")
     if (
         rep_number is not None
@@ -141,6 +189,13 @@ def cited_subject_issues(
         and not any(record.get("rep") == rep_number for record in records)
     ):
         issues.append("The cited records omit the requested rep.")
+    if rep_numbers and records:
+        cited_reps = {record.get("rep") for record in records}
+        missing_reps = sorted(set(rep_numbers) - cited_reps)
+        if missing_reps:
+            issues.append(
+                "The cited records omit requested reps: " + ", ".join(map(str, missing_reps)) + "."
+            )
     matching = [
         record
         for record in records
@@ -148,10 +203,13 @@ def cited_subject_issues(
         or record.get("metric") in requested_features
         or set(record.get("values", {})).intersection(requested_features)
     ]
+    phase_scope = set(requested_phases)
+    if phase_scope.intersection({"lunge_finish", "lunge_hold"}):
+        phase_scope.add("finish")
     if (
         requested_phases
         and matching
-        and not any(record.get("phase") in requested_phases for record in matching)
+        and not any(record.get("phase") in phase_scope for record in matching)
     ):
         issues.append(
             "The cited feature belongs to a different phase than the athlete asked about."
@@ -166,6 +224,8 @@ def review_issues(
     rep_number=None,
     require_session=False,
     requested_phases=(),
+    requested_reps=(),
+    answer="",
 ):
     """Local acceptance rules shared by initial reviews and their bounded repair."""
     if not isinstance(decision, AnswerReview):
@@ -185,7 +245,12 @@ def review_issues(
         issues.append("A cited evidence ID is absent from the current session.")
     issues.extend(
         cited_subject_issues(
-            packet, decision.session_evidence_ids, requested_features, rep_number, requested_phases
+            packet,
+            decision.session_evidence_ids,
+            requested_features,
+            rep_number,
+            requested_phases,
+            requested_reps,
         )
     )
     records = focused_packet(packet, decision.session_evidence_ids)["cited_evidence_records"]
@@ -208,9 +273,7 @@ def review_issues(
             ) and isinstance(value, (int, float)):
                 degree_values.append(value)
     if records:
-        reported = re.findall(
-            r"(-?\d+(?:\.\d+)?)\s*(?:degrees?|deg\b|°)", decision.final_answer, re.I
-        )
+        reported = re.findall(r"(-?\d+(?:\.\d+)?)\s*(?:degrees?|deg\b|°)", answer, re.I)
         if any(
             not any(abs(float(number) - value) <= 0.15 for value in degree_values)
             for number in reported

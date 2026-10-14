@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: fencecoach-demo
+    runtime: docker
+    region: ohio
+    # MediaPipe video analysis needs more memory than Render's free service.
+    plan: 2c-4g
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    disk:
+      name: fencecoach-data
+      mountPath: /app/data
+      sizeGB: 10
+    envVars:
+      # Render passes this as the Docker build argument that installs MediaPipe
+      # and downloads the pinned pose model into the image.
+      - key: VIDEO
+        value: "true"
+      - key: FENCECOACH_CHAT_PROVIDER
+        value: gemini
+      - key: FENCECOACH_DB_PATH
+        value: /app/data/fencecoach.sqlite3
+      - key: FENCECOACH_VIDEO_DIR
+        value: /app/data/videos
+      - key: FENCECOACH_POSE_MODEL
+        value: /app/models/pose_landmarker_full.task
+      - key: FENCECOACH_VIDEO_WORKER
+        value: "true"
+      - key: FENCECOACH_COACHING_WORKER
+        value: "true"
+      - key: FENCECOACH_SEED_EXAMPLES
+        value: "true"
+      - key: FENCECOACH_EXAMPLES_DIR
+        value: /app/examples/video
+      - key: GEMINI_API_KEY
+        sync: false

@@ -158,10 +158,13 @@ export function athleteReview(state) {
       ? `<div class="saved-practice-confirmation" role="status"><strong>Practice saved</strong><span>${e(session.title)} is in your practice log. Your reviewed rep intervals and video measurements are attached to this session.</span></div>`
       : "";
   return `${heading("REVIEW YOUR PRACTICE", "See what to work on.", '<button class="secondary-action" data-go="record">' + icon("upload") + "New video</button>")}
-    ${sessionPicker(state)}
+
     ${saveConfirmation}
     <div class="athlete-review-layout"><section class="athlete-video-column">
-      <div class="replay-view">${footage}</div>
+    <div>
+    ${sessionPicker(state)}
+    <div class="replay-view">${footage}</div></div>
+
       ${clip ? frameStepControls("replay-frame-controls", result?.preview?.fps_hint || 30) : ""}
       ${session.video_job_id ? `<div class="athlete-video-tools"><button class="text-action" data-video-overlay aria-pressed="${state.videoOverlay}">${icon("target")}Body overlay ${state.videoOverlay ? "on" : "off"}</button><a class="text-action" download href="/api/videos/${e(session.video_job_id)}/preview">${icon("download")}Download video</a></div>` : ""}
       <details class="athlete-session-details"><summary>Session notes & detailed measurements ${icon("chevron")}</summary>${session.notes ? `<p>${e(session.notes)}</p>` : '<p class="helper">No practice note was added.</p>'}${measurementTable(session)}${result?.source_credit ? `<p class="helper">${e(result.source_credit)}</p>` : ""}</details>

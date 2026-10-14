@@ -14,14 +14,75 @@ def provider_failure(exc):
     import httpx
     from langchain_core.exceptions import ModelAPIError, ModelRateLimitError, ModelTimeoutError
 
+    from fencecoach.coach.router import ProvidersUnavailable, failure_reason
+
+    if isinstance(exc, ProvidersUnavailable):
+        primary = (exc.primary_reason or "").removeprefix("cooldown:")
+        if primary == "rate_limit" and exc.fallback_reason == "not_ready":
+            return (
+                503,
+                "Gemini's usage limit was reached and the local coach isn't ready. Your question is kept; start Ollama or retry when Gemini's limit resets.",
+            )
+        if exc.fallback_reason == "timeout":
+            return (
+                504,
+                "The primary coach was unavailable and the local coach timed out. Your question is kept; retry shortly.",
+            )
+        if exc.fallback_reason == "not_ready":
+            return (
+                503,
+                "Gemini was unavailable and the local coach isn't ready. Your question is kept; check Ollama and retry.",
+            )
+        return (
+            503,
+            "Gemini was unavailable and the local coach also failed. Your question is kept; check provider status and retry.",
+        )
+
+    # Google and other SDKs often raise their own exception classes. Normalize
+    # their status/code/cause chain through the same classifier used by routing
+    # instead of turning a quota or timeout into an unhelpful generic error.
+    reason = failure_reason(exc)
+    if reason == "rate_limit":
+        return (
+            429,
+            "The AI provider's usage limit was reached. Your question is kept; retry when the limit resets or check provider usage.",
+        )
+    if reason == "timeout":
+        return (
+            504,
+            "The coaching provider took too long to respond. Your question is kept; try again.",
+        )
+    if reason == "connection":
+        return (
+            503,
+            "The coaching provider could not be reached. Your question is kept; check the connection and retry.",
+        )
+    if reason == "transient":
+        return (
+            503,
+            "The coaching provider is temporarily unavailable. Your question is kept; try again shortly.",
+        )
+
     if isinstance(exc, ModelRateLimitError):
-        return 429, "The AI provider's API quota has been reached. Your question is kept. Retry after the limit resets or check your provider's API usage."
+        return (
+            429,
+            "The AI provider's API quota has been reached. Your question is kept. Retry after the limit resets or check your provider's API usage.",
+        )
     if isinstance(exc, (ModelTimeoutError, httpx.TimeoutException, TimeoutError)):
-        return 504, "The coaching provider took too long to respond. Your question is kept; try again."
+        return (
+            504,
+            "The coaching provider took too long to respond. Your question is kept; try again.",
+        )
     if isinstance(exc, ModelAPIError):
         if "high demand" in str(exc).lower():
-            return 503, "Gemini's servers are busy right now. Your question is kept; try again shortly."
-        return 503, "The coaching provider is temporarily unavailable. Your question is kept; try again."
+            return (
+                503,
+                "Gemini's servers are busy right now. Your question is kept; try again shortly.",
+            )
+        return (
+            503,
+            "The coaching provider is temporarily unavailable. Your question is kept; try again.",
+        )
     return None
 
 
@@ -55,7 +116,7 @@ def gemini_transport():
 
 def warm_local_model():
     """Load the configured model without generating a reply; callers run this in the background."""
-    if settings.fencecoach_chat_provider != "local":
+    if settings.fencecoach_chat_provider != "local" and not settings.fencecoach_local_fallback:
         return
     request = Request(
         settings.ollama_base_url.rstrip("/") + "/api/generate",
@@ -126,12 +187,16 @@ def chat_model(mode, model_id=None):
             base_url=settings.ollama_base_url,
             temperature=0,
             reasoning=False,
-            num_ctx=16384,
+            num_ctx=4096 if settings.fencecoach_verified_dialogue else 16384,
             # Structured coaching reports are short; avoid slow oversized local
             # generations on modest hardware.
             num_predict=240,
             keep_alive=-1,
-            client_kwargs={"timeout": 180},
+            client_kwargs={
+                "timeout": settings.fencecoach_local_timeout_seconds
+                if settings.fencecoach_verified_dialogue
+                else 180
+            },
         )
     if mode == "gemini":
         from langchain_google_genai import ChatGoogleGenerativeAI
@@ -144,7 +209,9 @@ def chat_model(mode, model_id=None):
             if "gemini-3" in selected_model
             else {"thinking_budget": 0}
         )
-        timeout = max(10, settings.gemini_request_timeout_seconds)  # Google's request deadline has a 10-second minimum.
+        timeout = max(
+            10, settings.gemini_request_timeout_seconds
+        )  # Google's request deadline has a 10-second minimum.
         client_options = {"timeout": timeout}
         if settings.gemini_force_ipv4:
             client_options["transport"] = gemini_transport()
@@ -154,7 +221,8 @@ def chat_model(mode, model_id=None):
             vertexai=False,
             **(
                 {"temperature": 1.0}
-                if "gemini-3.6" not in selected_model and "gemini-3.5-flash-lite" not in selected_model
+                if "gemini-3.6" not in selected_model
+                and "gemini-3.5-flash-lite" not in selected_model
                 else {}
             ),
             max_tokens=2048,

@@ -30,6 +30,8 @@ def request():
     )
 
 
+# LoopModel/PlainModel fixtures verify the retained legacy and Bedrock writer contracts.
+@patch.object(settings, "fencecoach_verified_dialogue", False)
 class DataAndEvidenceTests(unittest.TestCase):
     def test_duplicate_metric_ids_and_reversed_timestamps_are_rejected(self):
         data = session_data().model_dump()
@@ -121,7 +123,7 @@ class DataAndEvidenceTests(unittest.TestCase):
                 self.calls += 1
                 if self.calls == 4:
                     return AIMessage(
-                        content="The available evidence only supports interval comparisons.",
+                        content="The recovery interval beginning at 1.0 seconds lasted 1.04 seconds; that supports an interval comparison, not a correctness verdict.",
                         usage_metadata={"input_tokens": 5, "output_tokens": 2, "total_tokens": 7},
                     )
                 return AIMessage(

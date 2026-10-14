@@ -1,10 +1,12 @@
 import unittest
+from unittest.mock import patch
 
 from langchain_core.messages import AIMessage, AIMessageChunk
 
 from fencecoach.coach.graph import run_coach
 from fencecoach.coach.turns import conversation_issues, general_guidance_query
 from fencecoach.schemas import CoachRequest, ConversationMessage
+from fencecoach.settings import settings
 
 BAD = "For a lunge, extend your arm to the side, about shoulder-width apart from the body. This position helps in maintaining balance and allows for a smooth transition into the next stroke."
 
@@ -28,6 +30,8 @@ class RepeatingModel:
         return AIMessage(content=BAD)
 
 
+# These fixtures check legacy writer repair and cited-library clarification fallback.
+@patch.object(settings, "fencecoach_verified_dialogue", False)
 class ClarificationTests(unittest.TestCase):
     def test_identical_reply_is_rejected_and_arm_role_is_required(self):
         self.assertTrue(conversation_issues(question("which arm"), BAD))

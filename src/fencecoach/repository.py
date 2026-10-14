@@ -229,6 +229,7 @@ class Repository:
         ]
         return {
             "reviewed_feedback": reviewed_feedback,
+            "dialogue_state": chat_runs[0].dialogue_state if chat_runs else None,
             "training_history": logs,
             "previous_reviews": reviews,
             "session_history": history,

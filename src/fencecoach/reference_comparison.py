@@ -2,6 +2,7 @@
 
 import json
 from functools import lru_cache
+from hashlib import sha256
 from statistics import median
 
 from fencecoach.feedback_learning import corrected_windows
@@ -18,7 +19,7 @@ POLICY = (
 
 
 @lru_cache(maxsize=32)
-def _reference_evaluation(path, modified, review_json, profile_json, windows_json):
+def _reference_evaluation(path, modified, review_json, profile_json, windows_json, content_sha256):
     result = json.loads(path.read_text(encoding="utf-8"))
     review = json.loads(review_json)
     windows = corrected_windows(review, json.loads(windows_json) or result.get("candidates", []))
@@ -40,6 +41,7 @@ def attach_reference_comparisons(evaluation, current_job, directory, repository,
                 json.dumps(review, sort_keys=True),
                 json.dumps(job.get("capture_profile", {}), sort_keys=True),
                 json.dumps(job.get("reviewed_windows", []), sort_keys=True),
+                sha256(path.read_bytes()).hexdigest(),
             )
         except (KeyError, ValueError, IndexError):
             continue

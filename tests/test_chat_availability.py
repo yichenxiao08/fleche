@@ -8,6 +8,7 @@ from langchain_core.messages import AIMessage
 from fencecoach.api import app, coaching_request
 from fencecoach.coach.graph import run_coach
 from fencecoach.schemas import CoachRequest, ReportRequest, SessionRecord
+from fencecoach.settings import settings
 
 
 class MissingEvidenceModel:
@@ -23,6 +24,8 @@ class MissingEvidenceModel:
         )
 
 
+# These fixtures exercise the retained free-prose writer and evidence-tool protocol.
+@patch.object(settings, "fencecoach_verified_dialogue", False)
 class ChatAvailabilityTests(unittest.TestCase):
     def setUp(self):
         self.session = SessionRecord(

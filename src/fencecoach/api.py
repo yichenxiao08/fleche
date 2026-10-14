@@ -164,6 +164,7 @@ def _report_or_error(request: CoachRequest, mode: str):
         raise HTTPException(503, str(exc)) from exc
     except Exception as exc:
         from fencecoach.coach.providers import provider_failure
+
         known_failure = provider_failure(exc)
         if known_failure:
             code, message = known_failure
@@ -202,23 +203,16 @@ def coaching_request(session, data):
     context["reviewed_feedback"] = context.get("reviewed_feedback") or {}
     evaluation = {}
     if session.video_job_id:
-        from fencecoach.feedback_learning import corrected_windows
-        from fencecoach.technique import evaluate_lunges
+        from fencecoach.coaching_evidence_cache import coaching_evaluation
 
-        path = video_jobs.directory / session.video_job_id / "result.json"
-        if path.is_file():
-            result = json.loads(path.read_text(encoding="utf-8"))
-            job = video_jobs.get(session.video_job_id)
-            windows = job.get("reviewed_windows") or result.get("candidates", [])
-            if context["reviewed_feedback"]:
-                windows = corrected_windows(context["reviewed_feedback"], windows)
-            evaluation = evaluate_lunges(result, windows, session.capture_profile)
-            from fencecoach.reference_comparison import attach_reference_comparisons
-
-            evaluation = attach_reference_comparisons(
-                evaluation, {**job, "capture_profile": session.capture_profile},
-                video_jobs.directory, repository, video_jobs,
-            )
+        evaluation = coaching_evaluation(
+            session.video_job_id,
+            session.capture_profile,
+            context["reviewed_feedback"],
+            video_jobs.directory,
+            repository,
+            video_jobs,
+        )
     try:
         require_supported_session(session)
     except HTTPException as exc:
@@ -235,6 +229,7 @@ def coaching_request(session, data):
             training_history=context["training_history"],
             session_history=context["session_history"],
             conversation_history=context["conversation_history"],
+            dialogue_state=context.get("dialogue_state"),
             reviewed_feedback=context["reviewed_feedback"],
             technique_evaluation=evaluation,
             capture_profile=session.capture_profile,

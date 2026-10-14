@@ -14,6 +14,7 @@ from fencecoach.coach.latency import compact_session_context, expand_session_con
 from fencecoach.coach.technique_evidence import current_session_context
 from fencecoach.coach.turns import contextual_question
 from fencecoach.schemas import CoachRequest, ConversationMessage
+from fencecoach.settings import settings
 
 
 class Model:
@@ -37,9 +38,12 @@ class Model:
 
 
 class StructuredModel(Model):
-    def __init__(self, draft, review):
+    def __init__(self, draft, review, repair=None):
         super().__init__(draft.model_dump_json())
+        self.draft = draft
         self.review = review
+        self.repair = repair
+        self.repair_called = False
 
     def bind(self, **kwargs):
         return self
@@ -50,9 +54,16 @@ class StructuredModel(Model):
         class Reviewer:
             def invoke(self, messages):
                 parent.review_messages = messages
+                if schema is AnswerDraft:
+                    parent.repair_called = True
+                    parsed = parent.repair or parent.draft
+                elif parent.repair is not None and not parent.repair_called:
+                    parsed = parent.review.model_copy(update={"grounded": False})
+                else:
+                    parsed = parent.review
                 return {
-                    "parsed": parent.review,
-                    "raw": AIMessage(content=parent.review.model_dump_json()),
+                    "parsed": parsed,
+                    "raw": AIMessage(content=parsed.model_dump_json()),
                 }
 
         return Reviewer()
@@ -134,21 +145,22 @@ def request(question):
     )
 
 
+# These fixtures check legacy writer repair, independent review and tool-grounded prose.
+@patch.object(settings, "fencecoach_verified_dialogue", False)
 class CoachResponseReliabilityTests(unittest.TestCase):
     def test_missing_timing_can_be_explained_without_unrelated_angle_citations(self):
         draft = AnswerDraft(answer="Your arm should lead the front foot.")
-        answer = "The session measures your arm position at the finish, but not its extension onset relative to your foot. In a basic drill, practice letting the hand lead."
+        answer = "The session measures your arm position at the finish, but not its extension onset relative to your foot. I need that timing measurement to assess whether your extension should start earlier."
         review = AnswerReview(
             addresses_question=True,
             grounded=True,
             session_evidence_relevant=False,
             uses_session_evidence=False,
-            final_answer=answer,
         )
         out = run_conversation(
             request("Should I extend my arm earlier?"),
             "gemini",
-            model=StructuredModel(draft, review),
+            model=StructuredModel(draft, review, repair=AnswerDraft(answer=answer)),
         )
         self.assertEqual(out.report.summary, answer)
 
@@ -160,7 +172,6 @@ class CoachResponseReliabilityTests(unittest.TestCase):
             grounded=True,
             session_evidence_relevant=True,
             uses_session_evidence=True,
-            final_answer=draft.answer,
             session_evidence_ids=[record],
         )
         with self.assertRaises(CoachAnswerError):
@@ -176,18 +187,36 @@ class CoachResponseReliabilityTests(unittest.TestCase):
             expand_session_context(compact_session_context(json.dumps(original))), original
         )
 
+    def test_review_cannot_bless_a_writer_citing_the_wrong_feature(self):
+        draft = AnswerDraft(
+            answer="Your sword arm was near horizontal in rep 1.",
+            session_evidence_ids=["rep:1:measurement:front_knee_angle"],
+        )
+        review = AnswerReview(
+            addresses_question=True,
+            grounded=True,
+            uses_session_evidence=True,
+            session_evidence_ids=["rep:1:measurement:weapon_arm_direction"],
+        )
+        published = []
+        with self.assertRaises(CoachAnswerError):
+            run_conversation(
+                request("what about my arm"),
+                "gemini",
+                model=StructuredModel(draft, review),
+                on_text=published.append,
+            )
+        self.assertEqual(published, [])
+
     def test_supported_observation_keeps_independent_quality_review(self):
         record = "rep:1:measurement:weapon_arm_direction"
         answer = "Your sword arm stayed near horizontal at the measured finish in rep 1."
-        draft = AnswerDraft(
-            answer=answer, session_evidence_relevant=True, session_evidence_ids=[record]
-        )
+        draft = AnswerDraft(answer=answer, session_evidence_ids=[record])
         review = AnswerReview(
             addresses_question=True,
             grounded=True,
             session_evidence_relevant=True,
             uses_session_evidence=True,
-            final_answer=answer,
             session_evidence_ids=[record],
         )
         model = StructuredModel(draft, review)
@@ -199,7 +228,6 @@ class CoachResponseReliabilityTests(unittest.TestCase):
     def test_wrong_feature_citation_still_gets_independent_review(self):
         draft = AnswerDraft(
             answer="Your arm looked close to the reference at the finish.",
-            session_evidence_relevant=True,
             session_evidence_ids=["rep:1:measurement:front_knee_angle"],
         )
         answer = "Your sword arm was near horizontal at the measured finish in rep 1."
@@ -208,35 +236,44 @@ class CoachResponseReliabilityTests(unittest.TestCase):
             grounded=True,
             session_evidence_relevant=True,
             uses_session_evidence=True,
-            final_answer=answer,
             session_evidence_ids=["rep:1:measurement:weapon_arm_direction"],
         )
-        model = StructuredModel(draft, review)
+        model = StructuredModel(
+            draft,
+            review,
+            repair=AnswerDraft(answer=answer, session_evidence_ids=review.session_evidence_ids),
+        )
         out = run_conversation(request("what about my arm"), "gemini", model=model)
         self.assertEqual(out.report.summary, answer)
         self.assertTrue(hasattr(model, "review_messages"))
-        self.assertTrue(any(e.step == "semantic_review" for e in out.trace))
+        self.assertTrue(any(e.step == "answer_repair" for e in out.trace))
 
     def test_generic_draft_can_be_repaired_using_uncited_session_evidence(self):
         record = "rep:2:measurement:weapon_arm_direction"
         draft = AnswerDraft(answer="In general, reach your sword arm toward the target.")
-        answer = "Your sword arm stayed near horizontal at the measured finishes. Keep aiming toward your target."
+        answer = "Your sword arm stayed near horizontal at the measured finish in rep 2."
         review = AnswerReview(
             addresses_question=True,
             grounded=True,
             session_evidence_relevant=True,
             uses_session_evidence=True,
-            final_answer=answer,
             session_evidence_ids=[record],
         )
-        model = StructuredModel(draft, review)
+        model = StructuredModel(
+            draft, review, repair=AnswerDraft(answer=answer, session_evidence_ids=[record])
+        )
         out = run_conversation(request("what about my arm"), "gemini", model=model)
         self.assertEqual(out.report.summary, answer)
         packet = expand_session_context(
             json.dumps(json.loads(model.review_messages[1].content)["active_session"])
         )
         self.assertEqual(len(packet["per_rep_measurements"]), 3)
-        self.assertIn("weapon_arm_direction", packet["per_rep_measurements"][1]["measures"])
+        self.assertTrue(
+            any(
+                item["feature"] == "weapon_arm_direction"
+                for item in packet["per_rep_measurements"][1]["measurements"]
+            )
+        )
 
     def test_general_only_answer_is_rejected_when_reviewer_finds_session_evidence(self):
         draft = AnswerDraft(answer="Reach your sword arm toward the target.")
@@ -245,7 +282,6 @@ class CoachResponseReliabilityTests(unittest.TestCase):
             grounded=True,
             session_evidence_relevant=True,
             uses_session_evidence=False,
-            final_answer=draft.answer,
         )
         with self.assertRaises(CoachAnswerError):
             run_conversation(
@@ -276,11 +312,11 @@ class CoachResponseReliabilityTests(unittest.TestCase):
     def test_verified_answer_is_published_without_canned_substitution(self):
         record = "rep:1:reference:finish:projected_torso_tilt"
         draft = AnswerDraft(answer="Try leaning forward more.", session_evidence_ids=[record])
+        answer = "Your torso position at the checked finish in rep 1 matched your upright reference example."
         review = AnswerReview(
             addresses_question=True,
             grounded=True,
             uses_session_evidence=True,
-            final_answer="Your torso position at the checked finish matched your upright reference example. Keep that position.",
             session_evidence_ids=[record],
             corrections=["No torso correction is supported."],
         )
@@ -288,11 +324,13 @@ class CoachResponseReliabilityTests(unittest.TestCase):
         out = run_conversation(
             request("How was my torso during the drill?"),
             "gemini",
-            model=StructuredModel(draft, review),
+            model=StructuredModel(
+                draft, review, repair=AnswerDraft(answer=answer, session_evidence_ids=[record])
+            ),
             on_text=published.append,
         )
-        self.assertEqual(out.report.summary, review.final_answer)
-        self.assertEqual(published, [review.final_answer])
+        self.assertEqual(out.report.summary, answer)
+        self.assertEqual(published, [answer])
         self.assertNotIn("knee", out.report.summary)
 
     def test_semantic_reviewer_cannot_authorize_a_change_from_a_plain_measurement(self):
@@ -302,7 +340,6 @@ class CoachResponseReliabilityTests(unittest.TestCase):
             addresses_question=True,
             grounded=True,
             uses_session_evidence=True,
-            final_answer="Lean forward more.",
             session_evidence_ids=[record],
             personal_changes=[PersonalChange(feature="projected_torso_tilt", evidence_id=record)],
         )
@@ -326,7 +363,6 @@ class CoachResponseReliabilityTests(unittest.TestCase):
             addresses_question=True,
             grounded=True,
             uses_session_evidence=True,
-            final_answer=answer,
             session_evidence_ids=[record],
         )
         out = run_conversation(query, "gemini", model=StructuredModel(draft, review))
@@ -340,7 +376,6 @@ class CoachResponseReliabilityTests(unittest.TestCase):
             addresses_question=True,
             grounded=True,
             uses_session_evidence=False,
-            final_answer="Your posture was perfect.",
         )
         published = []
         with self.assertRaises(CoachAnswerError):
@@ -356,16 +391,13 @@ class CoachResponseReliabilityTests(unittest.TestCase):
         draft = AnswerDraft(
             answer="Your torso was perfect.", session_evidence_ids=["rep:99:measurement:torso"]
         )
-        record = "rep:1:measurement:projected_torso_tilt"
-        answer = (
-            "Your torso was more upright at the measured finishes than in your reference examples."
-        )
+        record = "rep:1:reference:finish:projected_torso_tilt"
+        answer = "Your torso tilt at the measured finish in rep 1 overlapped the range in your reference examples."
         review = AnswerReview(
             session_evidence_relevant=True,
             addresses_question=True,
             grounded=True,
             uses_session_evidence=True,
-            final_answer=answer,
             session_evidence_ids=[record],
             corrections=["Replaced the nonexistent draft citation with actual torso evidence."],
         )
@@ -373,7 +405,9 @@ class CoachResponseReliabilityTests(unittest.TestCase):
         run = run_conversation(
             request("How was my torso?"),
             "gemini",
-            model=StructuredModel(draft, review),
+            model=StructuredModel(
+                draft, review, repair=AnswerDraft(answer=answer, session_evidence_ids=[record])
+            ),
             on_text=published.append,
         )
         self.assertEqual(run.report.summary, answer)
@@ -428,7 +462,7 @@ class CoachResponseReliabilityTests(unittest.TestCase):
             "gemini",
             model=Model(
                 "At 2.0 seconds, your knee angle is 95 degrees.",
-                repair="Your torso at the checked finishes matched your upright reference examples. Keep your chest over your hips as you repeat the drill.",
+                repair="Your torso at the checked finish in rep 1 matched your upright reference examples.",
             ),
         )
         self.assertIn("torso", run.report.summary)
@@ -496,7 +530,9 @@ class CoachResponseReliabilityTests(unittest.TestCase):
         run = run_conversation(
             request("Analyze all 3 reps and tell me the best and worst."),
             "gemini",
-            model=Model(error=AssertionError("Should use supplied evidence")),
+            model=Model(
+                "Rep 1 was closest to the front-knee reference range. Rep 2 finished with a straighter front leg than the reference. Rep 3 was furthest from that range, with the straightest front leg."
+            ),
         )
         self.assertEqual(mentioned_rep_numbers(run.report.summary), {1, 2, 3})
         self.assertIn("closest", run.report.summary)
@@ -510,11 +546,14 @@ class CoachResponseReliabilityTests(unittest.TestCase):
             for m in model.messages
             if str(m.content).startswith("Active session evidence checked")
         )
-        data = json.loads(snapshot.split("(reference data): ", 1)[1])
+        data = expand_session_context(snapshot.split("(reference data): ", 1)[1])
         self.assertEqual(len(data["per_rep_measurements"]), 3)
-        self.assertEqual(
-            data["per_rep_measurements"][2]["measures"]["front_knee_angle"]["value"], 135
+        measured = next(
+            item
+            for item in data["per_rep_measurements"][2]["measurements"]
+            if item["feature"] == "front_knee_angle"
         )
+        self.assertEqual(measured["value"], 135)
 
 
 if __name__ == "__main__":

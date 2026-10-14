@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 from langchain_core.messages import AIMessage, AIMessageChunk
 
@@ -6,6 +7,7 @@ from fencecoach.coach.graph import run_coach
 from fencecoach.coach.grounding import unsupported_claims
 from fencecoach.coach.latency import compact_guidance, compact_measurements
 from fencecoach.schemas import CoachRequest, MetricObservation
+from fencecoach.settings import settings
 
 
 class StreamingModel:
@@ -37,6 +39,8 @@ class StreamingModel:
         return AIMessage(content="".join(chunk.content for chunk in self.stream(messages)))
 
 
+# This fixture checks the legacy free-prose writer's bounded stream and publication guard.
+@patch.object(settings, "fencecoach_verified_dialogue", False)
 class ChatLatencyTests(unittest.TestCase):
     def test_only_complete_checked_answer_is_published_and_stream_is_closed(self):
         model = StreamingModel()

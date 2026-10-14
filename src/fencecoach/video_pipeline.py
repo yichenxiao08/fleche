@@ -144,8 +144,10 @@ def proposals(frames, baseline=None, start_after_ms=0, width=None, profile=None)
             for candidate_direction in (-1, 1):
                 leading = max(
                     ids,
-                    key=lambda i: candidate_direction
-                    * active["peak"].get("motion_landmarks", active["peak"]["landmarks"])[i][0],
+                    key=lambda i: (
+                        candidate_direction
+                        * active["peak"].get("motion_landmarks", active["peak"]["landmarks"])[i][0]
+                    ),
                 )
                 origin_points = origin.get("motion_landmarks", origin["landmarks"])
                 drives = [
@@ -171,7 +173,10 @@ def proposals(frames, baseline=None, start_after_ms=0, width=None, profile=None)
                 default=None,
             )
             usable_observed = (
-                (profile.get("camera_motion") != "moving" or profile.get("camera_translation_compensated"))
+                (
+                    profile.get("camera_motion") != "moving"
+                    or profile.get("camera_translation_compensated")
+                )
                 and observed_direction is not None
                 and drive_by_direction[observed_direction]["samples"] >= 3
                 and drive_by_direction[observed_direction]["travel"] >= 0.35
@@ -211,6 +216,7 @@ def proposals(frames, baseline=None, start_after_ms=0, width=None, profile=None)
                 evidence["front_foot_forward_travel_torso_lengths"] = None
 
             if direction is not None:
+
                 def motion_hip(frame):
                     pts = frame.get("motion_landmarks", frame.get("landmarks", []))
                     return (
@@ -220,9 +226,7 @@ def proposals(frames, baseline=None, start_after_ms=0, width=None, profile=None)
                     )
 
                 hips = [
-                    direction * motion_hip(f)
-                    for f in active["frames"]
-                    if motion_hip(f) is not None
+                    direction * motion_hip(f) for f in active["frames"] if motion_hip(f) is not None
                 ]
                 returned_hip = (
                     direction * motion_hip(active["last_frame"])

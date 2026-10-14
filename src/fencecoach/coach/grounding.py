@@ -188,13 +188,8 @@ def assessment_issues(request, reply, metrics):
         bool(metrics) and brief["requested_topic"] in {"lunge", "knee", "arm", "recovery"}
     ) or "supported observation" in request.question.lower()
     if assessment:
-        shape = (
-            r"\b(cue|try|practice|focus|keep)\b",
-            r"\b(drill|repeat|reps|attempts|slow|set)\b",
-            r"\b(why|because|helps|so that|to help)\b",
-        )
-        if not all(re.search(pattern, reply, re.I) for pattern in shape):
-            issues.append("Assessment needs one cue, one drill, and its purpose.")
+        # An observation may be all the evidence supports. Requiring a cue and
+        # drill on every assessment pressures the writer to invent advice.
         if len(re.findall(r"\d+(?:\.\d+)?\s*(?:degrees?|deg\b|°|ratio\b)", reply, re.I)) > 2:
             issues.append("Assessment dumps measurements instead of selecting one observation.")
         if (

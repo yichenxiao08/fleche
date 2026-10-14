@@ -81,38 +81,106 @@
   gap: 24px;
   max-width: 1200px;
 }
-.coach-conversation-column { min-width: 0; display: grid; gap: 16px; }
-.coach-workspace > .coach-replay { position: sticky; top: 24px; min-width: 0; }
-.coach-general { position: relative; z-index: 4; }
-.coach-chat { padding: 20px; }
-.coach-chat > h2 { font-size: 20px; margin: 0 0 10px; }
-.coach-replay .review-caption { gap: 8px; font-size: 12px; margin-bottom: 10px; }
-.coach-replay .review-caption span { min-width: 0; overflow-wrap: anywhere; }
-.coach-replay .review-caption .text-action { flex-shrink: 0; font-size: 12px; }
+.coach-conversation-column {
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+}
+.coach-workspace > .coach-replay {
+  position: sticky;
+  top: 24px;
+  min-width: 0;
+}
+.coach-general {
+  position: relative;
+  z-index: 4;
+}
+.coach-chat {
+  padding: 20px;
+}
+.coach-chat > h2 {
+  font-size: 20px;
+  margin: 0 0 10px;
+}
+.coach-replay .review-caption {
+  gap: 8px;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+.coach-replay .review-caption span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.coach-replay .review-caption .text-action {
+  flex-shrink: 0;
+  font-size: 12px;
+}
 .coach-workspace .coach-replay .replay-view:has(video) {
   max-width: none;
 }
-.coach-chat .coach-composer { margin-inline: -10px; padding-inline: 10px; }
+.coach-chat .coach-composer {
+  margin-inline: -10px;
+  padding-inline: 10px;
+}
 @media (max-width: 900px) {
-  .coach-workspace { display: flex; flex-direction: column; gap: 16px; }
-  .coach-workspace > .coach-replay { position: static; order: -1; width: 100%; }
-  .coach-conversation-column { width: 100%; }
-  .coach-chat { padding: 16px; }
+  .coach-workspace {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .coach-workspace > .coach-replay {
+    position: static;
+    order: -1;
+    width: 100%;
+  }
+  .coach-conversation-column {
+    width: 100%;
+  }
+  .coach-chat {
+    padding: 16px;
+  }
   .coach-workspace .coach-replay .replay-view:has(video) {
     max-width: none;
   }
 }
 
-.athlete-review-layout { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 24px; }
-.athlete-video-column { position: sticky; top: 24px; }
-.athlete-review-aside { padding-top: 0; gap: 16px; }
-.athlete-rep-review-pane { min-width: 0; }
-.athlete-rep-review-pane .rep-picker-heading { margin-top: 0; }
-.athlete-rep-review-pane .athlete-rep-detail { margin-top: 16px; padding: 20px; }
-.athlete-rep-review-pane .athlete-readings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.athlete-coach-card { padding: 18px; }
-.athlete-coach-card h2 { font-size: 22px; }
+.athlete-review-layout {
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 24px;
+}
+.athlete-video-column {
+  position: sticky;
+  top: 24px;
+}
+.athlete-review-aside {
+  padding-top: 0;
+  gap: 16px;
+}
+.athlete-rep-review-pane {
+  min-width: 0;
+}
+.athlete-rep-review-pane .rep-picker-heading {
+  margin-top: 0;
+}
+.athlete-rep-review-pane .athlete-rep-detail {
+  margin-top: 33.5px;
+  padding: 20px;
+}
+.athlete-rep-review-pane .athlete-readings {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.athlete-coach-card {
+  padding: 18px;
+}
+.athlete-coach-card h2 {
+  font-size: 22px;
+}
 @media (max-width: 900px) {
-  .athlete-review-layout { grid-template-columns: minmax(0, 1fr); gap: 16px; }
-  .athlete-video-column { position: static; }
+  .athlete-review-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .athlete-video-column {
+    position: static;
+  }
 }

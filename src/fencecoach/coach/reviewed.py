@@ -7,11 +7,13 @@ from fencecoach.schemas import KnowledgeSource
 
 
 def select_feedback(request, limit=None):
+    from fencecoach.coach.intent import corrected_subject
+
     review = request.reviewed_feedback
     if review.get("status") != "submitted":
         return []
     reps = sorted(review.get("reps", []), key=lambda rep: rep["rep_number"])
-    question = request.question.lower()
+    question = corrected_subject(request.question).lower()
     named = re.search(r"\brep(?:etition)?\s*(\d+)\b", question)
     if named:
         selected = [r for r in reps if r["rep_number"] == int(named[1])]
@@ -23,31 +25,50 @@ def select_feedback(request, limit=None):
     topics = {
         "arm": ("arm", "hand", "sword", "target", "extension"),
         "knee": ("knee", "bend", "leg", "depth", "lower", "short"),
-        "recovery": ("recovery", "recover", "guard", "return"),
+        "recovery": (
+            "recovery",
+            "recover",
+            "guard",
+            "return",
+            "rear leg",
+            "back leg",
+            "rear foot",
+            "heel",
+        ),
         "torso": ("torso", "lean", "balance", "upright", "body"),
     }
     terms = {
         term for group in topics.values() if any(t in question for t in group) for term in group
     }
 
-    def score(rep):
+    def text_for(rep):
         text = " ".join(
-            str(rep.get(k, "")) for k in ("main_issue", "evidence_description", "cue")
+            str(rep.get(k, ""))
+            for k in ("main_issue", "evidence_description", "cue", "improvement", "done_well")
         ).lower()
+        return text
+
+    def score(rep):
+        text = text_for(rep)
         return (
             sum(term in text for term in terms) * 4
             + (2 if rep.get("rating") == "correction" else 0)
             + bool(rep.get("main_issue"))
         )
 
-    if re.search(
-        (
-            r"\b(?:best|worst|strongest|weakest|compare|comparison)\b|"
-            r"\bwhich (?:rep|lunge)\b|\bwhich of my lunges\b"
-        ),
-        question,
-    ) and limit is None:
+    if (
+        re.search(
+            (
+                r"\b(?:best|worst|strongest|weakest|compare|comparison)\b|"
+                r"\bwhich (?:rep|lunge)\b|\bwhich of my lunges\b"
+            ),
+            question,
+        )
+        and limit is None
+    ):
         return reps
+    if terms and not any(any(term in text_for(rep) for term in terms) for rep in reps):
+        return []
     ranked = sorted(reps, key=score, reverse=True)
     return ranked[: (2 if limit is None else limit)]
 

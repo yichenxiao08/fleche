@@ -2,14 +2,28 @@
 
 import re
 
-ADVICE_FIRST_POLICY = """Reply like a coach giving a useful next step. For a personal
-review, lead with what the athlete should TRY or CHANGE in ordinary movement language.
-Then explain the relevant observed pattern and how to check the change on the next rep.
+ADVICE_FIRST_POLICY = """Answer the latest question directly, like a conversational coach.
+For a personal analysis, lead with the relevant qualitative assessment or supported change
+in ordinary movement language. Explain what matched or differed from the references.
+Give a practice cue when a change is supported and useful; do not prescribe one on every turn.
+When the athlete asks for a direct verdict (for example, whether reps were good or bad),
+answer that first against the requested reference feature, then give a cue if needed.
 Default to 2–4 short sentences and one main focus. Address both topics if two are asked.
-For a short follow-up, continue the current rep and cue; do not restart a generic lesson.
-Supporting evidence comes AFTER the advice: use at most one useful timestamp by default.
-Do not recite angles, elbow values, knee values, ranges, confidence, or raw measurements
-unless the athlete explicitly asks for numbers. Never start by listing measurements.
+For a short follow-up, continue the current subject, phase and rep; do not restart a generic lesson.
+For analysis or a question about how a movement was, give the assessment or useful cue first,
+then ONE concrete supporting example: a named rep with its relevant observed difference, or
+a measured statistic compared with the same feature in the reference. A representative example
+supports the pattern; it does not establish that every rep had that difference.
+Choose one representative rep, usually the clearest difference, instead of listing both ends
+of the set. Expand examples only when the request explicitly asks to compare or break down reps.
+Make that example support the main assessment: if you discuss a deviation, illustrate the
+deviating rep rather than an earlier rep that matched. The packet's representative_support is
+an available evidence record, not a generated verdict; use it when it supports your observation.
+When explicitly asked for numbers, statistics or quantifiable evidence, provide an actual
+measured value with units and explain what it supports. One useful example is enough unless
+the athlete asks for every rep or a full table. A qualitative restatement does not answer this.
+Avoid a dump of angles, timings or confidence values. Supporting evidence follows the answer;
+use at most one useful timestamp by default. Requests to analyze all reps still cover each rep.
 Write ALL times and durations in seconds with exactly one decimal: 10.9 seconds, 0.8 seconds.
 Never show milliseconds or many decimal places. Keep measurement precision in the evidence
 panel, not the spoken answer. No boilerplate disclaimers, rubric explanations, camera/2D
@@ -23,6 +37,52 @@ Evidence references and limitations are separate from the conversational answer.
 
 _NUMBER = r"(?<![\w.])(-?\d+(?:\.\d+)?)"
 _TIME = re.compile(_NUMBER + r"\s*(milliseconds?|msecs?|ms|seconds?|secs?|s)\b", re.I)
+_NUMERIC_REQUEST = re.compile(
+    r"\b(?:numbers?|numerical|numeric|quantif(?:iable|ied|y|ication)|stats?|statistics?|"
+    r"values?|measurements?|angles?|degrees?|timings?|timestamps?|percentages?)\b|"
+    r"\bhow (?:much|many)\b",
+    re.I,
+)
+_STATISTIC = re.compile(
+    _NUMBER + r"\s*(?:degrees?|deg\b|°|milliseconds?|ms\b|seconds?|secs?\b|s\b|"
+    r"%|percent\b|inches|inch\b|feet\b|foot\b|cm\b|meters?|metres?|"
+    r"leg lengths?|torso lengths?|ratio\b|reps?\b|lunges?\b|recoveries\b)|"
+    r"\b\d+\s+(?:of|out of)\s+\d+\b",
+    re.I,
+)
+
+
+def requests_numbers(question):
+    """One definition of numerical evidence requests for context, prompts and validation."""
+    return bool(_NUMERIC_REQUEST.search(question))
+
+
+def response_evidence_issues(question, reply, available=False):
+    """Require a concrete example without turning a concise answer into a data dump."""
+    if not available:
+        return []
+    if requests_numbers(question):
+        if not _STATISTIC.search(reply):
+            return [
+                "The athlete requested numerical evidence; give a measured value with its units or a supported count comparison, not just a qualitative restatement."
+            ]
+        return []
+    assessment = re.search(
+        r"\banaly[sz]e\b|\bassess\b|\breview\b|\bhow (?:was|were|did)\b|"
+        r"\bwhat (?:needs|should i|can i)\b.{0,35}\b(?:work|improve|fix|change)\b",
+        question,
+        re.I,
+    )
+    if assessment and not (
+        re.search(r"\brep(?:s|etition(?:s)?)?\s*#?\s*\d+\b", reply, re.I)
+        or _STATISTIC.search(reply)
+    ):
+        return [
+            "Support this analysis with one relevant named rep and observed difference, or one measured statistic, after the assessment or cue."
+        ]
+    return []
+
+
 _BOILERPLATE = re.compile(
     r"^(?:note that\b|keep in mind\b|remember that\b|as an ai\b|"
     r"(?:this|these|the)\s+(?:2d|2-d|image-plane|pose|tracking)\s+(?:measurement|measurements|estimate|estimates|value|values)\b|"
@@ -71,22 +131,31 @@ def format_answer(text):
 
 
 def style_issues(question, reply, personal=False):
-    if not personal or re.search(
-        r"\b(angle|degrees|numbers?|measurements?|timings?|timestamps?|values?)\b", question, re.I
+    if not personal or requests_numbers(question):
+        return []
+    from fencecoach.coach.intent import wants_all_reps, wants_rep_comparison
+
+    if (
+        wants_all_reps(question)
+        or wants_rep_comparison(question)
+        or re.search(r"\b(?:compare|comparison|versus)\b", question, re.I)
     ):
         return []
-    numbers = re.findall(_NUMBER + r"\s*(?:degrees?|deg\b|°|ratio\b|torso lengths?)", reply, re.I)
-    if numbers:
+    evidence_sentences = [
+        sentence
+        for sentence in re.split(r"(?<=[.!?])\s+", reply.strip())
+        if re.search(_NUMBER + r"\s*(?:degrees?|deg\b|°|ratio\b|torso lengths?)", sentence, re.I)
+    ]
+    statistics = re.findall(
+        _NUMBER + r"\s*(?:degrees?|deg\b|°|ratio\b|torso lengths?)", reply, re.I
+    )
+    example_reps = {
+        number
+        for sentence in evidence_sentences
+        for number in re.findall(r"\brep(?:s|etition(?:s)?)?\s*#?\s*(\d+)\b", sentence, re.I)
+    }
+    if len(example_reps) > 1 or len(evidence_sentences) > 2 or len(statistics) > 3:
         return [
-            "Unrequested angle/ratio numbers belong in evidence details; give qualitative movement feedback in the reply."
+            "Keep default analysis concise: one supporting statistical example is enough; put the full measurement list in evidence details."
         ]
-    first = re.split(r"(?<=[.!?])\s+", reply.strip())[0]
-    if re.search(
-        r"\d+(?:\.\d+)?\s*(?:degrees?|deg\b|°|seconds?|ms\b)", first, re.I
-    ) and not re.search(
-        r"\b(?:try|keep|focus|aim|reach|push|drive|return|bend|extend|straighten|practice|choose|hold|avoid|reduce|bring|relax)\b",
-        first,
-        re.I,
-    ):
-        return ["Lead with the practice cue; supporting numbers belong after the advice."]
     return []

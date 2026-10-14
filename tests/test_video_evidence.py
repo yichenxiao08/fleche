@@ -17,6 +17,7 @@ def frame(t, stance=0.7, knee=120, epoch=1):
         "quality": 0.9,
         "track_epoch": epoch,
         "features": {
+            "torso_pixels": 100,
             "stance_ratio": stance,
             "left_knee_angle": knee,
             "right_knee_angle": knee,
@@ -67,7 +68,7 @@ class VideoEvidenceTests(unittest.TestCase):
 
     def test_onset_precedes_large_expansion_and_identity_break_drops_rep(self):
         frames = [frame(t) for t in range(0, 1000, 100)]
-        frames += [frame(1000, 0.95), frame(1100, 1.25), frame(1200, 1.5)]
+        frames += [frame(1000, 0.95), frame(1100, 1.25), frame(1200, 1.5), frame(1250, 1.5)]
         frames += [frame(t) for t in range(1300, 1900, 100)]
         candidates, _ = proposals(frames, baseline=0.7, start_after_ms=500)
         self.assertEqual(len(candidates), 1)

@@ -4,8 +4,15 @@ import json
 import re
 from statistics import median
 
-from fencecoach.coach.analysis import build_coaching_brief
-from fencecoach.coach.intent import classify_coach_question, wants_rep_comparison
+from fencecoach.coach.analysis import _rep_key, build_coaching_brief
+from fencecoach.coach.intent import (
+    arm_roles,
+    arm_sides,
+    classify_coach_question,
+    question_phases,
+    question_topics,
+    wants_rep_comparison,
+)
 from fencecoach.coach.policy import MOTION_POLICY
 from fencecoach.coach.turns import motion_question
 from fencecoach.schemas import KnowledgeSource
@@ -45,33 +52,27 @@ def reference_context(request, selected):
     """Keep the primary coaching context focused; full comparisons stay in evidence."""
     intent = classify_coach_question(request.question)
     question = request.question.lower()
-    metric_by_topic = {
-        "arm": {"weapon_arm_direction", "weapon_elbow_angle"},
-        "front_leg": {"front_knee_angle", "front_knee_ahead_of_toe"},
-        "rear_leg": {
-            "rear_knee_angle",
-            "rear_foot_displacement_inches",
-            "rear_foot_displacement_leg_lengths",
-        },
-        "torso": {"projected_torso_tilt"},
-        "distance": {
-            "feet_separation_leg_lengths",
-            "rear_foot_displacement_inches",
-            "rear_foot_displacement_leg_lengths",
-        },
-        "speed": {
-            "action_projected_hip_speed",
-            "action_to_lunge_time",
-            "estimated_active_recovery_time",
-        },
-        "recovery": {"front_knee_angle", "rear_knee_angle", "estimated_active_recovery_time"},
-    }
+    requested_metrics = requested_feature_names(request)
+    requested_phases = question_phases(request.question)
+
+    def phase_matches(phase):
+        return (
+            not requested_phases
+            or phase in requested_phases
+            or phase == "finish"
+            and bool(requested_phases & {"lunge_finish", "lunge_hold"})
+        )
+
     rows = []
     for rep in selected["rep_measurements"]:
         comparison = rep.get("reference_comparison", {})
         candidates = comparison.get("rows", [])
-        if intent.topic in metric_by_topic:
-            candidates = [r for r in candidates if r["metric"] in metric_by_topic[intent.topic]]
+        if requested_metrics:
+            candidates = [
+                row
+                for row in candidates
+                if row["metric"] in requested_metrics and phase_matches(row.get("phase"))
+            ]
         elif re.search(r"\b(?:speed|fast|slow|power|explosive)\b", question):
             candidates = [r for r in candidates if r["phase"] in {"action", "active_recovery"}]
         elif re.search(r"\b(?:distance|disatnce|reach|stride|long|far)\b", question):
@@ -93,11 +94,8 @@ def reference_context(request, selected):
                 "coaching_priorities": [
                     p
                     for p in comparison.get("coaching_priorities", [])
-                    if intent.topic not in metric_by_topic
-                    or any(
-                        metric.replace("_", " ") in p.get("reason", "").lower()
-                        for metric in metric_by_topic[intent.topic]
-                    )
+                    if (not requested_metrics or p.get("metric") in requested_metrics)
+                    and phase_matches(p.get("phase", "finish"))
                 ],
                 "comparisons": candidates[:6],
             }
@@ -118,6 +116,9 @@ def selected_evaluation(request):
     intent = classify_coach_question(request.question)
     if intent.kind == "specific_rep" and intent.rep_number is not None:
         reps = [r for r in reps if r["rep_number"] == intent.rep_number]
+    elif intent.kind == "specific_reps" and intent.rep_numbers:
+        requested = set(intent.rep_numbers)
+        reps = [r for r in reps if r["rep_number"] in requested]
     elif intent.kind == "last_rep":
         reps = reps[-1:]
     elif intent.kind == "first_rep":
@@ -128,17 +129,8 @@ def selected_evaluation(request):
         for word in list(words)
         if word in {"arms", "hands", "legs", "knees"}
     )
-    phase_names = {
-        "recovery": {"active_recovery", "recovery_peak", "returned_guard"},
-        "speed": {"lunge_drive", "active_recovery", "lunge_finish"},
-        "distance": {"lunge_finish", "lunge_hold"},
-        "torso": {"lunge_drive", "lunge_hold", "lunge_finish"},
-        "arm": {"lunge_drive", "lunge_hold", "lunge_finish"},
-        "rear_leg": {"lunge_drive", "lunge_finish", "recovery_peak", "returned_guard"},
-        "front_leg": {"starting_guard", "lunge_hold", "lunge_finish"},
-        "lunge": {"starting_guard", "lunge_drive", "lunge_hold", "lunge_finish"},
-    }.get(intent.topic)
-    if phase_names is None:
+    phase_names = question_phases(request.question)
+    if not phase_names:
         phase_names = (
             {"active_recovery", "recovery_peak", "returned_guard"}
             if words & {"recover", "recovery", "return"}
@@ -211,7 +203,6 @@ _TOPIC_MEASUREMENTS = {
         "estimated_active_recovery_time",
         "estimated_recovery_onset",
         "finish_to_guard_time",
-        "front_knee_angle",
         "rear_knee_angle",
     },
     "speed": {
@@ -250,18 +241,172 @@ _TOPIC_LIMITS = {
 }
 
 
+def requested_feature_names(request):
+    """One body-role resolver shared by evidence selection and answer verification."""
+    topics = question_topics(request.question)
+    features = set().union(*(_TOPIC_MEASUREMENTS.get(topic, set()) for topic in topics))
+    if "arm" not in topics:
+        return features
+    features -= _TOPIC_MEASUREMENTS["arm"]
+    roles = arm_roles(request.question)
+    weapon = request.capture_profile.get("weapon_arm")
+    for role in roles:
+        if role in {"weapon", "non_weapon"}:
+            prefix = role
+        elif weapon in {"left", "right"}:
+            prefix = "weapon" if role == weapon else "non_weapon"
+        else:
+            continue
+        features.update({f"{prefix}_arm_direction", f"{prefix}_elbow_angle"})
+        if prefix == "weapon":
+            features.add("arm_extension_timing")
+    sides = arm_sides(request.question, request.capture_profile)
+    features.update(
+        metric.name
+        for metric in request.metrics
+        if metric.name.startswith(tuple(side + "_" for side in sides))
+        and any(term in metric.name for term in ("arm_extension", "elbow_angle", "wrist_height"))
+    )
+    return features
+
+
+def _metric_phase(name):
+    if "initial_guard" in name:
+        return "starting_guard"
+    if name.endswith("_at_peak"):
+        return "lunge_finish"
+    if name.endswith("_at_onset"):
+        return "lunge_drive"
+    return None
+
+
+def question_scoped_session_context(request, snapshot=None):
+    """Return only the active-session records relevant to this turn's subject.
+
+    Keep the complete feature inventory in the packet so the agent can see when
+    the requested evidence is unavailable. Measurements, phase medians, and
+    reference comparisons are narrowed to the explicit subject and phase; broad
+    unscoped coaching priorities are removed because they can hijack follow-ups.
+    """
+    intent = classify_coach_question(request.question)
+    topics = question_topics(request.question) or ([intent.topic] if intent.topic else [])
+    features = requested_feature_names(request)
+    phases = question_phases(request.question)
+    selected = selected_evaluation(request)
+    reps = [row.get("rep_number") for row in selected["rep_measurements"]]
+
+    packet = session_evidence_context(
+        request,
+        sorted(features),
+        sorted(phases),
+        reps if intent.kind in {"first_rep", "last_rep", "specific_rep", "specific_reps"} else (),
+        snapshot=snapshot,
+    )
+    if features or phases:
+        # These fields summarize the whole clip and can refer to a different
+        # movement feature than the question. The exact per-rep comparison rows
+        # below already include relevant supported changes and reference ranges.
+        packet["per_rep_reference_findings"] = []
+        packet["recurring_reference_comparison"] = None
+        packet["question_relevant_focus"] = None
+        packet["reference_baselines"] = None
+        # Conversation construction separately adds human feedback selected for
+        # this corrected subject and rep scope. Do not also leak the full review
+        # form here, where an unrelated cue could pull the answer off topic.
+        packet["submitted_feedback"] = None
+        packet["requested_scope"] = {
+            **packet.get("requested_scope", {}),
+            "topics": topics,
+            "arm_roles": list(arm_roles(request.question)) if "arm" in topics else [],
+            "anatomical_arm_sides": sorted(arm_sides(request.question, request.capture_profile))
+            if "arm" in topics
+            else [],
+            "instruction": "Only these requested features and phases are in scope for personal feedback. Retrieve other evidence with a tool only if the question requires it.",
+        }
+    comparisons = [
+        row
+        for rep in packet["per_rep_measurements"]
+        for row in rep["reference_comparisons"]
+        if isinstance(row.get("current"), (int, float))
+        and isinstance(row.get("reference_range"), list)
+        and len(row["reference_range"]) == 2
+        and all(isinstance(value, (int, float)) for value in row["reference_range"])
+    ]
+    if comparisons:
+
+        def reference_deviation(row):
+            lower, upper = sorted(row["reference_range"])
+            return max(lower - row["current"], row["current"] - upper, 0) / max(upper - lower, 1e-6)
+
+        packet["representative_support"] = {
+            "record": max(comparisons, key=reference_deviation),
+            "selection_policy": "An available example of the largest relative reference difference in the requested scope, or a matching example when all overlap. This is evidence selection, not a technique score or corrective verdict. Assess the full set, then illustrate the same pattern with one relevant record.",
+        }
+    packet["answer_affordances"] = {
+        "observed_features": sorted(
+            {record["feature"] for record in packet["session_measurements"]}
+            | {name for rep in packet["per_rep_measurements"] for name in rep["measures"]}
+            | {
+                name
+                for rep in packet["per_rep_measurements"]
+                for phase in rep["phases"].values()
+                for name in phase["values"]
+            }
+        ),
+        "reference_features": sorted(
+            {
+                row["metric"]
+                for rep in packet["per_rep_measurements"]
+                for row in rep["reference_comparisons"]
+            }
+        ),
+        "supported_corrections": [
+            {
+                "evidence_id": row["evidence_id"],
+                "feature": row["metric"],
+                "phase": row.get("phase"),
+                "cue": row["supported_change"],
+            }
+            for rep in packet["per_rep_measurements"]
+            for row in rep["reference_comparisons"]
+            if row.get("supported_change")
+        ],
+        "instruction": "Use observations to describe what happened, matching references to assess differences, and only supported corrections or matching submitted feedback to identify a fault to fix. If no correction is established, a useful observation or positive comparison is a complete answer. Do not invent a correction merely because the athlete asks how something was. If the requested evidence is absent, explain that precise gap naturally and offer relevant general guidance.",
+    }
+    return json.dumps(packet, separators=(",", ":"))
+
+
 def requested_topic_evidence(request, selected):
     """Keep all relevant per-rep values available for non-ranking questions."""
     intent = classify_coach_question(request.question)
-    names = _TOPIC_MEASUREMENTS.get(intent.topic)
+    topics = question_topics(request.question) or ([intent.topic] if intent.topic else [])
+    names = requested_feature_names(request)
     if not names:
         return None
     reps = []
-    benchmark_names = _TOPIC_BENCHMARKS.get(intent.topic, set())
+    benchmark_names = set().union(*(_TOPIC_BENCHMARKS.get(topic, set()) for topic in topics))
+    phases_requested = question_phases(request.question)
+    phased_features = {
+        "front_knee_angle",
+        "front_knee_ahead_of_toe",
+        "rear_knee_angle",
+        "projected_torso_tilt",
+        "weapon_arm_direction",
+        "weapon_elbow_angle",
+    }
     for rep in selected["rep_measurements"]:
         values = {}
         for name, measurement in rep.get("measurements", {}).items():
             if name in names:
+                # Posture values on a rep-wide record usually refer to the finish.
+                # Use explicit phase medians instead so a recovery question cannot
+                # accidentally receive the lunge-finish knee or torso value.
+                if name in phased_features:
+                    measurement_phase = measurement.get("phase")
+                    if not measurement_phase or (
+                        phases_requested and measurement_phase not in phases_requested
+                    ):
+                        continue
                 value = measurement.get("value")
                 unit = measurement.get("unit")
                 if unit == "ms" and isinstance(value, (int, float)):
@@ -269,6 +414,8 @@ def requested_topic_evidence(request, selected):
                 values[name] = {"value": value, "unit": unit}
         phases = {}
         for phase_name, phase in rep.get("phase_medians", {}).items():
+            if phases_requested and phase_name not in phases_requested:
+                continue
             phase_values = {}
             for name, measurement in phase.get("medians", {}).items():
                 if name not in names:
@@ -296,7 +443,7 @@ def requested_topic_evidence(request, selected):
         )
     return (
         {
-            "topic": intent.topic,
+            "topic": topics[0] if len(topics) == 1 else topics,
             "measurement_limits": _TOPIC_LIMITS.get(intent.topic),
             "reps": reps,
         }
@@ -315,6 +462,8 @@ def current_session_context(request):
     per_rep_findings = []
     for rep in reps:
         available.update(rep.get("measurements", {}).keys())
+        for phase in rep.get("phases", {}).values():
+            available.update(phase.get("measurements", {}))
         priorities = rep.get("reference_comparison", {}).get("coaching_priorities", [])
         if priorities:
             priority = priorities[0]
@@ -379,9 +528,7 @@ def current_session_context(request):
                 ),
             }
             for metric in request.metrics
-        ]
-        if not reps
-        else [],
+        ],
         "per_rep_reference_findings": per_rep_findings,
         "per_rep_measurements": [
             {
@@ -503,13 +650,32 @@ def current_session_context(request):
         "front_knee_angle": "Included front-knee angle: smaller means more bend. Compare only the matching phase with accepted reference reps; a different angle alone does not grade the whole lunge.",
         "weapon_arm_direction": "Whole sword-arm direction relative to the image horizontal. This is not elbow bend and does not measure extension onset relative to foot movement.",
         "weapon_elbow_angle": "Included sword-elbow bend: larger means straighter. This does not determine whether arm extension started before the front foot.",
+        "non_weapon_arm_direction": "Non-sword shoulder-to-wrist direction relative to image horizontal. Do not compare with sword-arm targets.",
+        "non_weapon_elbow_angle": "Non-sword elbow bend: larger means straighter. This is not sword-arm extension.",
     }
+    # Preserve sided observations even when the phase evaluator supplies other
+    # features. Previously all raw metrics disappeared as soon as reps existed.
+    for metric, record in zip(request.metrics, summary["session_measurements"], strict=True):
+        key = _rep_key(metric)
+        record["rep"] = int(key.rsplit(":", 1)[-1]) if key else None
+        record["feature"] = metric.name
+        record["phase"] = _metric_phase(metric.name)
+        if "elbow_angle" in metric.name:
+            record["meaning"] = (
+                "Included elbow angle on the named anatomical side; larger means straighter. An at_peak reading describes the detected peak, not a phase median or a technique verdict."
+            )
+        elif "arm_extension" in metric.name:
+            record["meaning"] = (
+                "Shoulder-to-wrist reach on the named anatomical side in torso lengths; this is not an angle or extension-onset timing."
+            )
     return json.dumps(summary, separators=(",", ":"))
 
 
-def session_evidence_context(request, feature_names=(), phase_names=(), rep_numbers=()):
+def session_evidence_context(
+    request, feature_names=(), phase_names=(), rep_numbers=(), snapshot=None
+):
     """Select exact records requested by the agent, independent of question categories."""
-    packet = json.loads(current_session_context(request))
+    packet = json.loads(snapshot if snapshot is not None else current_session_context(request))
     features, phases, numbers = set(feature_names), set(phase_names), set(rep_numbers)
     reference_phases = phases | ({"finish"} if phases & {"lunge_finish", "lunge_hold"} else set())
     selected = []
@@ -551,6 +717,13 @@ def session_evidence_context(request, feature_names=(), phase_names=(), rep_numb
         ]
         selected.append(rep)
     packet["per_rep_measurements"] = selected
+    packet["session_measurements"] = [
+        record
+        for record in packet["session_measurements"]
+        if (not features or record["feature"] in features)
+        and (not phases or record["phase"] in reference_phases)
+        and (not numbers or record["rep"] in numbers)
+    ]
     packet["requested_scope"] = {
         "feature_names": list(feature_names),
         "phase_names": list(phase_names),
@@ -1000,15 +1173,117 @@ def all_reps_fallback(request):
         intent.topic,
         "Use the front-leg bend in your reference finish as your target for each rep.",
     )
+    if intent.topic == "recovery":
+        matched = next(
+            (
+                labels
+                for observation, labels in grouped.items()
+                if "rear-leg position overlapped" in observation
+            ),
+            [],
+        )
+        differed = [
+            label
+            for observation, labels in grouped.items()
+            if "your rear leg was" in observation
+            for label in labels
+        ]
+        parts = []
+        if matched:
+            parts.append(
+                f"Rep {', '.join(matched)} matched your reference for rear-leg shape during recovery"
+            )
+        if differed:
+            parts.append(
+                f"Rep {', '.join(differed)} were less aligned: your rear leg was straighter at the recovery peak"
+            )
+        if parts:
+            opening = (
+                ". ".join(parts)
+                + ". Try matching the rear-leg bend in your accepted reference recoveries as you return to guard."
+            )
     if len(distinct_cues) == 1:
-        opening = distinct_cues[0]
-    elif distinct_cues:
+        if intent.topic != "recovery":
+            opening = distinct_cues[0]
+    elif distinct_cues and intent.topic != "recovery":
         opening = "The reps have different priorities, so use the cue listed with each one."
     lines = []
+    phase_label = {
+        "finish": "lunge finish",
+        "lunge_finish": "lunge finish",
+        "lunge_hold": "held finish",
+        "active_recovery": "active recovery",
+        "recovery_peak": "recovery peak",
+        "returned_guard": "returned guard",
+        "starting_guard": "starting guard",
+        "lunge_drive": "lunge drive",
+    }.get(phase)
     for observation, labels in grouped.items():
         noun = "Rep" if len(labels) == 1 else "Reps"
-        lines.append(f"{noun} {', '.join(labels)}: {observation}.")
+        phase_text = f" at the {phase_label}" if phase_label else ""
+        lines.append(f"{noun} {', '.join(labels)}: {observation}{phase_text}.")
     return opening + "\n\n" + "\n".join(lines)
+
+
+def session_evidence_fallback(request):
+    """Build a safe answer from the requested feature when model review cannot.
+
+    This is a shared recovery path for citation/schema failures, not a template for
+    a particular question. It scopes to the same selected reps, builds a separate
+    evidence summary for each explicitly joined movement feature, and never turns
+    a missing comparison into a corrective verdict.
+    """
+    if request.technique_evaluation.get("coaching_mode") != "reference_comparison":
+        return evaluation_fallback(request)
+
+    intent = classify_coach_question(request.question)
+    if intent.kind == "rep_comparison":
+        return rep_comparison_fallback(request)
+
+    selected = selected_evaluation(request)["rep_measurements"]
+    if not selected:
+        return None
+
+    topics = question_topics(request.question)
+    if not topics and intent.topic:
+        topics = [intent.topic]
+    if not topics:
+        topics = ["lunge"]
+    if len(topics) > 1 and not re.search(
+        r"\b(?:and|both|as well as)\b|[,/]", request.question, re.I
+    ):
+        topics = [intent.topic or topics[0]]
+
+    wanted_reps = {rep["rep_number"] for rep in selected}
+    evaluation = request.technique_evaluation
+    scoped_evaluation = {
+        **evaluation,
+        "reps": [rep for rep in evaluation.get("reps", []) if rep.get("rep_number") in wanted_reps],
+    }
+    labels = {
+        "arm": "arm",
+        "front_leg": "front leg",
+        "rear_leg": "rear leg",
+        "torso": "torso",
+        "recovery": "recovery",
+        "speed": "speed",
+        "distance": "distance",
+        "lunge": "lunge",
+    }
+    answers = []
+    for topic in topics:
+        focused = request.model_copy(
+            update={
+                "question": f"How was my {labels.get(topic, topic)} in this session?",
+                "technique_evaluation": scoped_evaluation,
+            }
+        )
+        answer = all_reps_fallback(focused)
+        if answer:
+            answers.append(answer)
+    if answers:
+        return "\n\n".join(answers)
+    return evaluation_fallback(request)
 
 
 def evaluation_fallback(request):
@@ -1164,6 +1439,12 @@ def evaluation_issues(request, reply, metrics):
                     for k in ("current", "reference_median", "difference", "watch_at_seconds")
                     if isinstance((v := row.get(k)), (int, float))
                 )
+                for range_name in ("reference_range", "current_range"):
+                    values.extend(
+                        value
+                        for value in row.get(range_name, [])
+                        if isinstance(value, (int, float))
+                    )
             benchmark = rep.get("drill_benchmarks", {})
             timing = benchmark.get("timing", {})
             if timing.get("duration_seconds") is not None:

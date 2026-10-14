@@ -65,8 +65,15 @@ const motionController = setupMotion({ state, notice });
 motionController.setup();
 function notice(text = "") {
   state.error = text;
-  $("notice").textContent = text;
-  $("notice").hidden = !text;
+  const noticeElement = $("notice");
+  if (noticeElement) {
+    noticeElement.textContent = text;
+    noticeElement.hidden = !text;
+  } else if (text) {
+    // The persistent alert banner is optional in the current UI. Keep action
+    // handlers working when it is absent, and surface errors through the toast.
+    toast(text);
+  }
 }
 function toast(text) {
   $("toast").textContent = text;

@@ -18,9 +18,9 @@ from urllib.parse import quote
 PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT / "src"))
 
-from fencecoach.coach.conversation import run_conversation
-from fencecoach.coach.intent import classify_coach_question, mentioned_rep_numbers
-from fencecoach.coach.technique_evidence import (
+from fencecoach.coach.conversation import run_conversation  # noqa: E402
+from fencecoach.coach.intent import classify_coach_question, mentioned_rep_numbers  # noqa: E402
+from fencecoach.coach.technique_evidence import (  # noqa: E402
     all_reps_fallback,
     coaching_evaluation_context,
     current_session_context,
@@ -28,7 +28,7 @@ from fencecoach.coach.technique_evidence import (
     rep_comparison_result,
     selected_evaluation,
 )
-from fencecoach.schemas import CoachRequest
+from fencecoach.schemas import CoachRequest  # noqa: E402
 
 
 def load_latest_reference_request(database: Path) -> CoachRequest | None:
@@ -132,15 +132,16 @@ def check_local_evidence(request, cases):
             for rep in reps
             if rep.get("reference_comparison", {}).get("coaching_priorities")
         ]
-        actual_finding_reps = [
-            row["rep"] for row in snapshot.get("per_rep_reference_findings", [])
-        ]
+        actual_finding_reps = [row["rep"] for row in snapshot.get("per_rep_reference_findings", [])]
         if actual_finding_reps != expected_finding_reps:
             failures.append(case["id"] + "-incomplete-per-rep-session-evidence")
         intent = classify_coach_question(case["question"])
-        if intent.topic and case["needs_technique_evaluation"]:
-            if not snapshot.get("per_rep_measurements"):
-                failures.append(case["id"] + "-missing-question-relevant-session-evidence")
+        if (
+            intent.topic
+            and case["needs_technique_evaluation"]
+            and not snapshot.get("per_rep_measurements")
+        ):
+            failures.append(case["id"] + "-missing-question-relevant-session-evidence")
 
         if not case["needs_technique_evaluation"]:
             continue
@@ -148,13 +149,12 @@ def check_local_evidence(request, cases):
         selected = selected_evaluation(tailored)["rep_measurements"]
         selected_numbers = [rep["rep_number"] for rep in selected]
         selection = case["selection"]
-        if selection == "all" and selected_numbers != all_numbers:
-            failures.append(case["id"])
-        elif selection == "first" and selected_numbers != all_numbers[:1]:
-            failures.append(case["id"])
-        elif selection == "last" and selected_numbers != all_numbers[-1:]:
-            failures.append(case["id"])
-        elif selection == "number" and selected_numbers != [case["rep_number"]]:
+        if (
+            (selection == "all" and selected_numbers != all_numbers)
+            or (selection == "first" and selected_numbers != all_numbers[:1])
+            or (selection == "last" and selected_numbers != all_numbers[-1:])
+            or (selection == "number" and selected_numbers != [case["rep_number"]])
+        ):
             failures.append(case["id"])
         if case["id"] in {"arm-extension-timing", "rear-foot-movement", "personal-lunge-speed"}:
             topic_checks += 1
@@ -168,9 +168,7 @@ def check_local_evidence(request, cases):
             else:
                 failures.append(case["id"] + "-topic-evidence")
 
-    comparison_case = next(
-        (case for case in cases if case["intent"] == "rep_comparison"), None
-    )
+    comparison_case = next((case for case in cases if case["intent"] == "rep_comparison"), None)
     comparison_ok = False
     if comparison_case:
         tailored = request.model_copy(update={"question": comparison_case["question"]})
@@ -180,12 +178,8 @@ def check_local_evidence(request, cases):
         comparison_ok = bool(
             expected_ranking
             and actual_ranking
-            and (actual_ranking["best"]["rep"], actual_ranking["worst"]["rep"])
-            == expected_ranking
-            and all(
-                re.search(rf"\brep\s*{rep}\b", response, re.I)
-                for rep in expected_ranking
-            )
+            and (actual_ranking["best"]["rep"], actual_ranking["worst"]["rep"]) == expected_ranking
+            and all(re.search(rf"\brep\s*{rep}\b", response, re.I) for rep in expected_ranking)
             and len(
                 re.findall(
                     r"\b\d+\.\d+ seconds\b|\b\d+\.\d+-second mark\b",
@@ -211,9 +205,8 @@ def check_local_evidence(request, cases):
             run = run_conversation(tailored, mode="demo", model=None)
             answer_reps = mentioned_rep_numbers(run.report.summary)
             if case["intent"] == "all_reps":
-                route_ok = (
-                    answer_reps.issuperset(all_numbers)
-                    and any(event.step == "summarize_reps" for event in run.trace)
+                route_ok = answer_reps.issuperset(all_numbers) and any(
+                    event.step == "summarize_reps" for event in run.trace
                 )
             else:
                 expected = independent_reference_ranking(tailored)
@@ -268,15 +261,15 @@ def main():
 
     project = PROJECT
     try:
-        cases = json.loads((project / "evals/coach-intent-cases.json").read_text(encoding="utf-8"))["cases"]
+        cases = json.loads((project / "evals/coach-intent-cases.json").read_text(encoding="utf-8"))[
+            "cases"
+        ]
     except (OSError, json.JSONDecodeError, KeyError) as exc:
         print(f"Could not load coach intent cases: {exc}", file=sys.stderr)
         return 2
 
     intent_failures = check_intents(cases)
-    request = load_latest_reference_request(
-        args.database or project / "data/fencecoach.sqlite3"
-    )
+    request = load_latest_reference_request(args.database or project / "data/fencecoach.sqlite3")
     evidence = check_local_evidence(request, cases) if request else {"status": "skipped"}
     passed = not intent_failures and evidence["status"] in {"passed", "skipped"}
     report = {
