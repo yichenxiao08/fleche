@@ -109,8 +109,8 @@ def main():
                     page.locator("#camera-motion").select_option("fixed")
                     page.locator("[data-video-upload]").click()
                     expect(page.locator("[data-video-accept]")).to_be_enabled(timeout=30000)
-                    expect(page.locator("[data-window-seek]")).to_have_count(1)
-                    page.locator("[data-window-seek]").first.click()
+                    expect(page.locator("[data-rep-review-seek]")).to_have_count(1)
+                    page.locator("[data-rep-review-seek]").first.click()
                     page.locator("[data-video-accept]").click()
                     # Wait for acceptance and session loading to finish before navigating.
                     coach_link = page.locator('.review-actions [data-go="coach"]')
