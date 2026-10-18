@@ -1,0 +1,135 @@
+{
+  "purpose": "Human-review draft only. No entry is active. Research ranges and development heuristics excluded.",
+  "entries": [
+    {
+      "id": "weapon_target",
+      "topic": "arm",
+      "approved": false,
+      "criterion": "Weapon arm reaches toward the actual target.",
+      "context": "Conventional simple lunge; target and weapon side known.",
+      "source": {
+        "library_file": "knowledge/lunge_arm_roles.md",
+        "verbatim": "this arm reaches forward toward\nthe target with the point aimed at it."
+      },
+      "measurement_support": "Requires human review of observability and applicability; not an automatic pass/fail test."
+    },
+    {
+      "id": "other_arm_finish",
+      "topic": "non_weapon_arm",
+      "approved": false,
+      "criterion": "Non-weapon arm extends behind in the conventional finish.",
+      "context": "Conventional teaching finish; style varies.",
+      "source": {
+        "library_file": "knowledge/lunge_arm_roles.md",
+        "verbatim": "it extends back behind the fencer, separately from the weapon arm."
+      },
+      "measurement_support": "Requires human review of observability and applicability; not an automatic pass/fail test."
+    },
+    {
+      "id": "front_bend",
+      "topic": "front_leg",
+      "approved": false,
+      "criterion": "Front knee bent at the finish.",
+      "context": "Conventional beginner simple lunge; no numerical cutoff.",
+      "source": {
+        "library_file": "knowledge/lunge_teaching_reference.md",
+        "verbatim": "finish with the front knee bent and rear leg extended."
+      },
+      "measurement_support": "Requires human review of observability and applicability; not an automatic pass/fail test."
+    },
+    {
+      "id": "rear_extension",
+      "topic": "rear_leg",
+      "approved": false,
+      "criterion": "Rear leg extended at the finish.",
+      "context": "Conventional beginner simple lunge; no numerical cutoff.",
+      "source": {
+        "library_file": "knowledge/lunge_teaching_reference.md",
+        "verbatim": "finish with the front knee bent and rear leg extended."
+      },
+      "measurement_support": "Requires human review of observability and applicability; not an automatic pass/fail test."
+    },
+    {
+      "id": "erect_torso",
+      "topic": "torso",
+      "approved": false,
+      "criterion": "Erect torso in this teaching model.",
+      "context": "Conventional straight lunge toward fixed torso-height target, not every competitive action.",
+      "source": {
+        "library_file": "knowledge/solo_lunge_review_rubric.md",
+        "verbatim": "a planted rear sole and an erect\ntorso."
+      },
+      "measurement_support": "Requires human review of observability and applicability; not an automatic pass/fail test."
+    },
+    {
+      "id": "rear_sole",
+      "topic": "rear_foot",
+      "approved": false,
+      "criterion": "Rear sole planted.",
+      "context": "Conventional straight-lunge teaching model; pose cannot establish contact force.",
+      "source": {
+        "library_file": "knowledge/solo_lunge_review_rubric.md",
+        "verbatim": "a planted rear sole and an erect\ntorso."
+      },
+      "measurement_support": "Requires human review of observability and applicability; not an automatic pass/fail test."
+    },
+    {
+      "id": "recover_back_sequence",
+      "topic": "recovery",
+      "approved": false,
+      "criterion": "Recover back starts by releasing rear knee and pushing from front leg.",
+      "context": "NWFC beginner recover-back drill; not a duration target.",
+      "source": {
+        "library_file": "knowledge/recovery_basics.md",
+        "verbatim": "recovering back begins by releasing the rear knee and pushing from the front leg."
+      },
+      "measurement_support": "Requires human review of observability and applicability; not an automatic pass/fail test."
+    },
+    {
+      "id": "guard_alignment",
+      "topic": "guard",
+      "approved": false,
+      "criterion": "Knees aligned over toes.",
+      "context": "Beginner en garde; side view cannot establish inward tracking.",
+      "source": {
+        "library_file": "knowledge/en_garde_reference.md",
+        "verbatim": "knees aligned over their toes"
+      },
+      "measurement_support": "Requires human review of observability and applicability; not an automatic pass/fail test."
+    },
+    {
+      "id": "basic_footwork",
+      "topic": "footwork",
+      "approved": false,
+      "criterion": "Advance starts front foot; retreat starts rear foot.",
+      "context": "Beginner basic footwork.",
+      "source": {
+        "library_file": "knowledge/en_garde_reference.md",
+        "verbatim": "Advance begins\nwith the front foot; retreat with the rear foot."
+      },
+      "measurement_support": "Requires human review of observability and applicability; not an automatic pass/fail test."
+    },
+    {
+      "id": "foil_sequence",
+      "topic": "timing",
+      "approved": false,
+      "criterion": "Start of arm extension precedes lunge launch.",
+      "context": "Simple foil attack only, confirmed weapon/side, usable onset and peak measurements; never infer right of way.",
+      "source": {
+        "library_file": "knowledge/foil_attack_timing.md",
+        "verbatim": "start of arm extension as preceding\nthe launch of the lunge."
+      },
+      "measurement_support": "Requires human review of observability and applicability; not an automatic pass/fail test."
+    }
+  ],
+  "topics_without_explicit_criteria": [
+    "speed",
+    "distance",
+    "blade_control",
+    "force",
+    "power",
+    "fleche_how_to",
+    "recovery_duration",
+    "arm_direction_numeric_target"
+  ]
+}
