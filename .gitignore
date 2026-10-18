@@ -19,3 +19,26 @@ data/*
 !data/.gitkeep
 
 models/*.json
+
+# Local runtime, provider requests/responses, cooldown ledgers and acceptance DBs.
+work/
+evals/citation_iteration/
+evals/conversational_kb/
+evals/layer1/
+evals/layer2/
+evals/next_phase/
+*.sqlite3
+*.sqlite3-*
+*.log
+tests/coaching-evidence-*/
+evals/coach_audit/after-*.json
+evals/coach_audit/before-*.json
+evals/coach_audit/forced-switch-*.json
+evals/coach_audit/conversations*.json
+evals/coach_audit/scope-*.json
+evals/coach_audit/*-before-after.md
+evals/coach_audit/forced-switch-tests.txt
+evals/results/coach-arm-scope-synthetic.json
+evals/results/coach-evidence-followups-latest.json
+evals/results/coach-scope-2026-10-14-before.json
+docs/next_phase_exact_writer_input.json
