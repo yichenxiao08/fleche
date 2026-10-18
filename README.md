@@ -40,12 +40,16 @@ $env:FENCECOACH_SEED_EXAMPLES='true'
 
 For the legacy local path, start Ollama first. On this development computer `scripts/start_local.ps1` also supports the existing portable runtime. Copy `.env.example` to `.env` for optional settings. Saved sessions/reviews and logs live in SQLite; unsent camera drafts live in browser IndexedDB. Clearing browser storage deletes unsent drafts, not saved server sessions.
 
-## Session coach — fewshot-v7.6
+## Session coach — fewshot-v7.6.1
 
 The default `COACH_CORE=new` answers questions about the loaded session, gives
 verdicts against usual qualitative coaching cues, and compares your own reps when
 there is no published standard. It uses available arm, knee, torso, recovery and
 relative hip-speed readings, retaining topic and rep across follow-ups.
+When saved, phase-matched comparisons with your chosen reference lunges are
+available, it uses them as examples with their reviewer corrections, rather than
+as universal targets. Whole-clip rejection can coexist with usable local rep
+geometry; rejected reps and whole-clip summaries remain withheld.
 
 “How good?” is decided for the measured topic: agreement with a coaching cue can
 support a positive verdict; mixed readings call for an inconsistent verdict;
@@ -73,6 +77,8 @@ The owner reviewed the live acceptance and approved this default on October 18,
 acceptance criteria PASS, including a real Groq-to-Gemini switch. Criterion 7 is
 input-only tracking/athlete-selection evidence, not model-quality evidence.
 There were 11 soft-slip turns. This result does not establish broader accuracy.
+The v7.6.1 evidence fixes have automated regression coverage; the earlier live
+acceptance result applies to the frozen v7.6 replies, not this updated revision.
 See [full acceptance transcripts](docs/live_acceptance.md),
 [rating sheets](docs/rating_sheet.md) and [pass notes](docs/pass_notes.md).
 

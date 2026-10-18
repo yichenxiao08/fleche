@@ -82,6 +82,16 @@ def _session_key(request):
 @lru_cache(maxsize=32)
 def _snapshot(key):
     request = CoachRequest.model_validate({**json.loads(key), "question": "Session briefing"})
+    evaluation = dict(request.technique_evaluation)
+    evaluation["reps"] = [
+        rep
+        for rep in evaluation.get("reps", [])
+        if rep.get("status") not in {"unsupported", "unavailable"}
+        and rep.get("geometry_available", True)
+    ]
+    request = request.model_copy(update={"technique_evaluation": evaluation})
+    if request.evidence_unavailable_reason:
+        request = request.model_copy(update={"metrics": [], "technique_evaluation": {}})
     packet = json.loads(current_session_context(request))
     # Reuse the measured evidence serializer, not its question focus or instruction.
     for field in (

@@ -197,6 +197,12 @@ def _resolve(text, state, rep_ids):
     phase_qualifier = PHASE_QUALIFIER.search(text)
     topic_text = PHASE_QUALIFIER.sub("", text) if phase_qualifier else text
     topics = _explicit_topics(topic_text)
+    if (
+        topics == ["distance"]
+        and "front_leg" in prior_topics
+        and re.search(r"\b(?:deep(?:er)?|shallow(?:er)?|bend|bent)\b", text, re.I)
+    ):
+        topics.append("front_leg")
     # Topic ontology order is not presentation order. Sort by the earliest
     # independently resolved span of the user's alternatives.
     if " or " in text.lower():
@@ -408,6 +414,28 @@ def build_packet(request, state, snapshot, *, conversation_only=False):
     requested = state.rep_numbers
     chosen = all_reps  # Relative comparisons need every comparable rep, even for a selected rep.
     phases = state.phases
+    # Unqualified finish questions include both producer finish labels. Keep
+    # each reading's actual phase, including clips with mixed finish/hold reps.
+    if (not phases or set(phases) <= {"lunge_finish", "lunge_hold"}) and not (
+        _explicit_phases(request.question) or "speed" in topics
+    ):
+        features_by_phase = {
+            phase: any(
+                (record.get("phase") == phase and feature in selected_features)
+                for rep in chosen
+                for feature, record in rep.get("measures", {}).items()
+            )
+            or any(
+                selected_features.intersection(
+                    rep.get("phases", {}).get(phase, {}).get("values", {})
+                )
+                for rep in chosen
+            )
+            for phase in ("lunge_finish", "lunge_hold")
+        }
+        available_finish_phases = [phase for phase, present in features_by_phase.items() if present]
+        if available_finish_phases:
+            phases = state.phases = available_finish_phases
     if not phases and selected_features and state.movement not in {"fleche", "advance", "retreat"}:
         available_phases = {p for r in chosen for p in r.get("phases", {})}
         preferred = (
@@ -435,7 +463,13 @@ def build_packet(request, state, snapshot, *, conversation_only=False):
     availability = "measurements_available"
     warning = request.evidence_unavailable_reason.strip()
     quality = request.technique_evaluation.get("whole_clip_quality")
-    if warning or quality in {"unsupported", "rejected"}:
+    local_geometry = any(
+        rep.get("status") not in {"unsupported", "unavailable"}
+        and rep.get("geometry_available", True)
+        and rep.get("measurements")
+        for rep in request.technique_evaluation.get("reps", [])
+    )
+    if warning or (quality in {"unsupported", "rejected"} and not local_geometry):
         availability = "tracking_unsupported"
     elif not any(r.get("measures") or r.get("phases") for r in all_reps) and not snapshot.get(
         "session_measurements"
@@ -504,6 +538,42 @@ def build_packet(request, state, snapshot, *, conversation_only=False):
     # Keep all matching reps for relative arithmetic; the writer sees only the selected
     # rows plus compact comparison objects, never a silently truncated comparison.
     measurements = sorted(measurements, key=lambda r: (r["feature"], r.get("rep") or 0))
+    reference_comparisons = []
+    reference_contexts = []
+    if availability == "measurements_available" and state.scope != "general":
+        for rep in chosen:
+            if requested and rep["rep"] not in requested:
+                continue
+            context = rep.get("reference_context", {})
+            if context.get("status") != "available":
+                continue
+            for reference in rep.get("reference_comparisons", []):
+                matching = next(
+                    (
+                        row
+                        for row in measurements
+                        if row.get("rep") == rep["rep"]
+                        and row["feature"] == reference.get("metric")
+                        and row.get("unit") == reference.get("unit")
+                        and (
+                            "finish"
+                            if row.get("phase") in {"lunge_finish", "lunge_hold"}
+                            else row.get("phase")
+                        )
+                        == reference.get("phase")
+                    ),
+                    None,
+                )
+                if matching and reference.get("reference_range"):
+                    if context not in reference_contexts:
+                        reference_contexts.append(context)
+                    reference_comparisons.append(
+                        {
+                            **reference,
+                            "measurement_phase": matching.get("phase"),
+                            "context_id": reference_contexts.index(context),
+                        }
+                    )
     if conversation_only:
         from collections import defaultdict
 
@@ -604,7 +674,11 @@ def build_packet(request, state, snapshot, *, conversation_only=False):
                 ),
                 "tracking_warning": "Tracking marked unsupported; specific cause unknown."
                 if warning and gap
-                else "",
+                else (
+                    "Whole-clip quality was rejected; only usable per-rep geometry is supplied."
+                    if quality in {"unsupported", "rejected"} and local_geometry
+                    else ""
+                ),
             },
             "scope": {
                 "topics": topics,
@@ -615,6 +689,17 @@ def build_packet(request, state, snapshot, *, conversation_only=False):
             },
             "capture": request.capture_profile,
             "measurements": selected,
+            "reference_comparisons": reference_comparisons,
+            "reference_contexts": reference_contexts,
+            "reference_policy": (
+                "Compare the supplied phase-matched measurements with the athlete's chosen "
+                "reference lunges when available. These examples are not universal numerical "
+                "pass/fail boundaries. Preserve their stated corrections; an aspect with a "
+                "stated issue is not a positive target. A reference difference does not "
+                "establish force, balance, safety, or distance travelled. Reference current "
+                "and current_range describe the comparison's phase summary, which may differ "
+                "from a single-frame measurement. Missing reps are not covered."
+            ),
             "not_measured": [
                 "shoulder height",
                 "smoothness",

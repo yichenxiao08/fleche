@@ -218,7 +218,10 @@ def coaching_request(session, data):
     except HTTPException as exc:
         # History tools must not reintroduce measurements from failed footage.
         usable_reps = any(
-            "projected_torso_tilt" in r.get("measurements", {}) for r in evaluation.get("reps", [])
+            r.get("measurements")
+            and r.get("geometry_available", True)
+            and r.get("status") not in {"unsupported", "unavailable"}
+            for r in evaluation.get("reps", [])
         )
         return CoachRequest(
             session_id=session.session_id,

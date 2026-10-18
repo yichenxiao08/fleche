@@ -101,6 +101,7 @@ def mentioned_rep_numbers(text: str) -> set[int]:
 def question_topics(question: str) -> list[str]:
     """Return every explicit movement topic, from specific body part to broad motion."""
     question = corrected_subject(question)
+    question = re.sub(r"\bkinee\b", "knee", question, flags=re.I)
     patterns = (
         (
             "recovery",
