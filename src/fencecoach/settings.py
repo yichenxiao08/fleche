@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     gemini_api_key: SecretStr = SecretStr("")
     gemini_chat_model: str = "gemini-3.5-flash-lite"
     gemini_fallback_model: str = "gemini-3.8-flash"
-    gemini_request_timeout_seconds: float = 12
+    gemini_request_timeout_seconds: float = 30
     gemini_force_ipv4: bool = True
     fencecoach_database_url: str = ""
     fencecoach_worker_concurrency: int = 1

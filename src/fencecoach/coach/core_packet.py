@@ -310,6 +310,8 @@ def run_packet_core(request, mode, model=None, on_step=None, on_text=None):
                         "status": "error",
                         "reason": detail,
                         "error_type": type(exc).__name__,
+                        "http_status": getattr(exc, "status_code", None)
+                        or getattr(getattr(exc, "response", None), "status_code", None),
                         "retry_after_seconds": delay,
                     }
                 )

@@ -513,6 +513,7 @@ class WriterTests(unittest.TestCase):
         self.assertGreaterEqual(
             first.answer_contract["provider_attempts"][0]["retry_after_seconds"], 120
         )
+        self.assertEqual(first.answer_contract["provider_attempts"][0]["http_status"], 429)
         self.assertEqual(primary.calls[0], fallback.calls[0])
         self.assertEqual(second.dialogue_state.topics, ["rear_leg"])
 

@@ -37,3 +37,14 @@ All model replies in those tests are mocked. No new live model quality claim is
 made. Frozen v7.6 transcripts, rating sheets and manifests remain historical;
 the runtime prompt revision is v7.6.1. Provider order and rollback remain unchanged:
 set COACH_CORE=old and restart for the legacy core.
+
+## Provider timeout follow-up
+
+The owner's subsequent torso question reached the fixed evidence path, but Groq
+was cooling after an HTTP error and Gemini raised ReadTimeout after approximately
+12 seconds. The preceding three Gemini replies succeeded. This is a provider
+availability failure, not a missing-measurement response. The default Gemini
+request timeout is now 30 seconds with SDK retries still disabled. Failure traces
+retain the HTTP status when available, without saving provider response bodies.
+The older Groq failure's exact status was not retained and cannot be recovered
+from its generic HostedError label. No automatic replay or live probe was made.
