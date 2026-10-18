@@ -116,6 +116,8 @@ def gemini_transport():
 
 def warm_local_model():
     """Load the configured model without generating a reply; callers run this in the background."""
+    if settings.coach_core == "new":
+        return
     if settings.fencecoach_chat_provider != "local" and not settings.fencecoach_local_fallback:
         return
     request = Request(
@@ -174,7 +176,7 @@ def configured_model_id(mode):
     }.get(mode)
 
 
-def chat_model(mode, model_id=None):
+def chat_model(mode, model_id=None, *, max_tokens=2048, temperature=None):
     if mode == "local":
         from langchain_ollama import ChatOllama
 
@@ -220,12 +222,14 @@ def chat_model(mode, model_id=None):
             api_key=settings.gemini_api_key,
             vertexai=False,
             **(
-                {"temperature": 1.0}
+                {"temperature": temperature}
+                if temperature is not None
+                else {"temperature": 1.0}
                 if "gemini-3.6" not in selected_model
                 and "gemini-3.5-flash-lite" not in selected_model
                 else {}
             ),
-            max_tokens=2048,
+            max_tokens=max_tokens,
             timeout=timeout,
             client_args=client_options,
             max_retries=0,

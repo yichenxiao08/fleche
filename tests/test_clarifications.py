@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 from langchain_core.messages import AIMessage, AIMessageChunk
 
+from fencecoach.coach.conversation import CoachAnswerError
 from fencecoach.coach.graph import run_coach
 from fencecoach.coach.turns import conversation_issues, general_guidance_query
 from fencecoach.schemas import CoachRequest, ConversationMessage
@@ -30,7 +31,8 @@ class RepeatingModel:
         return AIMessage(content=BAD)
 
 
-# These fixtures check legacy writer repair and cited-library clarification fallback.
+# The legacy writer rejects unsupported drafts; it no longer substitutes canned prose.
+@patch.object(settings, "coach_core", "old")
 @patch.object(settings, "fencecoach_verified_dialogue", False)
 class ClarificationTests(unittest.TestCase):
     def test_identical_reply_is_rejected_and_arm_role_is_required(self):
@@ -45,20 +47,14 @@ class ClarificationTests(unittest.TestCase):
             )
         )
 
-    def test_known_wrong_reply_is_corrected_with_a_real_reference(self):
+    def test_known_wrong_reply_is_rejected_without_a_canned_replacement(self):
         for text in (
             "can you describe better",
             "which arm",
             "which arm, sword arm or non-sword arm",
         ):
-            with self.subTest(text=text):
-                run = run_coach(question(text), "local", model=RepeatingModel())
-                self.assertIn("sword arm", run.report.summary)
-                self.assertIn("toward the target", run.report.summary)
-                self.assertIn("was wrong", run.report.summary)
-                self.assertNotEqual(run.report.summary, BAD)
-                self.assertTrue(any(s.source == "lunge_arm_roles.md" for s in run.sources))
-                self.assertGreater(run.citation_count, 0)
+            with self.subTest(text=text), self.assertRaises(CoachAnswerError):
+                run_coach(question(text), "local", model=RepeatingModel())
 
     def test_wrong_draft_is_not_published_while_streaming(self):
         class Stream(RepeatingModel):
@@ -66,10 +62,9 @@ class ClarificationTests(unittest.TestCase):
                 yield AIMessageChunk(content=BAD)
 
         published = []
-        run = run_coach(question("which arm"), "local", model=Stream(), on_text=published.append)
-        self.assertTrue(published)
-        self.assertNotIn(BAD, published)
-        self.assertEqual(published[-1], run.report.summary)
+        with self.assertRaises(CoachAnswerError):
+            run_coach(question("which arm"), "local", model=Stream(), on_text=published.append)
+        self.assertEqual(published, [])
 
     def test_new_topic_does_not_retrieve_old_arm_instruction(self):
         query = general_guidance_query(question("What is recovery in fencing?"))

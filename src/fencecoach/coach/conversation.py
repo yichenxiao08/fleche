@@ -39,6 +39,7 @@ from fencecoach.coach.answer_style import (
     response_evidence_issues,
     style_issues,
 )
+from fencecoach.coach.dialogue_state import resolve_turn
 from fencecoach.coach.grounding import (
     assessment_issues,
     evidence_summary,
@@ -51,6 +52,8 @@ from fencecoach.coach.intent import (
     mentioned_rep_numbers,
     question_phases,
     question_topics,
+    wants_all_reps,
+    without_rep_selectors,
 )
 from fencecoach.coach.latency import (
     coaching_session_context,
@@ -65,12 +68,14 @@ from fencecoach.coach.reviewed import (
     reviewed_claim_issues,
     select_feedback,
 )
+from fencecoach.coach.router import route
 from fencecoach.coach.technique_evidence import (
     MOTION_POLICY,
     baseline_context,
     current_session_context,
     evaluation_issues,
     evaluation_source,
+    explicit_phase_requested,
     question_scoped_session_context,
     rep_comparison_result,
     requested_feature_names,
@@ -78,10 +83,7 @@ from fencecoach.coach.technique_evidence import (
 )
 from fencecoach.coach.turns import (
     clarification,
-    contextual_question,
     conversation_issues,
-    general_guidance_fallback,
-    general_guidance_query,
     general_instruction,
 )
 from fencecoach.comparisons import comparable_capture
@@ -140,42 +142,38 @@ def _needs_measurements(question):
 def run_conversation(
     request: CoachRequest, mode: str, model=None, on_step=None, on_text=None
 ) -> RunRecord:
+    if settings.coach_core == "new":
+        from fencecoach.coach.core_new import run_new_core
+
+        return run_new_core(request, mode, model, on_step, on_text)
     if settings.fencecoach_verified_dialogue and mode in {"gemini", "local"}:
         from fencecoach.coach.verified_dialogue import run_verified_conversation
 
         return run_verified_conversation(request, mode, model, on_step, on_text)
-    started = time.perf_counter()
-    try:
+    if model is not None:
         return _run_conversation(request, mode, model, on_step, on_text)
-    except (
-        ModelAPIError,
-        ModelConnectionError,
-        ModelTimeoutError,
-        TransportError,
-        TimeoutError,
-        ConnectionError,
-    ):
-        if (
-            mode != "gemini"
-            or model is not None
-            or not settings.fencecoach_local_fallback
-            or not provider_status()["local_ready"]
-        ):
-            raise
-        if on_step:
+    started = time.perf_counter()
+
+    def generate(provider):
+        if provider != mode and on_step:
             on_step("local_fallback")
-        run = _run_conversation(request, "local", on_step=on_step, on_text=on_text)
+        return _run_conversation(request, provider, on_step=on_step, on_text=on_text)
+
+    run, fallback_reason = route(generate, mode)
+    run.fallback_reason = fallback_reason
+    if fallback_reason:
         run.model_id = (run.model_id or settings.ollama_chat_model) + " (provider failover: local)"
         run.trace.insert(
             0,
             TraceEvent(
                 step="local_fallback",
-                detail="Gemini was unavailable; the local model received the same current-session data and conversation.",
+                detail="Gemini was unavailable; the local model received the same current-session data and conversation. Reason: "
+                + fallback_reason,
                 elapsed_ms=round((time.perf_counter() - started) * 1000, 2),
             ),
         )
         run.latency_ms = round((time.perf_counter() - started) * 1000, 2)
-        return run
+    return run
 
 
 def _run_conversation(
@@ -184,8 +182,12 @@ def _run_conversation(
     started = time.perf_counter()
     provided_model = model is not None
     original_question = request.question
-    request = request.model_copy(update={"question": contextual_question(request)})
+    resolved_question, dialogue_state = resolve_turn(request)
+    request = request.model_copy(
+        update={"question": resolved_question, "dialogue_state": dialogue_state}
+    )
     intent = classify_coach_question(request.question)
+    latest_intent = classify_coach_question(original_question)
     corrected_turn = corrected_subject(original_question) != original_question
     current_topics = set(question_topics(request.question))
     prior_topic_question = next(
@@ -199,10 +201,14 @@ def _run_conversation(
     prior_topic_intent = (
         classify_coach_question(prior_topic_question) if prior_topic_question else None
     )
-    all_reps_requested = intent.kind == "all_reps" or bool(
-        corrected_turn
-        and prior_topic_intent
-        and prior_topic_intent.kind in {"all_reps", "rep_comparison"}
+    all_reps_requested = (
+        wants_all_reps(original_question)
+        or (dialogue_state.all_reps and requests_numbers(original_question))
+        or bool(
+            corrected_turn
+            and prior_topic_intent
+            and prior_topic_intent.kind in {"all_reps", "rep_comparison"}
+        )
     )
     assessment_question = (
         prior_topic_question if corrected_turn and prior_topic_question else request.question
@@ -303,7 +309,9 @@ def _run_conversation(
         requested_topics = question_topics(request.question) or (
             [intent.topic] if intent.topic else []
         )
-        for topic in requested_topics:
+        # A pronoun follow-up can refer to the subject through the exchange;
+        # it need not repeat the same anatomical noun on every turn.
+        for topic in question_topics(without_rep_selectors(original_question)):
             topic_pattern = topic_patterns.get(topic)
             if topic_pattern and not re.search(topic_pattern, reply, re.I):
                 issues.append(f"The answer did not address the requested {topic} topic.")
@@ -371,9 +379,11 @@ def _run_conversation(
                 "The current session has per-rep evidence; do not claim the breakdown is missing."
             )
         issues += response_evidence_issues(
-            request.question,
+            original_question,
             reply,
-            available=relevant_evidence_available and not general_instruction(request.question),
+            available=relevant_evidence_available
+            and intent.needs_video_metrics
+            and not general_instruction(request.question),
         )
         return issues
 
@@ -722,6 +732,11 @@ def _run_conversation(
         + "\nAnswer presentation:\n"
         + ADVICE_FIRST_POLICY
         + "\nThe active-session packet is scoped to the request when a feature or phase is clear; its inventory shows what else the session contains. Treat it as the authority for personal feedback. Read-only tools return evidence data; you are the only component that writes the conversational answer. Call the coaching-library tool only when general technique knowledge is needed, and do not retrieve or repeat it by default."
+        + "\nApplication-owned conversation scope: "
+        + dialogue_state.model_dump_json(exclude={"last_cited_evidence"})
+        + "\nResolved evidence query: "
+        + resolved_question
+        + "\nUse that scope as a contextual hint to resolve references and choose evidence. The athlete's latest explicit subject takes precedence; if it names something outside the inventory, explain the precise gap or clarify it. Answer the actual latest question naturally; the scope is not a script or a required answer format."
         + directive
     )
     corrected_scope = corrected_subject(original_question)
@@ -827,7 +842,7 @@ def _run_conversation(
             messages.append(
                 SystemMessage(
                     content="LATEST ATHLETE QUESTION: "
-                    + request.question
+                    + original_question
                     + ". Apply the shared evidence workflow to the complete requested scope. Resolve follow-ups using the recent conversation; current records override earlier answers."
                 )
             )
@@ -835,7 +850,7 @@ def _run_conversation(
             messages.append(
                 SystemMessage(
                     content="Answer the latest clarification: "
-                    + request.question
+                    + original_question
                     + ". Resolve what it refers to using the conversation and session records. Correct earlier wrong guidance rather than repeating it."
                 )
             )
@@ -956,7 +971,7 @@ def _run_conversation(
         else AIMessage(content=item.content)
         for item in recent_history
     ]
-    initial_messages = [*history, HumanMessage(content=request.question + directive)]
+    initial_messages = [*history, HumanMessage(content=original_question + directive)]
     session_check_started = time.perf_counter()
     session_snapshot = current_session_context(request)
     answer_packet = json.loads(question_scoped_session_context(request))
@@ -1036,6 +1051,7 @@ def _run_conversation(
             "The coach returned an empty answer. Your question is kept; try again."
         )
     semantically_reviewed = False
+    cited_session_ids = []
     review_validation_issues = []
     if structured_dialogue:
         start = time.perf_counter()
@@ -1046,6 +1062,7 @@ def _run_conversation(
             raise CoachAnswerError(
                 "The coach returned an incomplete answer. Your question is kept; try again."
             ) from exc
+        cited_session_ids = list(draft.session_evidence_ids)
         # The independent reviewer judges the writer's answer and evidence IDs;
         # it cannot replace the conversational answer with its own prose.
         reviewer = model.with_structured_output(
@@ -1080,7 +1097,9 @@ def _run_conversation(
         )
         decision = reviewed.get("parsed")
         requested_features = requested_feature_names(request)
-        requested_phases = question_phases(request.question)
+        requested_phases = (
+            question_phases(request.question) if explicit_phase_requested(request.question) else ()
+        )
         requested_rep = intent.rep_number
         requested_reps = intent.rep_numbers
         numbers = [r["rep"] for r in packet.get("per_rep_measurements", [])]
@@ -1096,7 +1115,10 @@ def _run_conversation(
             and "arm_extension_timing" not in packet.get("measured_features_available", [])
         )
         require_session = bool(
-            relevant_evidence_available and not clarification(request) and not timing_gap
+            relevant_evidence_available
+            and (latest_intent.needs_video_metrics or requests_numbers(original_question))
+            and not clarification(request)
+            and not timing_gap
         )
         validation = review_issues(
             decision,
@@ -1275,6 +1297,7 @@ def _run_conversation(
                     "The coach couldn't verify a corrected answer. Your question is kept; try again.",
                     remaining_issues,
                 )
+            cited_session_ids = list(repaired_draft.session_evidence_ids)
             semantically_reviewed = True
             review_usage = getattr(reviewed_repair.get("raw"), "usage_metadata", None) or {}
             result["input_tokens"] += int(review_usage.get("input_tokens", 0))
@@ -1313,32 +1336,6 @@ def _run_conversation(
                     + claim_issues(reply, request.metrics)
                 )
             )
-        if (
-            (not reply or remaining_issues)
-            and not structured_dialogue
-            and not relevant_evidence_available
-            and (clarification(request) or general_instruction(request.question))
-        ):
-            # Only authored library guidance can rescue a failed vocabulary
-            # or technique explanation. This never substitutes a session
-            # assessment or fabricates a correction from pose geometry.
-            query = general_guidance_query(request)
-            if query:
-                docs = search_knowledge(query, limit=3, use_embeddings=(mode == "bedrock"))
-                sources.update({doc.source_id: doc for doc in docs})
-                guidance = general_guidance_fallback(request, docs)
-                if guidance:
-                    candidate = "From the coaching library: " + guidance
-                    checks = conversation_issues(request, candidate) + claim_issues(candidate, ())
-                    if not checks:
-                        reply, remaining_issues = candidate, []
-                        result["trace"].append(
-                            event(
-                                "library_guidance_fallback",
-                                "Used retrieved authored guidance after the bounded writer repair failed; no session verdict was inferred.",
-                                start,
-                            )
-                        )
         if not reply or (not structured_dialogue and remaining_issues):
             logging.getLogger(__name__).warning(
                 "Coach answer repair failed local checks: %s",
@@ -1440,6 +1437,9 @@ def _run_conversation(
     refs = [ref for observation in observations for ref in observation.evidence]
     if plan:
         refs += plan.evidence
+    dialogue_state.last_cited_evidence = list(
+        dict.fromkeys([*cited_session_ids, *(ref.source_id for ref in refs)])
+    )
     return RunRecord(
         run_id=uuid4().hex,
         session_id=request.session_id,
@@ -1471,4 +1471,13 @@ def _run_conversation(
         output_tokens=result["output_tokens"],
         citation_count=len(refs),
         citation_ids_valid=True,
+        dialogue_state=dialogue_state,
+        answer_contract={
+            "engine": "llm_tools",
+            "resolved_question": resolved_question,
+            "model_authored": True,
+            "semantic_reviewed": semantically_reviewed,
+            "tool_calls": result["calls"],
+            "session_evidence_ids": cited_session_ids,
+        },
     )

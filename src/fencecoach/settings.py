@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Literal
 
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    coach_core: Literal["old", "new"] = "new"
     fencecoach_fast_reply_tokens: int = 112
     fencecoach_examples_dir: Path = Path("examples/video")
     fencecoach_seed_examples: bool = False
@@ -17,12 +19,14 @@ class Settings(BaseSettings):
     fencecoach_chat_provider: str = "gemini"
     fencecoach_provider_cooldown_seconds: float = 60
     fencecoach_local_timeout_seconds: float = 20
-    fencecoach_verified_dialogue: bool = True
+    fencecoach_verified_dialogue: bool = False
     fencecoach_local_fallback: bool = True
     fencecoach_coaching_worker: bool = True
     fencecoach_coaching_concurrency: int = 1
     ollama_base_url: str = "http://127.0.0.1:11434"
     ollama_chat_model: str = "qwen2.5:3b"
+    groq_api_key: SecretStr = SecretStr("")
+    groq_chat_model: str = "qwen/qwen3.8-27b"
     gemini_api_key: SecretStr = SecretStr("")
     gemini_chat_model: str = "gemini-3.5-flash-lite"
     gemini_fallback_model: str = "gemini-3.8-flash"

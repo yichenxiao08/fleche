@@ -65,6 +65,13 @@ def retry_after(exc):
                     return max(0, parsedate_to_datetime(hint).timestamp() - time.time())
                 except (TypeError, ValueError, OverflowError):
                     pass
+        # Google's RetryInfo may be a JSON detail rather than an HTTP header.
+        import re
+
+        detail = str(error)
+        match = re.search(r"retryDelay[\"']?\s*[:=]\s*[\"']?(\d+(?:\.\d+)?)s", detail)
+        if match:
+            return float(match[1])
     return 0
 
 
@@ -110,6 +117,7 @@ class CircuitBreaker:
 
 
 gemini_circuit = CircuitBreaker()
+groq_circuit = CircuitBreaker()
 
 
 def route(operation, mode, *, breaker=None):

@@ -15,6 +15,7 @@ from fencecoach.coach.providers import provider_failure
 from fencecoach.coach.router import CircuitBreaker, ProvidersUnavailable, failure_reason, route
 from fencecoach.coach.verified_dialogue import run_verified_conversation
 from fencecoach.schemas import CoachRequest, ConversationMessage, DialogueState
+from fencecoach.settings import settings
 
 FIXTURES = Path(__file__).resolve().parents[1] / "evals/coach_audit"
 
@@ -36,7 +37,8 @@ class Malicious:
 
 
 class VerifiedDialogueTests(unittest.TestCase):
-    def test_production_entry_uses_verified_dialogue(self):
+    @patch.object(settings, "fencecoach_verified_dialogue", True)
+    def test_explicit_opt_in_uses_verified_dialogue(self):
         run = run_conversation(fixture(), "local", model=Selector())
         self.assertTrue(run.answer_contract)
         self.assertIsNotNone(run.dialogue_state)
