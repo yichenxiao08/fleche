@@ -7,12 +7,14 @@ import unittest
 from unittest.mock import patch
 from uuid import uuid4
 
-from fencecoach.schemas import CoachRequest
+from fencecoach.schemas import CoachRequest, ConversationMessage
 from scripts.coach_eval_oracle import (
     check_answer,
     expectation,
     raw_records,
+    repetition_diagnostics,
     scenarios,
+    scope_scenarios,
     weapon_target_verdict,
 )
 from scripts.eval_coach import (
@@ -20,6 +22,7 @@ from scripts.eval_coach import (
     _run_turn,
     before_after_table,
     bounded_turn,
+    fingerprints,
     forced_switch_scenario,
     load_or_create,
     save_artifact,
@@ -79,6 +82,132 @@ class OracleTests(unittest.TestCase):
         self.assertEqual(switch["expected"][2]["topics"], ["arm"])
         self.assertEqual(switch["expected"][3]["topics"], ["arm"])
 
+    def test_scope_suite_preserves_independently_named_features_and_scopes(self):
+        cases = scope_scenarios()
+        self.assertEqual(len(cases), 3)
+        for case in cases:
+            self.assertEqual(len(case["turns"]), len(case["expected"]))
+            self.assertFalse(case["expected"][0]["followup"])
+            for expected in case["expected"][1:]:
+                self.assertTrue(expected["followup"])
+                self.assertEqual(expected["features"], case["expected"][0]["features"])
+                self.assertEqual(expected["phases"], case["expected"][0]["phases"])
+                self.assertEqual(expected["arm_roles"], case["expected"][0]["arm_roles"])
+            self.assertTrue(case["expected"][1]["all_reps"])
+            self.assertEqual(case["expected"][1]["reps"], [])
+
+    def scope_result(self, *, records=None, state=None, answer=None, natural=False):
+        expected = {
+            **expectation(["arm"], phases=["lunge_finish"], arm_roles=["weapon"]),
+            "scope": "session",
+            "all_reps": True,
+            "features": ["weapon_elbow_angle"],
+        }
+        if records is None:
+            records = {
+                record["rep"]: record
+                for record in raw_records(self.request)
+                if record["feature"] == "weapon_elbow_angle" and record["phase"] == "lunge_finish"
+            }.values()
+        units = [
+            {
+                "kind": "observation",
+                "text": (
+                    f"Your sword-elbow angle measured {record['value']} degrees "
+                    f"in rep {record['rep']} during lunge finish."
+                ),
+                "records": [record],
+            }
+            for record in records
+        ]
+        run = {
+            "dialogue_state": state or {"scope": "session", "all_reps": True, "rep_numbers": []},
+            "answer_contract": {} if natural else {"units": units},
+        }
+        return check_answer(
+            " ".join(unit["text"] for unit in units) if answer is None else answer,
+            self.request,
+            expected,
+            run,
+            ROOT / "knowledge",
+        )
+
+    def test_scope_score_requires_complete_real_measurements_and_visible_reps(self):
+        good = self.scope_result()
+        self.assertTrue(good["scope_correct"], good["issues"])
+        self.assertEqual(good["answer_rep_coverage"], 1)
+        partial = self.scope_result(records=[self.record])
+        self.assertFalse(partial["scope_correct"])
+        available_reps = {
+            record["rep"]
+            for record in raw_records(self.request)
+            if record["feature"] == "weapon_elbow_angle" and record["phase"] == "lunge_finish"
+        }
+        self.assertEqual(partial["answer_rep_coverage"], 1 / len(available_reps))
+        hidden = self.scope_result(answer="Your arm had some bend.")
+        self.assertFalse(hidden["scope_correct"])
+        self.assertEqual(hidden["answer_rep_coverage"], 0)
+        phantom = self.scope_result(answer="Your arm was measured in rep 1 and rep 2.")
+        self.assertFalse(phantom["scope_correct"])
+        self.assertEqual(phantom["answer_rep_coverage"], 0)
+
+    def test_scope_score_rejects_correct_labels_with_wrong_feature_phase_or_role(self):
+        for feature, phase in (
+            ("front_knee_angle", "lunge_finish"),
+            ("weapon_arm_direction", "lunge_finish"),
+            ("non_weapon_elbow_angle", "lunge_finish"),
+            ("weapon_elbow_angle", "lunge_drive"),
+        ):
+            records = [
+                record
+                for record in raw_records(self.request)
+                if record["feature"] == feature and record["phase"] == phase
+            ]
+            self.assertTrue(records, (feature, phase))
+            result = self.scope_result(records=records)
+            self.assertFalse(result["scope_correct"], (feature, phase))
+            self.assertEqual(result["answer_rep_coverage"], 0)
+
+    def test_scope_score_rejects_wrong_state_with_complete_visible_measurements(self):
+        result = self.scope_result(
+            state={"scope": "session", "all_reps": False, "rep_numbers": [1]}
+        )
+        self.assertEqual(result["answer_rep_coverage"], 1)
+        self.assertFalse(result["scope_correct"])
+        self.assertTrue(any(issue.startswith("scope_state") for issue in result["issues"]))
+
+    def test_natural_scope_uses_visible_measurements_without_renderer_contract(self):
+        result = self.scope_result(natural=True)
+        self.assertTrue(result["scope_correct"], result["issues"])
+        self.assertEqual(result["answer_rep_coverage"], 1)
+        qualitative = self.scope_result(
+            natural=True,
+            answer="Your sword arm maintained some bend across the measured repetitions.",
+        )
+        self.assertIsNone(qualitative["scope_correct"])
+        self.assertTrue(qualitative["scope_review_needed"])
+        self.assertFalse(qualitative["unsupported_claims_flagged"], qualitative["issues"])
+
+    def test_repetition_diagnostic_distinguishes_followup_from_numeric_repeat_request(self):
+        previous = "Your torso stayed more upright than the reference examples throughout the measured finish."
+        self.request.question = "Why does that matter?"
+        self.request.conversation_history = [
+            ConversationMessage(role="assistant", content=previous)
+        ]
+        repeated = repetition_diagnostics(previous, self.request)
+        self.assertTrue(repeated["unrequested_repetition"])
+        clarified = repetition_diagnostics(
+            "It describes your trunk position relative to upright; it does not establish balance.",
+            self.request,
+        )
+        self.assertFalse(clarified["unrequested_repetition"])
+        measured = "Your sword elbow measured 160 degrees in rep 1 at the lunge finish."
+        self.request.question = "Give me the measurements."
+        self.request.conversation_history = [
+            ConversationMessage(role="assistant", content=measured)
+        ]
+        self.assertIsNone(repetition_diagnostics(measured, self.request)["unrequested_repetition"])
+
     def test_independent_raw_numeric_check_accepts_measured_prose(self):
         answer = "Your sword-elbow angle measured 160 degrees in rep 1 during lunge finish (2.8 seconds)."
         result = self.check(answer)
@@ -117,6 +246,50 @@ class OracleTests(unittest.TestCase):
         )
         self.assertTrue(result["unsupported_claims_flagged"])
         self.assertTrue(any("incompatible unit" in issue for issue in result["issues"]))
+
+    def test_mixed_feature_ambiguity_requires_review_when_all_values_have_raw_support(self):
+        answer = (
+            "In rep 1, your sword-elbow angle was 160 degrees, "
+            "and arm direction was 15.8 degrees during lunge finish."
+        )
+        result = check_answer(answer, self.request, self.expected, {}, ROOT / "knowledge")
+        self.assertFalse(result["unsupported_claims_flagged"], result["issues"])
+        self.assertTrue(result["semantic_review_needed"], result["issues"])
+        answer = (
+            "In rep 1, your rear-knee angle was 177.6 degrees, "
+            "while the active recovery time was 0.1 seconds."
+        )
+        expected = expectation(["rear_leg", "recovery"], [1])
+        result = check_answer(answer, self.request, expected, {}, ROOT / "knowledge")
+        self.assertFalse(result["unsupported_claims_flagged"], result["issues"])
+        self.assertTrue(result["semantic_review_needed"], result["issues"])
+
+    def test_mixed_feature_local_binding_cannot_hide_wrong_feature_value_or_unit(self):
+        for answer in (
+            "In rep 1, your sword-elbow angle was 15.8 degrees, and weapon-arm direction was 160 degrees.",
+            "In rep 1, your front-knee angle was 160 degrees, and arm direction was 15.8 degrees.",
+            "In rep 1, your sword-elbow angle was 160 degrees, and arm direction was 37 degrees.",
+            "In rep 1, your sword-elbow angle was 160 seconds, and arm direction was 15.8 degrees.",
+        ):
+            result = check_answer(answer, self.request, self.expected, {}, ROOT / "knowledge")
+            self.assertTrue(result["unsupported_claims_flagged"], (answer, result["issues"]))
+
+    def test_missing_repetition_disclosure_is_not_a_fabricated_measurement(self):
+        expected = {
+            **expectation(["arm"], phases=["lunge_finish"], arm_roles=["weapon"]),
+            "features": ["weapon_elbow_angle"],
+        }
+        answer = "I don't have matching sword-elbow measurements for rep 6 during lunge finish."
+        result = check_answer(answer, self.request, expected, {}, ROOT / "knowledge")
+        self.assertFalse(result["unsupported_claims_flagged"], result["issues"])
+        wrong = check_answer(
+            answer + " The sword-elbow angle was 37 degrees in rep 6.",
+            self.request,
+            expected,
+            {},
+            ROOT / "knowledge",
+        )
+        self.assertTrue(wrong["unsupported_claims_flagged"], wrong["issues"])
 
     def test_exact_milliseconds_conversion_preserves_attribution(self):
         record = {
@@ -246,6 +419,50 @@ class OracleTests(unittest.TestCase):
 
 
 class HarnessTests(unittest.TestCase):
+    def test_after_natural_uses_production_writer_and_offline_requires_verified_engine(self):
+        fake_run = type("Fake", (), {"model_dump": lambda self, **kwargs: {"mode": "gemini"}})()
+        payload = {
+            "request": fixture().model_dump(mode="json"),
+            "phase": "after",
+            "provider": "gemini",
+            "offline": False,
+            "engine": "natural",
+        }
+        with (
+            patch("scripts.eval_coach.run_conversation", return_value=fake_run) as natural,
+            patch("scripts.eval_coach.run_verified_conversation") as verified,
+            patch("scripts.eval_coach.chat_model", return_value=object()),
+        ):
+            result = _run_turn(payload)
+        self.assertEqual(result["engine_actual"], "natural")
+        natural.assert_called_once()
+        verified.assert_not_called()
+        with self.assertRaisesRegex(ValueError, "Offline selectors"):
+            _run_turn({**payload, "offline": True})
+
+    def test_scope_summary_uses_only_completed_explicit_scope_scores(self):
+        result = summarize(
+            [
+                {"status": "completed", "scope_correct": True, "answer_rep_coverage": 1},
+                {"status": "completed", "scope_correct": False, "answer_rep_coverage": 0.25},
+                {"status": "completed", "scope_correct": None, "answer_rep_coverage": None},
+                {"status": "error", "scope_correct": False, "answer_rep_coverage": 0},
+            ]
+        )
+        self.assertEqual(result["scope_turns_scored"], 2)
+        self.assertEqual(result["scope_preservation_accuracy"], 0.5)
+        self.assertEqual(result["mean_requested_rep_coverage"], 0.625)
+        self.assertEqual(result["complete_requested_rep_coverage_rate"], 0.5)
+        self.assertIsNone(summarize([{"status": "completed"}])["scope_preservation_accuracy"])
+
+    def test_suite_fingerprints_cover_selected_independent_expectations(self):
+        self.assertNotEqual(
+            fingerprints()["expectation_sha256"],
+            fingerprints(scope_scenarios())["expectation_sha256"],
+        )
+        with self.assertRaisesRegex(ValueError, "expectations differ"):
+            before_after_table({"expectation_sha256": "standard"}, {"expectation_sha256": "scope"})
+
     def test_before_uses_retained_legacy_runner(self):
         request = fixture()
         fake_run = type("Fake", (), {"model_dump": lambda self, **kwargs: {"mode": "gemini"}})()
@@ -320,6 +537,7 @@ class HarnessTests(unittest.TestCase):
             {
                 "request": request.model_dump(mode="json"),
                 "phase": "after",
+                "engine": "verified",
                 "provider": "local",
                 "offline": True,
             },

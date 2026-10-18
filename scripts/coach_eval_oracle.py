@@ -10,6 +10,7 @@ from __future__ import annotations
 import math
 import re
 from decimal import Decimal
+from difflib import SequenceMatcher
 from functools import lru_cache
 
 FEATURES = {
@@ -298,6 +299,130 @@ def scenarios():
     return cases
 
 
+def scope_scenarios():
+    """Scope edits change the requested repetitions, not the coaching subject.
+
+    These conversations and labels are authored independently of production
+    resolution. Coverage is checked against matching raw fixture measurements.
+    """
+
+    def scoped(topics, reps=(), phases=(), *, roles=(), all_reps=False, feature):
+        return {
+            **expectation(topics, reps, phases, arm_roles=roles),
+            "scope": "session",
+            "all_reps": all_reps,
+            "features": [feature],
+        }
+
+    cases = [
+        {
+            "id": "scope-arm-finish",
+            "fixture": "current",
+            "category": "rep_scope",
+            "turns": [
+                "How is my arm extension during the lunge finish in rep 3?",
+                "What about all reps?",
+                "Give me the measurements.",
+                "And rep 2?",
+            ],
+            "expected": [
+                scoped(
+                    ["arm"], [3], ["lunge_finish"], roles=["weapon"], feature="weapon_elbow_angle"
+                ),
+                scoped(
+                    ["arm"],
+                    phases=["lunge_finish"],
+                    roles=["weapon"],
+                    all_reps=True,
+                    feature="weapon_elbow_angle",
+                ),
+                scoped(
+                    ["arm"],
+                    phases=["lunge_finish"],
+                    roles=["weapon"],
+                    all_reps=True,
+                    feature="weapon_elbow_angle",
+                ),
+                scoped(
+                    ["arm"], [2], ["lunge_finish"], roles=["weapon"], feature="weapon_elbow_angle"
+                ),
+            ],
+        },
+        {
+            "id": "scope-torso-guard",
+            "fixture": "current",
+            "category": "rep_scope",
+            "turns": [
+                "How is my torso during starting guard in rep 2?",
+                "What about every rep?",
+                "And the fourth rep?",
+                "And across all repetitions?",
+            ],
+            "expected": [
+                scoped(["torso"], [2], ["starting_guard"], feature="projected_torso_tilt"),
+                scoped(
+                    ["torso"],
+                    phases=["starting_guard"],
+                    all_reps=True,
+                    feature="projected_torso_tilt",
+                ),
+                scoped(["torso"], [4], ["starting_guard"], feature="projected_torso_tilt"),
+                scoped(
+                    ["torso"],
+                    phases=["starting_guard"],
+                    all_reps=True,
+                    feature="projected_torso_tilt",
+                ),
+            ],
+        },
+        {
+            "id": "scope-nonweapon-finish",
+            "fixture": "current",
+            "category": "rep_scope",
+            "turns": [
+                "How is my non-sword elbow during the lunge finish in rep 3?",
+                "And each repetition?",
+                "Give me the measurements.",
+                "What about rep 2?",
+            ],
+            "expected": [
+                scoped(
+                    ["arm"],
+                    [3],
+                    ["lunge_finish"],
+                    roles=["non_weapon"],
+                    feature="non_weapon_elbow_angle",
+                ),
+                scoped(
+                    ["arm"],
+                    phases=["lunge_finish"],
+                    roles=["non_weapon"],
+                    all_reps=True,
+                    feature="non_weapon_elbow_angle",
+                ),
+                scoped(
+                    ["arm"],
+                    phases=["lunge_finish"],
+                    roles=["non_weapon"],
+                    all_reps=True,
+                    feature="non_weapon_elbow_angle",
+                ),
+                scoped(
+                    ["arm"],
+                    [2],
+                    ["lunge_finish"],
+                    roles=["non_weapon"],
+                    feature="non_weapon_elbow_angle",
+                ),
+            ],
+        },
+    ]
+    for case in cases:
+        for index, expected in enumerate(case["expected"]):
+            expected["followup"] = index > 0
+    return cases
+
+
 def normalized(text):
     return " ".join(re.findall(r"[a-z0-9]+", str(text).lower()))
 
@@ -425,6 +550,8 @@ def scoped_records(request, expected):
             if ("non_weapon" in roles and r["feature"].startswith("non_weapon_"))
             or ("weapon" in roles and r["feature"].startswith("weapon_"))
         ]
+    if expected.get("features"):
+        records = [r for r in records if r["feature"] in expected["features"]]
     if expected.get("duration"):
         records = [
             r
@@ -556,6 +683,39 @@ def verify_contract_records(request, expected, units, corpus):
     return issues, len(point_keys)
 
 
+def _prose_unit(sentence, end):
+    suffix = sentence[end : end + 18].lower()
+    return (
+        "deg"
+        if re.match(r"\s*(?:degrees|degree|deg|°)", suffix)
+        else "ms"
+        if re.match(r"\s*(?:milliseconds|ms)\b", suffix)
+        else "s"
+        if re.match(r"\s*(?:seconds|second|s)\b", suffix)
+        else None
+    )
+
+
+def _number_supported(number, records, request, unit=None, timestamp=False):
+    values = []
+    for record in records:
+        if timestamp or unit is None:
+            values.extend(t / 1000 for t in record["timestamps"] if t is not None)
+        if timestamp:
+            continue
+        if unit and record["unit"] != unit and not (unit == "s" and record["unit"] == "ms"):
+            continue
+        values.append(
+            record["value"] / 1000 if unit == "s" and record["unit"] == "ms" else record["value"]
+        )
+        if unit is None and record["unit"] == "ms":
+            values.append(record["value"] / 1000)
+        for ref in reference_rows(request, record):
+            values.extend(ref.get("reference_range", []))
+            values.extend([ref.get("reference_median"), ref.get("difference")])
+    return any(value is not None and abs(number - value) <= 0.050001 for value in values)
+
+
 def numeric_issues(answer, records, request, corpus):
     """Check prose numbers at sentence feature/rep/phase scope, including timestamps."""
     issues, point_count = [], 0
@@ -576,7 +736,9 @@ def numeric_issues(answer, records, request, corpus):
         if not spans:
             continue
         reps = {int(n) for n in re.findall(r"\brep\s*#?\s*(\d+)", sentence, re.I)}
-        candidates = [r for r in records if not reps or r["rep"] in reps]
+        scoped_candidates = [r for r in records if not reps or r["rep"] in reps]
+        rep_candidates = scoped_candidates
+        candidates = scoped_candidates
         named_features = {
             feature
             for feature, pattern in FEATURE_WORDS.items()
@@ -598,22 +760,31 @@ def numeric_issues(answer, records, request, corpus):
         }
         if phases:
             candidates = [r for r in candidates if r["phase"] in phases or r["phase"] is None]
-        allowed_numbers = []
-        for record in candidates:
-            allowed_numbers.extend(
-                [
-                    record["value"],
-                    record["value"] / 1000 if record["unit"] == "ms" else record["value"],
-                ]
-            )
-            allowed_numbers.extend(t / 1000 for t in record["timestamps"] if t is not None)
-            for ref in reference_rows(request, record):
-                allowed_numbers.extend(ref.get("reference_range", []))
-                allowed_numbers.extend([ref.get("reference_median"), ref.get("difference")])
+            scoped_candidates = [
+                r for r in scoped_candidates if r["phase"] in phases or r["phase"] is None
+            ]
+        global_candidates = candidates
+        measured_spans = [
+            (start, end, number)
+            for start, end, number in spans
+            if _prose_unit(sentence, end)
+            and not re.search(r"\brep\s*#?\s*$", sentence[max(0, start - 8) : start], re.I)
+            and not sentence[max(0, start - 8) : start].rstrip().endswith("(")
+            and not re.search(r"\bat\s*$", sentence[max(0, start - 8) : start], re.I)
+        ]
+        mixed_values_supported = len(measured_spans) > 1 and all(
+            _number_supported(number, scoped_candidates, request, _prose_unit(sentence, end))
+            for _, end, number in measured_spans
+        )
+        boundaries = list(re.finditer(r"[,;]|\b(?:and|but|while|whereas)\b", sentence, re.I))
         for start, end, number in spans:
             preceding = sentence[max(0, start - 8) : start].lower()
             if re.search(r"\brep\s*#?\s*$", preceding):
-                if not any(r["rep"] == number for r in records):
+                if not any(r["rep"] == number for r in records) and not re.search(
+                    r"\b(?:don't have|do not have|no (?:reliable )?matching|missing|unavailable)\b",
+                    sentence,
+                    re.I,
+                ):
                     issues.append("rep_attribution: cited rep has no relevant fixture record")
                 continue
             # 2D is a camera dimension, not a session data point.
@@ -627,51 +798,56 @@ def numeric_issues(answer, records, request, corpus):
                 continue
             if normalized(sentence) in library_text:
                 continue
-            if not any(
-                value is not None and abs(number - value) <= 0.050001 for value in allowed_numbers
-            ):
-                issues.append(
-                    "numeric_attribution: number absent from feature/rep/phase-matched fixture evidence"
-                )
-            elif not preceding.rstrip().endswith("("):
-                point_count += 1
-            suffix = sentence[end : end + 18].lower()
-            cited_unit = (
-                "deg"
-                if re.match(r"\s*(?:degrees|degree|deg|°)", suffix)
-                else "ms"
-                if re.match(r"\s*(?:milliseconds|ms)\b", suffix)
-                else "s"
-                if re.match(r"\s*(?:seconds|second|s)\b", suffix)
-                else None
+            clause_start = max((b.end() for b in boundaries if b.end() <= start), default=0)
+            clause_end = min(
+                (b.start() for b in boundaries if b.start() >= end), default=len(sentence)
             )
+            clause = sentence[clause_start:clause_end]
+            local_features = {
+                feature
+                for feature, pattern in FEATURE_WORDS.items()
+                if re.search(pattern, clause, re.I)
+            }
+            # An explicit phase in a different feature's clause must not
+            # relabel this clause (finish knee angle + active recovery time).
+            local_phases = {phase for phase in phases if phase.replace("_", " ") in clause.lower()}
+            local_records = rep_candidates if len(boundaries) > 1 else scoped_candidates
+            if local_phases:
+                local_records = [
+                    r for r in local_records if r["phase"] in local_phases or r["phase"] is None
+                ]
+            candidates = (
+                [r for r in local_records if r["feature"] in local_features]
+                if local_features
+                else global_candidates
+            )
+            cited_unit = _prose_unit(sentence, end)
             timestamp_context = preceding.rstrip().endswith("(") or bool(
                 re.search(r"\bat\s*$", preceding)
             )
-            if cited_unit and not timestamp_context:
-                matching_units = [
-                    r
-                    for r in candidates
-                    if r["unit"] == cited_unit or (cited_unit == "s" and r["unit"] == "ms")
-                ]
-                if not any(
-                    abs(
-                        number
-                        - (
-                            r["value"] / 1000
-                            if cited_unit == "s" and r["unit"] == "ms"
-                            else r["value"]
-                        )
-                    )
-                    <= 0.050001
-                    for r in matching_units
-                ) and not any(
-                    abs(number - v) <= 0.050001
-                    for r in matching_units
-                    for ref in reference_rows(request, r)
-                    for v in ref.get("reference_range", [])
-                ):
-                    issues.append("numeric_attribution: value attached to an incompatible unit")
+            value_supported = _number_supported(number, candidates, request)
+            unit_supported = _number_supported(
+                number, candidates, request, cited_unit, timestamp_context
+            )
+            if (
+                not local_features
+                and mixed_values_supported
+                and not timestamp_context
+                and (not value_supported or not unit_supported)
+                and _number_supported(number, scoped_candidates, request, cited_unit)
+            ):
+                issues.append(
+                    "semantic_review: mixed-feature numbers are supported but local attribution is ambiguous"
+                )
+                continue
+            if not value_supported:
+                issues.append(
+                    "numeric_attribution: number absent from feature/rep/phase-matched fixture evidence"
+                )
+            elif not timestamp_context:
+                point_count += 1
+            if cited_unit and not timestamp_context and not unit_supported:
+                issues.append("numeric_attribution: value attached to an incompatible unit")
     return issues, point_count
 
 
@@ -786,6 +962,82 @@ def advice_issues(answer, request, corpus, run=None):
     return issues
 
 
+def prose_supported_reps(answer, records):
+    """Numeric coverage lower bound without requiring renderer-authored units.
+
+    Tables and qualitative comparisons outside this grammar need semantic
+    review. Failure to parse them does not establish an unsupported claim.
+    """
+    supported = set()
+    for sentence in re.split(r"(?<=[.!?])\s+", answer):
+        reps = {int(n) for n in re.findall(r"\brep\s*#?\s*(\d+)", sentence, re.I)}
+        values = [
+            (float(value), unit.lower())
+            for value, unit in re.findall(
+                r"(?<!\w)(-?\d+(?:\.\d+)?)\s*(degrees?|deg\b|°|seconds?|s\b|milliseconds?|ms\b)",
+                sentence,
+                re.I,
+            )
+        ]
+        for record in records:
+            if record["rep"] not in reps:
+                continue
+            for value, unit in values:
+                cited_unit = (
+                    "deg"
+                    if unit in {"degree", "degrees", "deg", "°"}
+                    else ("ms" if unit in {"millisecond", "milliseconds", "ms"} else "s")
+                )
+                expected_value = (
+                    record["value"] / 1000
+                    if record["unit"] == "ms" and cited_unit == "s"
+                    else record["value"]
+                )
+                if (
+                    record["unit"] == cited_unit or record["unit"] == "ms" and cited_unit == "s"
+                ) and abs(value - expected_value) <= 0.050001:
+                    supported.add(record["rep"])
+    return supported
+
+
+def repetition_diagnostics(answer, request):
+    """Surface repeated replies; a stable measurement may be requested again."""
+    data = request.model_dump(mode="json") if hasattr(request, "model_dump") else request
+    history = data.get("conversation_history", [])
+    previous = next(
+        (message["content"] for message in reversed(history) if message["role"] == "assistant"),
+        "",
+    )
+    if not previous:
+        return {"unrequested_repetition": None, "answer_repetition_similarity": None}
+    question = data.get("question", "")
+    repeat_requested = bool(
+        re.search(r"\b(?:repeat|restate)\b|\bsay (?:that|it) again\b", question, re.I)
+    )
+    numeric_request = bool(
+        re.search(
+            r"\b(?:numbers?|measurements?|values?|quantifi\w*|degrees?|angles?|statistics?)\b",
+            question,
+            re.I,
+        )
+    )
+    repeat_requested |= numeric_request and bool(
+        re.search(r"\d+(?:\.\d+)?\s*(?:degrees?|deg\b|°|seconds?|ms\b)", previous, re.I)
+    )
+    similarity = SequenceMatcher(None, normalized(previous), normalized(answer)).ratio()
+    old_sentences = {normalized(s) for s in re.split(r"(?<=[.!?])\s+", previous)}
+    copied_sentence = any(
+        len(normalized(sentence).split()) >= 10 and normalized(sentence) in old_sentences
+        for sentence in re.split(r"(?<=[.!?])\s+", answer)
+    )
+    return {
+        "unrequested_repetition": None
+        if repeat_requested
+        else bool(len(normalized(answer).split()) >= 12 and similarity >= 0.88 or copied_sentence),
+        "answer_repetition_similarity": similarity,
+    }
+
+
 def check_answer(answer, request, expected, run, library_directory):
     corpus = library_corpus(library_directory)
     records = scoped_records(request, expected)
@@ -813,6 +1065,58 @@ def check_answer(answer, request, expected, run, library_directory):
     if any(issue.startswith("retrieval_scope") for issue in provenance):
         topic_correct = False
     issues = list(dict.fromkeys(numeric + provenance + advice_issues(answer, request, corpus, run)))
+    scope_correct, answer_rep_coverage, scope_review_needed = None, None, False
+    if "all_reps" in expected:
+        state = run.get("dialogue_state") or {}
+        # State labels alone cannot pass: require actual, independently matched
+        # observation records for every requested repetition in the answer.
+        required_reps = (
+            {r["rep"] for r in records if r["rep"] is not None}
+            if expected["all_reps"]
+            else set(expected["reps"])
+        )
+        observation_units = contract.get("units", [])
+        answered_reps = {
+            record.get("rep")
+            for unit in observation_units
+            if unit.get("kind") == "observation" and unit.get("text") and unit["text"] in answer
+            for record in unit.get("records", [])
+            if record.get("rep") in cited_reps
+            and record.get("rep")
+            in {int(n) for n in re.findall(r"\brep\s*#?\s*(\d+)", unit["text"], re.I)}
+            if any(same_measurement(raw, record) for raw in records)
+        }
+        if not observation_units:
+            answered_reps = prose_supported_reps(answer, records)
+        answer_rep_coverage = (
+            len(required_reps & answered_reps) / len(required_reps) if required_reps else None
+        )
+        state_correct = (
+            state.get("scope") == expected["scope"]
+            and bool(state.get("all_reps", False)) == expected["all_reps"]
+            and set(state.get("rep_numbers", [])) == set(expected["reps"])
+        )
+        if not state_correct:
+            issues.append("scope_state: requested session/repetition scope was not retained")
+        if answer_rep_coverage != 1 and observation_units:
+            issues.append(
+                "scope_coverage: answer omits requested repetitions with matching evidence"
+            )
+        if observation_units or not state_correct or numeric or provenance:
+            scope_correct = bool(
+                state_correct
+                and topic_correct
+                and answer_rep_coverage == 1
+                and not numeric
+                and not provenance
+            )
+        elif answer_rep_coverage == 1 and topic_correct:
+            scope_correct = True
+        else:
+            scope_review_needed = True
+            issues.append(
+                "semantic_review: natural response scope is outside numeric parser coverage"
+            )
     if not topic_correct:
         issues.append("context_loss: answer does not address independently expected topic/rep")
     fallback_expected = not records and not has_library(expected, corpus)
@@ -847,6 +1151,8 @@ def check_answer(answer, request, expected, run, library_directory):
     causes = []
     if not topic_correct:
         causes.append("context loss")
+    if scope_correct is False:
+        causes.append("scope loss")
     if any(issue.startswith("retrieval_scope") for issue in issues) or not fallback_correct:
         causes.append("retrieval")
     if unsupported:
@@ -854,6 +1160,10 @@ def check_answer(answer, request, expected, run, library_directory):
     return {
         "issues": issues,
         "topic_correct": bool(topic_correct),
+        "scope_correct": scope_correct,
+        "answer_rep_coverage": answer_rep_coverage,
+        "scope_review_needed": scope_review_needed,
+        **repetition_diagnostics(answer, request),
         "unsupported_claims_flagged": unsupported,
         "semantic_review_needed": any(issue.startswith("semantic_review") for issue in issues),
         "fallback_correct": fallback_correct,

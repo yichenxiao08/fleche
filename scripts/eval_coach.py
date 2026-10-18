@@ -23,19 +23,19 @@ from uuid import uuid4
 
 from langchain_core.messages import AIMessageChunk
 
-from fencecoach.coach.conversation import _run_conversation
+from fencecoach.coach.conversation import _run_conversation, run_conversation
 from fencecoach.coach.providers import chat_model
 from fencecoach.coach.verified_dialogue import run_verified_conversation
 from fencecoach.schemas import CoachRequest, ConversationMessage, DialogueState
 
 try:
-    from scripts.coach_eval_oracle import check_answer, scenarios
+    from scripts.coach_eval_oracle import check_answer, scenarios, scope_scenarios
 except ModuleNotFoundError:
-    from coach_eval_oracle import check_answer, scenarios
+    from coach_eval_oracle import check_answer, scenarios, scope_scenarios
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "evals/coach_audit"
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 
 class OfflineSelector:
@@ -50,7 +50,7 @@ def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def fingerprints():
+def fingerprints(cases=None):
     return {
         "fixture_sha256": {
             p.name: digest(p)
@@ -61,12 +61,16 @@ def fingerprints():
             str(p.relative_to(ROOT)): digest(p)
             for p in sorted(
                 list((ROOT / "src/fencecoach/coach").glob("*.py"))
-                + [Path(__file__), ROOT / "scripts/coach_eval_oracle.py"]
+                + [
+                    Path(__file__),
+                    ROOT / "scripts/coach_eval_oracle.py",
+                    ROOT / "src/fencecoach/schemas.py",
+                ]
                 + list((ROOT / "knowledge").rglob("*.md"))
             )
         },
         "expectation_sha256": hashlib.sha256(
-            json.dumps(scenarios(), sort_keys=True).encode()
+            json.dumps(scenarios() if cases is None else cases, sort_keys=True).encode()
         ).hexdigest(),
     }
 
@@ -81,6 +85,9 @@ def summarize(rows):
     offline = bool(done) and all(r.get("offline") for r in done)
     followups = [r for r in done if r.get("expected", {}).get("followup")]
     bait = [r for r in done if r.get("category") == "bait"]
+    scope = [r for r in done if isinstance(r.get("scope_correct"), bool)]
+    repetition = [r for r in done if isinstance(r.get("unrequested_repetition"), bool)]
+    coverage = [r["answer_rep_coverage"] for r in scope if r.get("answer_rep_coverage") is not None]
 
     def rate(items, field):
         values = [r[field] for r in items if isinstance(r.get(field), bool)]
@@ -101,6 +108,18 @@ def summarize(rows):
         "skipped": sum(r["status"] == "skipped" for r in rows),
         "followup_turns_scored": len(followups),
         "followup_resolution_accuracy": rate(followups, "topic_correct"),
+        "scope_turns_scored": len(scope),
+        "scope_turns_needing_semantic_review": sum(
+            bool(r.get("scope_review_needed")) for r in done
+        ),
+        "scope_preservation_accuracy": rate(scope, "scope_correct"),
+        "mean_requested_rep_coverage": statistics.mean(coverage) if coverage else None,
+        "complete_requested_rep_coverage_rate": sum(value == 1 for value in coverage)
+        / len(coverage)
+        if coverage
+        else None,
+        "repetition_turns_scored": len(repetition),
+        "unrequested_repetition_rate": rate(repetition, "unrequested_repetition"),
         "unsupported_claim_rate": rate(done, "unsupported_claims_flagged"),
         "semantic_review_needed_rate": rate(done, "semantic_review_needed"),
         "bait_turns_scored": len(bait),
@@ -134,6 +153,10 @@ def summarize(rows):
             "independently specified simple-lunge sword-arm-to-target paraphrase relation. Other "
             "paraphrases remain semantic-review-needed, separate from unsupported claims. Zero flags is not proof "
             "of no fabrication. Errors/skips have no quality score; offline latency is not model latency."
+            " Scope coverage counts repetitions with matching reliable raw fixture records; "
+            "disclosures about unavailable repetitions are not scored."
+            " Natural prose outside numeric parser coverage requires semantic review. "
+            "Topic keywords and lexical repetition diagnostics do not measure directness or overall coaching quality."
         ),
     }
 
@@ -147,16 +170,26 @@ def _run_turn(payload):
         if text and not first:
             first.append((time.perf_counter() - started) * 1000)
 
+    engine = payload.get("engine", "natural")
+    if payload["offline"] and engine != "verified":
+        raise ValueError("Offline selectors only exercise the verified engine")
     model = OfflineSelector() if payload["offline"] else chat_model(payload["provider"])
     model_setup_ms = (time.perf_counter() - started) * 1000
-    runner = run_verified_conversation if payload["phase"] == "after" else _run_conversation
-    run = runner(base, payload["provider"], model=model, on_text=publish)
+    if payload["phase"] == "before":
+        run = _run_conversation(base, payload["provider"], model=model, on_text=publish)
+        engine = "legacy-natural"
+    elif engine == "verified":
+        run = run_verified_conversation(base, payload["provider"], model=model, on_text=publish)
+    else:
+        with patch("fencecoach.coach.conversation.settings.fencecoach_verified_dialogue", False):
+            run = run_conversation(base, payload["provider"], model=model, on_text=publish)
     return {
         "status": "completed",
         "run": run.model_dump(mode="json"),
         "latency_ms": (time.perf_counter() - started) * 1000,
         "first_visible_ms": first[0] if first else None,
         "offline": payload["offline"],
+        "engine_actual": engine,
         "model_setup_ms": model_setup_ms,
     }
 
@@ -286,6 +319,8 @@ def load_or_create(output, metadata, resume=False):
         for field in (
             "schema_version",
             "phase",
+            "suite",
+            "engine",
             "provider_requested",
             "execution",
             "fixture_sha256",
@@ -415,12 +450,22 @@ def before_after_table(before, after):
             raise ValueError("Before/after fixtures differ; the results are not comparable")
         if before.get("provider_requested") != after.get("provider_requested"):
             raise ValueError("Before/after provider requests differ")
+        if (
+            before.get("expectation_sha256")
+            and after.get("expectation_sha256")
+            and before["expectation_sha256"] != after["expectation_sha256"]
+        ):
+            raise ValueError("Before/after expectations differ; the results are not comparable")
     metrics = (
         "completed",
         "errors",
         "timeouts",
         "skipped",
         "followup_resolution_accuracy",
+        "scope_preservation_accuracy",
+        "mean_requested_rep_coverage",
+        "complete_requested_rep_coverage_rate",
+        "unrequested_repetition_rate",
         "unsupported_claim_rate",
         "semantic_review_needed_rate",
         "fabrication_rate_bait",
@@ -479,6 +524,18 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--phase", choices=["before", "after"])
     parser.add_argument(
+        "--engine",
+        choices=["natural", "verified"],
+        default="natural",
+        help="Evaluate the conversational tool writer, or explicit selector protocol diagnostics.",
+    )
+    parser.add_argument(
+        "--suite",
+        choices=["standard", "scope"],
+        default="standard",
+        help="Scope checks retain subject/phase/role and cover available requested repetitions.",
+    )
+    parser.add_argument(
         "--providers",
         nargs="+",
         choices=["gemini", "local", "bedrock"],
@@ -518,6 +575,10 @@ def main():
         parser.error("Timeout and maximum failures must be positive")
     if args.offline and args.phase != "after":
         parser.error("--offline requires --phase after; selector cannot exercise the legacy writer")
+    if args.offline and args.engine != "verified":
+        parser.error(
+            "--offline requires --engine verified; natural writer quality needs live calls"
+        )
     if args.forced_switch:
         output = FIXTURES / f"forced-switch-{args.run_id}.json"
         if output.exists():
@@ -526,26 +587,30 @@ def main():
         save_artifact(output, result)
         print(json.dumps({"output": str(output), "checks": result["checks"]}))
         raise SystemExit(0 if result["passed"] else 1)
-    cases = scenarios()
-    dataset = FIXTURES / "conversations-v2.json"
+    cases = scope_scenarios() if args.suite == "scope" else scenarios()
+    dataset = FIXTURES / (
+        "conversations-scope-v1.json" if args.suite == "scope" else "conversations-v2.json"
+    )
     serialized = json.dumps(cases, indent=2)
     if not dataset.exists():
         dataset.write_text(serialized, encoding="utf-8")
     elif json.loads(dataset.read_text(encoding="utf-8")) != cases:
-        parser.error("conversations-v2.json differs from expectations; review/update it explicitly")
+        parser.error(f"{dataset.name} differs from expectations; review/update it explicitly")
     for provider in args.providers:
-        output = (
-            FIXTURES
-            / f"{args.phase}-{provider}{'-offline' if args.offline else ''}-{args.run_id}.json"
+        output = FIXTURES / (
+            f"{'scope-' if args.suite == 'scope' else ''}{args.phase}-{provider}"
+            f"-{args.engine}{'-offline' if args.offline else ''}-{args.run_id}.json"
         )
         metadata = {
             "schema_version": SCHEMA_VERSION,
             "phase": args.phase,
+            "suite": args.suite,
+            "engine": args.engine,
             "provider_requested": provider,
             "execution": "offline protocol fixture" if args.offline else "live provider",
             "turn_timeout_seconds": args.turn_timeout_seconds,
             "timing_scope": "Latency and TTFT include model-client setup, retrieval and rendering; process bootstrap is separate wall_clock_ms. Baseline unstreamed paths may have no model TTFT.",
-            **fingerprints(),
+            **fingerprints(cases),
         }
         if args.phase == "before":
             metadata["baseline_kind"] = "retained legacy path at recorded revision"
@@ -604,6 +669,7 @@ def main():
                             "request": request.model_dump(mode="json"),
                             "provider": provider,
                             "phase": args.phase,
+                            "engine": args.engine,
                             "offline": True,
                         }
                     )
@@ -613,6 +679,7 @@ def main():
                             "request": request.model_dump(mode="json"),
                             "provider": provider,
                             "phase": args.phase,
+                            "engine": args.engine,
                             "offline": False,
                         },
                         args.turn_timeout_seconds,
