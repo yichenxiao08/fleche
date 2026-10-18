@@ -1,12 +1,15 @@
 """Correct numbers must not override a reviewer's unsupported-inference finding."""
 
 import unittest
+from unittest.mock import patch
 
 from fencecoach.coach.answer_review import AnswerDraft, AnswerReview, review_issues
 from fencecoach.coach.conversation import CoachAnswerError, run_conversation
+from fencecoach.settings import settings
 from tests.test_coach_response_reliability import StructuredModel, request
 
 
+@patch.object(settings, "coach_core", "old")
 class InterpretationReviewTests(unittest.TestCase):
     def test_grounded_numbers_do_not_override_unsupported_interpretation(self):
         for inference in (

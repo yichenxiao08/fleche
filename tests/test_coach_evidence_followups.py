@@ -142,6 +142,8 @@ class ReviewedWriter(Writer):
 
 
 # These fixtures exercise the legacy writer/reviewer and evidence-tool protocol.
+# These contracts exercise the retained COACH_CORE=old implementation.
+@patch.object(settings, "coach_core", "old")
 @patch.object(settings, "fencecoach_verified_dialogue", False)
 class EvidenceFollowupTests(unittest.TestCase):
     def test_repeated_supporting_value_is_presented_only_once(self):

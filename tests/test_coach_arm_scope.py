@@ -51,6 +51,8 @@ def arm_session(question, weapon="right"):
 
 
 # These fixtures exercise the legacy structured writer/reviewer citation contract.
+# These contracts exercise the retained COACH_CORE=old implementation.
+@patch.object(settings, "coach_core", "old")
 @patch.object(settings, "fencecoach_verified_dialogue", False)
 class ArmScopeTests(unittest.TestCase):
     def test_playback_bookmark_does_not_repeat_the_same_geometry(self):

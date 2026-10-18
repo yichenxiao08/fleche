@@ -146,6 +146,8 @@ def request(question):
 
 
 # These fixtures check legacy writer repair, independent review and tool-grounded prose.
+# These contracts exercise the retained COACH_CORE=old implementation.
+@patch.object(settings, "coach_core", "old")
 @patch.object(settings, "fencecoach_verified_dialogue", False)
 class CoachResponseReliabilityTests(unittest.TestCase):
     def test_missing_timing_can_be_explained_without_unrelated_angle_citations(self):

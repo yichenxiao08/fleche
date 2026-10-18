@@ -31,6 +31,8 @@ def request():
 
 
 # LoopModel/PlainModel fixtures verify the retained legacy and Bedrock writer contracts.
+# These contracts exercise the retained COACH_CORE=old implementation.
+@patch.object(settings, "coach_core", "old")
 @patch.object(settings, "fencecoach_verified_dialogue", False)
 class DataAndEvidenceTests(unittest.TestCase):
     def test_duplicate_metric_ids_and_reversed_timestamps_are_rejected(self):
@@ -222,6 +224,7 @@ class ApiPersistenceTests(unittest.TestCase):
             404,
         )
 
+    @patch.object(settings, "coach_core", "old")
     def test_failed_live_configuration_saves_no_report(self):
         session_id = self.client.post("/api/demo").json()["session_id"]
         with patch.object(settings, "bedrock_chat_model_id", ""):

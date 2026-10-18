@@ -25,6 +25,8 @@ class MissingEvidenceModel:
 
 
 # These fixtures exercise the retained free-prose writer and evidence-tool protocol.
+# These contracts exercise the retained COACH_CORE=old implementation.
+@patch.object(settings, "coach_core", "old")
 @patch.object(settings, "fencecoach_verified_dialogue", False)
 class ChatAvailabilityTests(unittest.TestCase):
     def setUp(self):

@@ -37,6 +37,7 @@ class Malicious:
 
 
 class VerifiedDialogueTests(unittest.TestCase):
+    @patch.object(settings, "coach_core", "old")
     @patch.object(settings, "fencecoach_verified_dialogue", True)
     def test_explicit_opt_in_uses_verified_dialogue(self):
         run = run_conversation(fixture(), "local", model=Selector())

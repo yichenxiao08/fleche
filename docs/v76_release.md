@@ -82,3 +82,13 @@ The pre-existing history contains runtime logs and two local timing-test databas
 | documents | 69 | README, full acceptance, rating sheets, pass notes, historical reports and recorded demo web assets |
 
 Verbatim historical transcripts retain their original trailing whitespace and blank lines. Code whitespace checks pass; the documentation commit permits those transcript-only whitespace findings rather than editing recorded model text.
+
+## CI correction after default promotion — October 18, 2026
+
+The earlier 333-test full-suite run explicitly selected COACH_CORE=old. It did not establish that the ordinary CI command passed under the newly shipped default. CI exposed legacy writer/repair/tool tests implicitly selecting that default, plus a quota test that read an ignored local provider ledger absent from checkout.
+
+Legacy-only test classes now explicitly patch coach_core=old within each test and restore it afterward. The workflow still runs its ordinary unittest discovery command without a global COACH_CORE override. The quota test supplies an in-memory saved-status fixture. Existing assertions and test cases remain enabled. No application source, default, prompt, packet, resolver, KB, map, examples or runtime checks changed.
+
+A new regression exercises the actual default through direct HTTP and a durable queued chat. Mocked providers verify Groq success, Groq429-to-Gemini fallback, unchanged model-authored text, preserved arm/rep2 focus, and zero rejected measurements in both provider packets. It makes no live provider calls.
+
+Verification: 334 tests PASS from a fresh tracked-file checkout plus this patch, with no .env, ignored provider ledgers or COACH_CORE override. Provider credentials are empty and test storage is separate. The semantic fallback test also passes. Ruff check and format check pass over src/tests/scripts. This was Windows/Python3.14 local reproduction; GitHub's Linux/Python3.12 result must be reported separately when available.

@@ -65,6 +65,8 @@ class ScriptedModel:
 
 
 # ScriptedModel fixtures test the retained legacy tool loop and free-prose writer.
+# These contracts exercise the retained COACH_CORE=old implementation.
+@patch.object(settings, "coach_core", "old")
 @patch.object(settings, "fencecoach_verified_dialogue", False)
 class ConversationTests(unittest.TestCase):
     def test_invented_angle_is_blocked_and_fallback_is_concrete(self):

@@ -33,6 +33,8 @@ class Writer:
         return next(self.replies)
 
 
+# These contracts exercise the retained COACH_CORE=old implementation.
+@patch.object(settings, "coach_core", "old")
 @patch.object(settings, "fencecoach_verified_dialogue", False)
 class NaturalDialogueTests(unittest.TestCase):
     def test_failed_writer_is_not_silently_replaced_with_a_canned_library_reply(self):

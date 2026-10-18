@@ -40,6 +40,8 @@ class StreamingModel:
 
 
 # This fixture checks the legacy free-prose writer's bounded stream and publication guard.
+# These contracts exercise the retained COACH_CORE=old implementation.
+@patch.object(settings, "coach_core", "old")
 @patch.object(settings, "fencecoach_verified_dialogue", False)
 class ChatLatencyTests(unittest.TestCase):
     def test_only_complete_checked_answer_is_published_and_stream_is_closed(self):

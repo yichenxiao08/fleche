@@ -1,3 +1,4 @@
+import json
 import sys
 import unittest
 from datetime import UTC, datetime
@@ -61,10 +62,21 @@ class QuotaReviewTests(unittest.TestCase):
         )
 
     def test_propagated_local_cap_recomputed_not_provider_bypassed(self):
-        cap = review.LEGACY / "fewshot-v4-frozen-pass/gemini/status.json"
-        with patch.object(review, "daily_attempts", return_value=0):
+        # The provider ledger is deliberately private/ignored and absent in CI.
+        # Supply the saved status as a fixture instead of reading this machine's ledger.
+        cap = Path("fixture-status.json")
+        status = {"detail": "20 saved daily gemini attempts reached across passes."}
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch.object(Path, "read_text", return_value=json.dumps(status)),
+            patch.object(review, "daily_attempts", return_value=0),
+        ):
             self.assertEqual(review.saved_resume_after("gemini", cap), 0)
-        with patch.object(review, "daily_attempts", return_value=20):
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch.object(Path, "read_text", return_value=json.dumps(status)),
+            patch.object(review, "daily_attempts", return_value=20),
+        ):
             self.assertGreater(review.saved_resume_after("gemini", cap), 0)
 
 
