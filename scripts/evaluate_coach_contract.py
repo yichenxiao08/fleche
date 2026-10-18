@@ -253,7 +253,7 @@ def check_local_evidence(request, cases):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--database", type=Path, help="Local FenceCoach SQLite database")
+    parser.add_argument("--database", type=Path, help="Local Flèche SQLite database")
     parser.add_argument(
         "--output", type=Path, help="Aggregate report path (defaults to ignored data/evals)"
     )

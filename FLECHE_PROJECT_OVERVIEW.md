@@ -1,4 +1,4 @@
-# FenceCoach — Project Overview and Completion Plan
+# Flèche — Project Overview and Completion Plan
 
 Updated: October 9, 2026 (America/Toronto)
 

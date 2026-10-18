@@ -1,4 +1,4 @@
-# FenceCoach Benchmarks
+# Flèche Benchmarks
 
 Generated from recorded results. Missing results are not success claims.
 

@@ -62,7 +62,7 @@ async def lifespan(app):
 
 
 app = FastAPI(
-    title="FenceCoach",
+    title="Flèche",
     version="0.5.0",
     description="Cited coaching reports over measured fencing-session data.",
     lifespan=lifespan,

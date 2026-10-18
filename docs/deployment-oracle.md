@@ -1,6 +1,6 @@
 # Oracle Cloud demo deployment
 
-This profile runs the full FenceCoach web app, video-analysis worker, local Ollama fallback, and Caddy HTTPS proxy on one ARM VM. SQLite, uploaded videos, the Ollama model, and HTTPS certificates persist in Docker volumes. The app listens only inside the Compose network.
+This profile runs the full Flèche web app, video-analysis worker, local Ollama fallback, and Caddy HTTPS proxy on one ARM VM. SQLite, uploaded videos, the Ollama model, and HTTPS certificates persist in Docker volumes. The app listens only inside the Compose network.
 
 ## Create the VM
 

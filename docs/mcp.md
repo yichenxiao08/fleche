@@ -1,4 +1,4 @@
-# FenceCoach MCP
+# Flèche MCP
 
 The local stdio server exposes five read-only tools:
 

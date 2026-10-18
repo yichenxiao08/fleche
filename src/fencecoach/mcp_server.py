@@ -11,7 +11,7 @@ from fencecoach.repository import Repository
 from fencecoach.settings import settings
 
 mcp = FastMCP(
-    "FenceCoach",
+    "Flèche",
     instructions="Use measurements as evidence, not a correctness score. Never turn unsupported footage or interval counts into technique verdicts. All tools are read-only.",
 )
 READ_ONLY = ToolAnnotations(

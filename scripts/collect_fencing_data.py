@@ -45,7 +45,7 @@ TOPICS = {
 
 
 def fetch(url):
-    return urlopen(Request(url, headers={"User-Agent": "FenceCoach-research/0.5"}), timeout=45)
+    return urlopen(Request(url, headers={"User-Agent": "Fleche-research/0.5"}), timeout=45)
 
 
 def collect(entry, root):

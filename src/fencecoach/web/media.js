@@ -27,7 +27,7 @@ async function db() {
       };
       request.onblocked = () =>
         reject(
-          new Error("Close other FenceCoach tabs before opening clip storage."),
+          new Error("Close other Flèche tabs before opening clip storage."),
         );
     });
   return database;

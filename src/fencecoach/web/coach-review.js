@@ -350,7 +350,7 @@ $("export").addEventListener("click", () => {
   const url = URL.createObjectURL(blob),
     a = document.createElement("a");
   a.href = url;
-  a.download = `fencecoach-feedback-${jobId.slice(0, 8)}.json`;
+  a.download = `fleche-feedback-${jobId.slice(0, 8)}.json`;
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 });

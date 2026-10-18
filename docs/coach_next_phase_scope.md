@@ -1,4 +1,4 @@
-# FenceCoach coach core: next phase (Layer 2 checkpoint approved with scope changes)
+# Flèche coach core: next phase (Layer 2 checkpoint approved with scope changes)
 
 ## Status and decisions
 Your Layer 2 + evidence-packet checkpoint is approved as infrastructure.

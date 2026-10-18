@@ -36,7 +36,7 @@ ALLOWED = {
 
 def fetch(url):
     return urlopen(
-        Request(url, headers={"User-Agent": "FenceCoach/0.5 (local fencing dataset research)"}),
+        Request(url, headers={"User-Agent": "Fleche/0.5 (local fencing dataset research)"}),
         timeout=60,
     )
 

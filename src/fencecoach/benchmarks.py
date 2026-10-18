@@ -136,7 +136,7 @@ def draft_agreement(result):
 
 def render_report(data):
     lines = [
-        "# FenceCoach Benchmarks",
+        "# Flèche Benchmarks",
         "",
         "Generated from recorded results. Missing results are not success claims.",
         "",

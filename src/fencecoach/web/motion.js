@@ -639,7 +639,7 @@ export function setupMotion({ state, notice }) {
           } else if (b.hasAttribute("data-dataset-export")) {
             downloadJSON(
               await api(`/api/videos/${state.videoJob.job_id}/dataset`),
-              `fencecoach-labeled-${state.videoJob.job_id}.json`,
+              `fleche-labeled-${state.videoJob.job_id}.json`,
             );
           } else if (b.hasAttribute("data-label-remove")) {
             b.disabled = true;

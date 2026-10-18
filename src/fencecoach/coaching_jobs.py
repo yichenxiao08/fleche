@@ -237,12 +237,12 @@ class CoachingWorker:
             if known_failure:
                 _, message = known_failure
             elif isinstance(exc, (httpx.TransportError, ConnectionError, OSError)):
-                message = "FenceCoach couldn't connect to the coaching provider. Your question is kept; check the server's internet connection and retry."
+                message = "Flèche couldn't connect to the coaching provider. Your question is kept; check the server's internet connection and retry."
             else:
                 message = (
                     str(exc)[:400]
                     if isinstance(exc, (EvidenceValidationError, RuntimeError))
-                    else "FenceCoach hit an internal error while answering. Your question is kept; try again."
+                    else "Flèche hit an internal error while answering. Your question is kept; try again."
                 )
             self.jobs.update(
                 job["job_id"],

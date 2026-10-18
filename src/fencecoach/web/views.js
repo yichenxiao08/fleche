@@ -381,7 +381,7 @@ export function record(state) {
         </div>
         <p class="helper">
           ${draft
-            ? "Analyze sends this clip to your local FenceCoach server. Download a copy to keep it elsewhere."
+            ? "Analyze sends this clip to your local Flèche server. Download a copy to keep it elsewhere."
             : "Camera access starts only when you choose Enable camera. Audio is not recorded."}
         </p>
       </section>
@@ -519,7 +519,7 @@ export function coach(state) {
     ? html`<article class="coach-turn">
         <div class="chat-message user">
           <span class="eyebrow">YOU</span>
-          <p>${e(state.coachingJob?.question || state.question)}</p>
+          <p>${e(state.pendingQuestion || state.coachingJob?.question || state.question)}</p>
         </div>
         <div class="chat-message coach" ${state.partialReply ? "" : "hidden"}>
           <span class="coach-emblem">${icon("spark")}</span>

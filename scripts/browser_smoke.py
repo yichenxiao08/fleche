@@ -86,6 +86,7 @@ def main():
                 page = context.new_page()
                 page.on("pageerror", lambda exc: errors.append(str(exc)))
                 page.goto(base)
+                expect(page).to_have_title(re.compile("Flèche"))
                 page.locator('[data-go="record"]').first.click()
                 page.locator("[data-enable-camera]").click()
                 expect(page.locator("[data-start-recording]")).to_be_visible()
@@ -124,7 +125,24 @@ def main():
                     expect(coach_message).to_be_visible(timeout=15000)
                     # Wording is evidence-driven; this smoke checks that the response renders.
                     expect(coach_message).to_contain_text(re.compile(r"\S"), timeout=15000)
+                    expect(page.locator(".generating")).to_have_count(0, timeout=15000)
                     if name == "one":
+                        # Hold the POST: the pending bubble must already show the
+                        # new question while the previous job remains in history.
+                        pattern = "**/api/sessions/*/coaching-jobs"
+                        held = []
+                        page.route(pattern, lambda route: held.append(route))
+                        question = "How is my torso in this session?"
+                        page.locator("#question").fill(question)
+                        page.locator("#question").press("Enter")
+                        expect(page.locator(".coach-turn").first.locator(".user p")).to_have_text(
+                            question
+                        )
+                        page.wait_for_function("document.querySelector('.generating') !== null")
+                        assert len(held) == 1
+                        held[0].continue_()
+                        page.unroute(pattern)
+                        expect(page.locator(".generating")).to_have_count(0, timeout=15000)
                         # A rejected request must be visible at the composer and leave it usable.
                         pattern = "**/api/sessions/*/coaching-jobs"
 

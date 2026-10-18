@@ -2,7 +2,7 @@ import { html } from "./html.js";
 import { api, downloadJSON } from "./api-client.js";
 import { e, icon, heading, primary, secondary } from "./ui.js";
 import { frameStepControls } from "./replay-player.js?v=20261012-startup-fix-v1";
-import { refreshSessions } from "./store.js?v=20261012-review-layout-v1";
+import { refreshSessions } from "./store.js?v=20261018-fleche-chat-v1";
 
 const videoPath = (id) => `/api/videos/${encodeURIComponent(id)}`;
 export const previewURL = (id, result) =>

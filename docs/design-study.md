@@ -1,10 +1,10 @@
-# FenceCoach design study
+# Flèche design study
 
 ## Research
 
 Reviewed HomeCourt's [official product site](https://www.homecourt.ai/) and [published App Store screens](https://apps.apple.com/us/app/homecourt-basketball-training/id1258520424). This is a study of published material, not a hands-on review of the installed app. The dated screenshots should not be assumed to represent every current screen.
 
-Patterns adapted for fencing: make starting practice obvious; use visual activity cards; keep footage central during review; make key measurements easy to scan; give practice and progress a clear place in the navigation. The interpretation below is original to FenceCoach.
+Patterns adapted for fencing: make starting practice obvious; use visual activity cards; keep footage central during review; make key measurements easy to scan; give practice and progress a clear place in the navigation. The interpretation below is original to Flèche.
 
 ## Three directions
 

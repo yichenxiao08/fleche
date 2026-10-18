@@ -87,7 +87,7 @@ def main():
                     page.goto(base)
                     caption(
                         page,
-                        "FenceCoach / grounded coaching workflow",
+                        "Flèche / grounded coaching workflow",
                         "Fixed-camera solo drills. Measurement tools, retrieval, conversational memory, and observable runs.",
                     )
                     page.wait_for_timeout(9000)
@@ -148,7 +148,7 @@ def main():
                     page.wait_for_timeout(10000)
                     smoke = json.loads((project / "data/evals/mcp-smoke.json").read_text())
                     page.set_content(
-                        '<html><body style="background:#faf9f6;color:#201d1b;padding:65px;font-family:sans-serif"><small style="color:#a22533">FENCECOACH / MCP PROTOCOL CHECK</small><h1 style="font-size:48px">Five tools. One evidence source.</h1>'
+                        '<html><body style="background:#faf9f6;color:#201d1b;padding:65px;font-family:sans-serif"><small style="color:#a22533">FLÈCHE / MCP PROTOCOL CHECK</small><h1 style="font-size:48px">Five tools. One evidence source.</h1>'
                         + "".join(
                             f'<p style="padding:12px;border-bottom:1px solid #ddd;font-size:22px">{name}</p>'
                             for name in smoke["tools"]

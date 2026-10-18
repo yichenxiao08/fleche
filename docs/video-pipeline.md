@@ -32,7 +32,7 @@ MP4 / WebM → SQLite queue → supervised child → upright preview + timestamp
                                                                LangGraph + RAG
 ```
 
-One supervisor runs one child at a time, outside the HTTP request. SQLite retains progress and errors. Interrupted jobs become failures after restart; failed jobs can be retried. Review acceptance writes the session and completed job in one transaction and is idempotent. **Use one API process**, without Uvicorn `--workers`, and one FenceCoach instance per database. This is a local queue, not distributed scheduling.
+One supervisor runs one child at a time, outside the HTTP request. SQLite retains progress and errors. Interrupted jobs become failures after restart; failed jobs can be retried. Review acceptance writes the session and completed job in one transaction and is idempotent. **Use one API process**, without Uvicorn `--workers`, and one Flèche instance per database. This is a local queue, not distributed scheduling.
 
 Bounds: 200 MiB, 120 seconds, at most 4K resolution; five outstanding jobs; ten-minute worker timeout and decoded-frame cap. Multipart bytes are bounded as they arrive, including chunked requests. Storage uses generated IDs rather than user filenames; no arbitrary remote URL endpoint exists.
 

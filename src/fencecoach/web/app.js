@@ -10,10 +10,10 @@ import {
   resumeCoaching,
   stopCoaching,
   savePreferences,
-} from "./store.js?v=20261012-review-layout-v1";
+} from "./store.js?v=20261018-fleche-chat-v1";
 import { setupMotion } from "./motion.js";
 import { setupJournal } from "./journal.js?v=20261012-review-layout-v1";
-import { screens } from "./views.js?v=20261012-review-layout-v1";
+import { screens } from "./views.js?v=20261018-fleche-chat-v1";
 import {
   replayControls,
   mountReplayControls,
@@ -151,7 +151,7 @@ function render({ keepScroll = false, focus = false } = {}) {
   $("screen").innerHTML = state.loading
     ? '<div class="loading-state"><span class="spinner"></span><h1>Getting your training space ready.</h1><p>Loading your saved sessions…</p></div>'
     : screens[state.screen](state);
-  document.title = `FenceCoach · ${state.screen === "drill" ? findDrill(state.drillId).name : state.screen.charAt(0).toUpperCase() + state.screen.slice(1)}`;
+  document.title = `Flèche · ${state.screen === "drill" ? findDrill(state.drillId).name : state.screen.charAt(0).toUpperCase() + state.screen.slice(1)}`;
   mountMedia(playback);
   if (!keepScroll) window.scrollTo({ top: 0, behavior: "instant" });
   else window.scrollTo({ top: scroll, behavior: "instant" });
@@ -556,12 +556,12 @@ document.addEventListener("click", async (event) => {
     else if (button.hasAttribute("data-download-clip") && getClip())
       downloadBlob(
         getClip(),
-        `fencecoach-${state.session.session_id}.${getClip().type.includes("mp4") ? "mp4" : "webm"}`,
+        `fleche-${state.session.session_id}.${getClip().type.includes("mp4") ? "mp4" : "webm"}`,
       );
     else if (button.hasAttribute("data-download-draft") && state.draftClip)
       downloadBlob(
         state.draftClip,
-        `fencecoach-practice.${state.draftClip.type.includes("mp4") ? "mp4" : "webm"}`,
+        `fleche-practice.${state.draftClip.type.includes("mp4") ? "mp4" : "webm"}`,
       );
     else if (button.hasAttribute("data-clear-draft")) {
       setDraft(null);
@@ -719,7 +719,7 @@ async function init() {
   } catch (error) {
     state.loading = false;
     render();
-    notice(`${error.message} Make sure the FenceCoach server is running, then reload.`);
+    notice(`${error.message} Make sure the Flèche server is running, then reload.`);
   }
 }
 setupJournal({ state, render, go, notice, toast });

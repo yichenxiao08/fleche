@@ -1,4 +1,8 @@
-# FenceCoach
+# Flèche
+
+The app is named Flèche. The `fencecoach` Python package, existing `FENCECOACH_*`
+settings and browser storage keys retain their legacy identifiers for compatibility.
+Verbatim historical evaluation transcripts preserve their original wording.
 
 A local fencing practice app with a LangGraph conversational coach, evidence tools, retrieval, persistent session memory, and video measurements. Phase 1 targets **one fencer, a fixed side camera, full-body footage**. Flèche rules are beta. Bout analysis, learned classifiers, and automatic label drafts are experimental.
 
@@ -12,7 +16,7 @@ Requires Docker Engine/Desktop with Compose, internet for initial downloads, and
 docker compose up --build
 ```
 
-Open [FenceCoach](http://127.0.0.1:8000) and [Phoenix traces](http://127.0.0.1:6006). The stack downloads `qwen2.5:3b`, installs checksum-verified pose weights, starts SQLite-backed workers, and seeds three preprocessed archival examples. No account or API key is required. First-start time depends on network and hardware; the under-ten-minute target has **not** been verified on a fresh machine. The local Docker CLI is available and the Compose manifest validates, but the image build and container API smoke check have not been run for this revision.
+Open [Flèche](http://127.0.0.1:8000) and [Phoenix traces](http://127.0.0.1:6006). The stack downloads `qwen2.5:3b`, installs checksum-verified pose weights, starts SQLite-backed workers, and seeds three preprocessed archival examples. No account or API key is required. First-start time depends on network and hardware; the under-ten-minute target has **not** been verified on a fresh machine. The local Docker CLI is available and the Compose manifest validates, but the image build and container API smoke check have not been run for this revision.
 
 The three MIT examples demonstrate QA, overlays, and rep proposals. They are low resolution and **unsupported for personal coaching**. They are not quietly upgraded or assigned synthetic measurements. The separate **Try synthetic sample review** demonstrates the evidence/report workflow without claiming video accuracy. Select **Local AI** there for a real model conversation; **Sample report** is deterministic and makes no LLM calls.
 
@@ -134,7 +138,7 @@ Implementation references: [LangChain Gemini integration](https://docs.langchain
 
 Choose **Coach feedback · review frame by frame** from movement review, or open `/coach-review/<video-job-id>`. The workspace keeps video beside one form per rep, supports native seeking, slow playback, frame stepping, and attaching the displayed frame as evidence. It displays milliseconds for video and original-source timing; this does not increase the pose-sample resolution. Set the source offset in clip details for trimmed footage.
 
-Draft feedback autosaves to the server with a browser backup. Saves use revisions to prevent another reviewer being silently overwritten. Submission requires an author, intended drill, and each rep's assessment; corrections additionally require a timestamp, visible reason, cue, and improvement check. JSON export preserves attribution. Reviewer roles are self-declared, and submission does not automatically promote feedback into training ground truth. A localhost URL is accessible on the computer running FenceCoach.
+Draft feedback autosaves to the server with a browser backup. Saves use revisions to prevent another reviewer being silently overwritten. Submission requires an author, intended drill, and each rep's assessment; corrections additionally require a timestamp, visible reason, cue, and improvement check. JSON export preserves attribution. Reviewer roles are self-declared, and submission does not automatically promote feedback into training ground truth. A localhost URL is accessible on the computer running Flèche.
 
 ## Architecture
 

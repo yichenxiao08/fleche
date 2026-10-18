@@ -31,6 +31,7 @@ export const state = {
   libraryFilter: "all",
   mode: "local",
   question: "",
+  pendingQuestion: "",
   partialReply: "",
   coachError: "",
   preferences: read("fencecoach.preferences", {
@@ -169,6 +170,8 @@ export async function loadSample() {
 export async function generateReport(question) {
   if (!state.session || state.generating) return;
   const id = state.session.session_id;
+  state.pendingQuestion = question;
+  state.coachingJob = null;
   state.generating = true;
   state.partialReply = "";
   state.coachError = "";
@@ -197,6 +200,7 @@ export async function generateReport(question) {
     throw error;
   } finally {
     state.generating = false;
+    state.pendingQuestion = "";
   }
 }
 
@@ -214,7 +218,7 @@ export async function waitForCoaching(id) {
         localStorage.removeItem("fencecoach.coachingJob");
       } catch {}
       throw new Error(
-        "Lost connection to FenceCoach. Your question is kept; reconnect and try again.",
+        "Lost connection to Flèche. Your question is kept; reconnect and try again.",
       );
     }
     state.coachingJob = job;
@@ -277,6 +281,8 @@ export async function resumeCoaching(onState = () => {}) {
   }
   if (state.session?.session_id !== job.session_id) await selectSession(job.session_id);
   state.question = job.question || state.question;
+  state.pendingQuestion = job.question || state.question;
+  state.coachingJob = job;
   state.mode = job.mode || state.mode;
   state.generating = true;
   onState();
@@ -291,6 +297,7 @@ export async function resumeCoaching(onState = () => {}) {
     throw error;
   } finally {
     state.generating = false;
+    state.pendingQuestion = "";
     onState();
   }
 }

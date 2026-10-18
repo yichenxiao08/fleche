@@ -1,4 +1,4 @@
-name: Check FenceCoach
+name: Check Flèche
 on:
   push:
   pull_request:
@@ -28,6 +28,8 @@ jobs:
             node --input-type=module --check < "$file"
           done
       - run: python -m unittest discover -s tests -v
+      - name: Check pending coach messages
+        run: node --experimental-vm-modules scripts/check_coach_loading.mjs
       - run: python -m fencecoach.evaluation
       - name: Exercise MCP tool protocol
         run: python scripts/mcp_smoke.py

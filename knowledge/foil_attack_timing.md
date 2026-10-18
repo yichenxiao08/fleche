@@ -7,7 +7,7 @@ action. Do not diagnose tactical intent or right of way from a solo pose clip.
 
 For an isolated practice drill, an athlete can try five slow, simple lunges, beginning the
 weapon-hand extension just before the front foot launches. Review the hand and foot together,
-then ask a fencing coach whether that tempo fits the intended action. FenceCoach's shoulder,
+then ask a fencing coach whether that tempo fits the intended action. Flèche's shoulder,
 elbow, and wrist landmarks estimate arm shape only; they do not track the blade, valid target,
 touch, opponent, or attack correctness. Only offer this cue when the athlete confirmed foil
 and the weapon-arm side, and the clip has usable arm measurements at movement onset and lunge

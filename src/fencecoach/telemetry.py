@@ -21,7 +21,7 @@ def provider():
 
             _provider = TracerProvider(
                 resource=Resource.create(
-                    {"service.name": "fencecoach", "openinference.project.name": "fencecoach"}
+                    {"service.name": "fleche", "openinference.project.name": "Flèche"}
                 )
             )
             if settings.fencecoach_phoenix_endpoint:
