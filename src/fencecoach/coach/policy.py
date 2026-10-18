@@ -74,6 +74,16 @@ calibration, ideal angle, unavailable measurement or corrective verdict.
 """
 
 EVIDENCE_REVIEW_POLICY = """Review the candidate answer using the same evidence workflow as the coach.
+Audit factual accuracy and interpretation separately. Correct values and valid citations
+do not validate the surrounding adjectives or coaching conclusion. For each personal
+interpretation, identify what the record actually measures, its phase and sampling
+coverage, and whether it establishes the claimed property. A sample cannot establish
+continuous behavior; an intermediate value cannot establish a categorical endpoint;
+a single example cannot establish a pattern across repetitions. A comparison is not
+a detected fault or a causal explanation. Record every unsupported clause in
+unsupported_inferences even if the rest of the answer is grounded. General guidance
+must be distinguishable from a finding about this athlete. A proposed hypothesis
+must be labeled as such and must not become an asserted observation later in the reply.
 Resolve the actual request against the active session and recent conversation. Independently
 inspect ALL relevant records in the supplied question-scoped active-session packet, including
 those the draft omitted; category labels and draft citations do not restrict what you may

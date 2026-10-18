@@ -24,9 +24,11 @@ from fencecoach.coach.intent import (
 from fencecoach.coach.reviewed import reviewed_claim_issues, select_feedback
 from fencecoach.coach.technique_evidence import (
     current_session_context,
+    explicit_phase_requested,
     question_scoped_session_context,
     rep_comparison_result,
     requested_feature_names,
+    requested_timing_features,
 )
 from fencecoach.comparisons import comparable_capture
 from fencecoach.rag.knowledge import search_knowledge
@@ -391,13 +393,7 @@ def build_packet(request):
         question_scoped_session_context(usable, snapshot=canonical_snapshot(usable))
     )
     original_reps = {r["rep_number"]: r for r in usable.technique_evaluation.get("reps", [])}
-    duration_requested = bool(
-        re.search(
-            r"\b(?:how long|duration|elapsed|time|seconds|fast|slow|shortest|longest)\b",
-            question,
-            re.I,
-        )
-    )
+    timing_features = requested_timing_features(usable)
     rows = []
     if (topics or broad) and not (forbidden or explicit_general):
         for rep in packet["per_rep_measurements"]:
@@ -479,49 +475,13 @@ def build_packet(request):
             }
             for record in packet["session_measurements"]
         )
-        # Interval features have definitions even in older saved records without
-        # an explicit phase field. Keep their exact value/event timestamp; never
-        # replace a duration request with a posture reference just because of that.
-        if duration_requested:
-            timing_features = (
-                ("estimated_active_recovery_time", "finish_to_guard_time")
-                if "recovery" in topics
-                else ("action_to_lunge_time",)
-            )
-            allowed_reps = {r["rep"] for r in packet["per_rep_measurements"]}
-            for rep_number, original_rep in original_reps.items():
-                if rep_number not in allowed_reps:
-                    continue
-                for feature in timing_features:
-                    measurement = original_rep.get("measurements", {}).get(feature)
-                    if measurement is None:
-                        continue
-                    identifier = f"rep:{rep_number}:measurement:{feature}"
-                    if any(row["evidence_id"] == identifier for row in rows):
-                        continue
-                    value = (
-                        measurement["value"] / 1000
-                        if measurement["unit"] == "ms"
-                        else measurement["value"]
-                    )
-                    rows.append(
-                        {
-                            "evidence_id": identifier,
-                            "feature": feature,
-                            "rep": rep_number,
-                            "value": value,
-                            "unit": "seconds"
-                            if measurement["unit"] == "ms"
-                            else measurement["unit"],
-                            "phase": measurement.get("phase"),
-                            "meaning": measurement.get("note", ""),
-                            "time_seconds": measurement["time_ms"] / 1000
-                            if measurement.get("time_ms") is not None
-                            else None,
-                        }
-                    )
     # Preserve scalar evidence with explicit selection when canonical phase tags are unavailable.
-    if not rows and not (forbidden or explicit_general or request.evidence_unavailable_reason):
+    if not rows and not (
+        forbidden
+        or explicit_general
+        or request.evidence_unavailable_reason
+        or explicit_phase_requested(question)
+    ):
         features = requested_feature_names(usable)
         for m in valid_metrics:
             relevant = m.name in features or ("recovery" in topics and "recovery" in m.name)
@@ -554,13 +514,6 @@ def build_packet(request):
         and math.isfinite(r["value"])
     ]
     wants_extension = "arm" in topics and bool(re.search(r"\bextension|\belbow", question, re.I))
-    duration_requested = bool(
-        re.search(
-            r"\b(?:how long|duration|elapsed|time|seconds|fast|slow|shortest|longest)\b",
-            question,
-            re.I,
-        )
-    )
 
     def priority(row):
         ref = row.get("reference_range")
@@ -569,14 +522,7 @@ def build_packet(request):
             "elbow" in row["feature"] or "arm_extension" in row["feature"]
         )
         return (
-            not ("time" in row["feature"] or "duration" in row["feature"])
-            if duration_requested
-            else False,
-            row["feature"] != "estimated_active_recovery_time"
-            if duration_requested
-            and "recovery" in topics
-            and not re.search(r"\bfinish.to.guard|\bhold\b", question, re.I)
-            else False,
+            row["feature"] not in timing_features if timing_features else False,
             not extension if wants_extension else False,
             not bool(ref),
             -gap,
@@ -584,7 +530,9 @@ def build_packet(request):
         )
 
     rows.sort(key=priority)
-    all_reps = wants_all_reps(question)
+    all_reps = wants_all_reps(question) or bool(
+        request.dialogue_state and request.dialogue_state.all_reps
+    )
     selected = []
     topic_labels = {
         "arm": "sword arm",
@@ -613,6 +561,8 @@ def build_packet(request):
         for subject in subjects:
             atom = usable.model_copy(update={"question": subject})
             features = requested_feature_names(atom)
+            if topic in {"speed", "recovery", "lunge"}:
+                features.update(timing_features)
             groups.append(
                 [
                     r
@@ -692,6 +642,23 @@ def build_packet(request):
         sources[row["evidence_id"]] = row
         if row.get("reference_id"):
             sources[row["reference_id"]] = row["reference_record"]
+    requested_coverage = requested_reps or (
+        {r["rep_number"] for r in request.technique_evaluation.get("reps", [])}
+        if all_reps
+        else set()
+    )
+    missing_reps = requested_coverage - {r.get("rep") for r in selected}
+    if selected and missing_reps:
+        names = ("rep " if len(missing_reps) == 1 else "reps ") + ", ".join(
+            map(str, sorted(missing_reps))
+        )
+        units.append(
+            Unit(
+                "rep_gaps",
+                f"I don't have a reliable matching measurement for {names} within the requested subject and phase.",
+                "gap",
+            )
+        )
     latest = question.rsplit("in this session:", 1)[-1]
     assessment_requested = bool(
         re.search(r"\b(?:good|bad|correct|better|fault|change|fix|should)\b", latest, re.I)

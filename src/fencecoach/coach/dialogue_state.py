@@ -5,11 +5,14 @@ from __future__ import annotations
 import re
 
 from fencecoach.coach.intent import (
+    PHASE_QUALIFIER,
     arm_roles,
     corrected_subject,
     mentioned_rep_numbers,
     question_phases,
     question_topics,
+    wants_all_reps,
+    without_rep_selectors,
 )
 from fencecoach.coach.turns import history_instruction
 from fencecoach.schemas import DialogueState
@@ -28,18 +31,9 @@ ORDINALS = {
 }
 
 
-_EXPLICIT_PHASE = re.compile(
-    r"\b(?:at|during|before|after)\s+(?:the\s+)?(?:starting guard|initial guard|"
-    r"active recovery|recovery peak|peak (?:of (?:the )?)?recovery|returned guard|"
-    r"return(?:ed)? to guard|lunge drive|lunge finish|finish|recovery|lunge)\b|"
-    r"\b(?:starting guard|initial guard|active recovery|recovery peak|returned guard)\b",
-    re.I,
-)
-
-
 def _subject(question):
     """Store a subject without a stale question, scope instruction or verdict."""
-    text = re.sub(r"\brep\s+\d+\b", "", question)
+    text = without_rep_selectors(question)
     text = re.sub(
         r"\b(?:in general|generally|not (?:my|this) (?:session|video))\b", "", text, flags=re.I
     ).strip(" ,:?")
@@ -51,6 +45,26 @@ def _subject(question):
         flags=re.I,
     )
     return re.sub(r"\s+", " ", text).strip(" ,:?")[:350]
+
+
+def _names_subject(question):
+    """A possessive noun phrase can name a subject outside the metric vocabulary."""
+    subject_text = without_rep_selectors(PHASE_QUALIFIER.sub("", question))
+    named = re.search(r"\b(?:my|our|your)\s+([a-z][a-z-]*)", subject_text, re.I)
+    if not named:
+        return False
+    # Asking for the active subject's evidence is still a continuation.
+    return named[1].lower() not in {
+        "number",
+        "numbers",
+        "measurement",
+        "measurements",
+        "statistic",
+        "statistics",
+        "stats",
+        "values",
+        "own",
+    }
 
 
 def resolve_turn(request):
@@ -83,7 +97,11 @@ def _resolve(question, state, request):
         question = re.sub(
             rf"\b{word}\s+(?:rep(?:etition)?|one|lunge)\b", f"rep {number}", question, flags=re.I
         )
-    topics = question_topics(question)
+    # Rep coverage and the movement subject are independent. In particular,
+    # "every lunge" names a rep set, not a switch from the active body part
+    # to a whole-lunge assessment.
+    topics = question_topics(without_rep_selectors(question))
+    all_reps = wants_all_reps(question)
     # A newly named unsupported subject is still a topic switch, never an empty filter.
     explicit_other = bool(
         re.search(r"\b(?:blade|parry|injury|force|nutrition|sleep)\b", question, re.I)
@@ -99,9 +117,7 @@ def _resolve(question, state, request):
             re.I,
         )
     )
-    broad = bool(
-        re.search(r"\b(?:overall|whole session|all reps|every rep|how did i do)\b", question, re.I)
-    )
+    broad = bool(re.search(r"\b(?:overall|whole session|how did i do)\b", question, re.I))
     explicit_general = bool(
         re.search(r"\b(?:in general|generally|not (?:my|this) (?:session|video))\b", question, re.I)
     )
@@ -114,14 +130,15 @@ def _resolve(question, state, request):
             question = re.sub(
                 r"\b(?:last|final)\s+(?:rep|one|lunge)\b", f"rep {numbers[0]}", question, flags=re.I
             )
-    phase_qualifier = _EXPLICIT_PHASE.search(question)
+    explicit_other = explicit_other or (not topics and _names_subject(question))
+    phase_qualifier = PHASE_QUALIFIER.search(question)
     # A phase-only follow-up retains the body part. Naming recovery directly
     # ("And my recovery?") still switches topics; "at the recovery peak" does not.
     phase_only = bool(
         followup
         and phase_qualifier
         and state.subject
-        and not question_topics(_EXPLICIT_PHASE.sub("", question))
+        and not question_topics(PHASE_QUALIFIER.sub("", question))
         and not re.search(r"\bmy (?:active )?recovery\b", question, re.I)
     )
     attribute_followup = bool(
@@ -151,22 +168,23 @@ def _resolve(question, state, request):
         state.scope = "general"
     elif history_instruction(question):
         state.scope = "history"
-    elif personal or broad:
+    elif personal or broad or all_reps:
         state.scope = "session"
     if inherit and state.subject:
         state.subject = _subject(state.subject)
         if phase_qualifier:
             state.subject = (
-                _EXPLICIT_PHASE.sub("", state.subject).strip() + " " + phase_qualifier.group()
+                PHASE_QUALIFIER.sub("", state.subject).strip() + " " + phase_qualifier.group()
             ).strip()
         resolved = f"Regarding {state.subject} in this session: {question}"
     else:
         resolved = question
-        if topics or explicit_other or broad:
+        if topics or explicit_other or broad or all_reps:
             state.subject = _subject(question)
             state.topics = topics
             if broad or not followup:
                 state.rep_numbers = []
+                state.all_reps = False
             if re.search(
                 r"\b(?:in general|generally|not (?:my|this) (?:session|video))\b", question, re.I
             ):
@@ -175,12 +193,19 @@ def _resolve(question, state, request):
                 state.scope = "history"
             else:
                 state.scope = "session"
-    if numbers:
+    if all_reps:
+        state.rep_numbers = []
+        state.all_reps = True
+    elif numbers:
         state.rep_numbers = numbers
+        state.all_reps = False
     elif broad:
         state.rep_numbers = []
+        state.all_reps = False
     elif state.rep_numbers and followup:
         resolved += " (rep " + ", ".join(map(str, state.rep_numbers)) + ")"
+    elif state.all_reps and (inherit or followup):
+        resolved += " (all reps)"
     state.topics = question_topics(resolved)
     state.phases = sorted(question_phases(resolved))
     state.arm_roles = list(arm_roles(resolved)) if "arm" in state.topics else []

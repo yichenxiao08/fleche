@@ -7,6 +7,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 
 from fencecoach.coach.policy import EVIDENCE_REVIEW_POLICY
+from fencecoach.coach.technique_evidence import measurement_matches_phases
 
 
 class PersonalChange(BaseModel):
@@ -86,6 +87,10 @@ class AnswerReview(BaseModel):
     )
     grounded: bool = Field(
         description="Every personal observation or correction in the candidate answer is supported by relevant supplied evidence; general guidance is not presented as a detected fault."
+    )
+    unsupported_inferences: list[str] = Field(
+        default_factory=list,
+        description="Quote every candidate clause whose interpretation exceeds its evidence, even when its numbers are correct. Check inferred quality, categorical endpoints, continuity, causes, outcomes and across-rep patterns against the supplied measurement definition, phase and sampling coverage. Empty only when each interpretation is supported or explicitly presented as a hypothesis rather than an observed finding.",
     )
     uses_session_evidence: bool = Field(
         description="The candidate answer makes at least one observation or comparison about the current session."
@@ -209,7 +214,7 @@ def cited_subject_issues(
     if (
         requested_phases
         and matching
-        and not any(record.get("phase") in phase_scope for record in matching)
+        and not any(measurement_matches_phases(record, phase_scope) for record in matching)
     ):
         issues.append(
             "The cited feature belongs to a different phase than the athlete asked about."
@@ -233,6 +238,11 @@ def review_issues(
     issues = []
     if not decision.grounded or not decision.addresses_question:
         issues.append("The answer is unsupported or does not address the exact question.")
+    if decision.unsupported_inferences:
+        issues.append(
+            "The interpretation exceeds the measured evidence: "
+            + "; ".join(decision.unsupported_inferences)
+        )
     if (
         require_session or decision.session_evidence_relevant
     ) and not decision.uses_session_evidence:

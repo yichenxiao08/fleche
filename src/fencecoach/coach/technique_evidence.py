@@ -6,6 +6,7 @@ from statistics import median
 
 from fencecoach.coach.analysis import _rep_key, build_coaching_brief
 from fencecoach.coach.intent import (
+    PHASE_QUALIFIER,
     arm_roles,
     arm_sides,
     classify_coach_question,
@@ -16,6 +17,18 @@ from fencecoach.coach.intent import (
 from fencecoach.coach.policy import MOTION_POLICY
 from fencecoach.coach.turns import motion_question
 from fencecoach.schemas import KnowledgeSource
+
+
+def _has_measured_finish(rep, feature):
+    finishes = {"finish", "lunge_finish"}
+    measurement = rep.get("measures", rep.get("measurements", {})).get(feature, {})
+    if measurement.get("phase") in finishes:
+        return True
+    return any(
+        feature in phase.get("values", phase.get("medians", phase.get("measurements", {})))
+        for name, phase in rep.get("phases", rep.get("phase_medians", {})).items()
+        if name in finishes
+    )
 
 
 def motion_context(request):
@@ -71,7 +84,14 @@ def reference_context(request, selected):
             candidates = [
                 row
                 for row in candidates
-                if row["metric"] in requested_metrics and phase_matches(row.get("phase"))
+                if row["metric"] in requested_metrics
+                and phase_matches(row.get("phase"))
+                and (
+                    row.get("phase") != "finish"
+                    or "lunge_hold" in requested_phases
+                    or not explicit_phase_requested(request.question)
+                    or _has_measured_finish(rep, row["metric"])
+                )
             ]
         elif re.search(r"\b(?:speed|fast|slow|power|explosive)\b", question):
             candidates = [r for r in candidates if r["phase"] in {"action", "active_recovery"}]
@@ -96,6 +116,12 @@ def reference_context(request, selected):
                     for p in comparison.get("coaching_priorities", [])
                     if (not requested_metrics or p.get("metric") in requested_metrics)
                     and phase_matches(p.get("phase", "finish"))
+                    and (
+                        p.get("phase", "finish") != "finish"
+                        or "lunge_hold" in requested_phases
+                        or not explicit_phase_requested(request.question)
+                        or _has_measured_finish(rep, p.get("metric", ""))
+                    )
                 ],
                 "comparisons": candidates[:6],
             }
@@ -241,10 +267,72 @@ _TOPIC_LIMITS = {
 }
 
 
+_RECOVERY_PHASES = {"active_recovery", "recovery_peak", "returned_guard"}
+_INTERVAL_PHASES = {
+    "action_to_lunge_time": {"lunge_drive", "lunge_finish"},
+    "action_projected_hip_speed": {"lunge_drive"},
+    "estimated_active_recovery_time": _RECOVERY_PHASES,
+    "estimated_recovery_onset": _RECOVERY_PHASES,
+    "finish_to_guard_time": _RECOVERY_PHASES | {"lunge_finish", "lunge_hold", "finish"},
+}
+
+
+def measurement_matches_phases(record, phases):
+    """Match declared phase or a defined interval without inventing a phase label."""
+    requested = set(phases)
+    feature = record.get("feature") or record.get("metric") or record.get("name")
+    return bool(
+        not requested
+        or record.get("phase") in requested
+        or record.get("phase") is None
+        and requested & _INTERVAL_PHASES.get(feature, set())
+    )
+
+
+def explicit_phase_requested(question):
+    """Distinguish a named phase from the default phases of a body-part query."""
+    return bool(
+        PHASE_QUALIFIER.search(question)
+        or re.search(
+            r"\b(?:finish position|back in guard|recover(?:y|ies|ing)?|"
+            r"return(?:ed|ing)? to guard|en garde|reset)\b",
+            question,
+            re.I,
+        )
+    )
+
+
+def requested_timing_features(request):
+    """Choose the measured operation from its phase, independently of its subject."""
+    question = request.question
+    duration = re.search(
+        r"\b(?:how long|duration|elapsed|time|timing|seconds|interval|shortest|longest)\b",
+        question,
+        re.I,
+    )
+    speed = re.search(
+        r"\b(?:speed|fast(?:er|est)?|slow(?:er|est)?|quick(?:er|est)?)\b", question, re.I
+    )
+    if not (duration or speed):
+        return ()
+    if re.search(r"\bfinish[ -]to[ -]guard\b", question, re.I):
+        return ("finish_to_guard_time",)
+    phases = question_phases(question)
+    if phases and phases <= _RECOVERY_PHASES:
+        return ("estimated_active_recovery_time",)
+    if phases & {"lunge_drive", "lunge_finish", "finish"}:
+        return ("action_to_lunge_time",) if duration else ("action_projected_hip_speed",)
+    return ()
+
+
 def requested_feature_names(request):
     """One body-role resolver shared by evidence selection and answer verification."""
     topics = question_topics(request.question)
     features = set().union(*(_TOPIC_MEASUREMENTS.get(topic, set()) for topic in topics))
+    timing_features = requested_timing_features(request)
+    if timing_features and set(topics) & {"speed", "recovery", "lunge"}:
+        features -= _INTERVAL_PHASES.keys()
+        features.update(timing_features)
     if "arm" not in topics:
         return features
     features -= _TOPIC_MEASUREMENTS["arm"]
@@ -273,8 +361,8 @@ def requested_feature_names(request):
 def _metric_phase(name):
     if "initial_guard" in name:
         return "starting_guard"
-    if name.endswith("_at_peak"):
-        return "lunge_finish"
+    # A detected peak is a legacy bookmark, not an independently measured phase.
+    # Keep it usable as an at-peak observation without relabeling it as finish.
     if name.endswith("_at_onset"):
         return "lunge_drive"
     return None
@@ -301,7 +389,17 @@ def question_scoped_session_context(request, snapshot=None):
         sorted(phases),
         reps if intent.kind in {"first_rep", "last_rep", "specific_rep", "specific_reps"} else (),
         snapshot=snapshot,
+        include_unphased_metrics=not explicit_phase_requested(request.question),
     )
+    if phases and phases <= {"finish", "lunge_finish"}:
+        for rep in packet["per_rep_measurements"]:
+            # Older reference rows call both a finish sample and a held lunge
+            # "finish". Only retain that alias when this rep has a measured finish.
+            rep["reference_comparisons"] = [
+                row
+                for row in rep["reference_comparisons"]
+                if row.get("phase") != "finish" or _has_measured_finish(rep, row["metric"])
+            ]
     if features or phases:
         # These fields summarize the whole clip and can refer to a different
         # movement feature than the question. The exact per-rep comparison rows
@@ -672,7 +770,12 @@ def current_session_context(request):
 
 
 def session_evidence_context(
-    request, feature_names=(), phase_names=(), rep_numbers=(), snapshot=None
+    request,
+    feature_names=(),
+    phase_names=(),
+    rep_numbers=(),
+    snapshot=None,
+    include_unphased_metrics=False,
 ):
     """Select exact records requested by the agent, independent of question categories."""
     packet = json.loads(snapshot if snapshot is not None else current_session_context(request))
@@ -685,7 +788,7 @@ def session_evidence_context(
         rep["measures"] = {
             name: record
             for name, record in rep["measures"].items()
-            if (not features or name in features) and (not phases or record.get("phase") in phases)
+            if (not features or name in features) and measurement_matches_phases(record, phases)
         }
         rep["phases"] = {
             name: {
@@ -721,7 +824,12 @@ def session_evidence_context(
         record
         for record in packet["session_measurements"]
         if (not features or record["feature"] in features)
-        and (not phases or record["phase"] in reference_phases)
+        and (
+            not phases
+            or record["phase"] in reference_phases
+            or include_unphased_metrics
+            and record["phase"] is None
+        )
         and (not numbers or record["rep"] in numbers)
     ]
     packet["requested_scope"] = {

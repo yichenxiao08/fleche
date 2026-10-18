@@ -78,7 +78,7 @@ class ArmScopeTests(unittest.TestCase):
         )
         self.assertTrue(all(not rep["measures"] for rep in packet["per_rep_measurements"]))
         row = packet["session_measurements"][0]
-        self.assertEqual((row["rep"], row["phase"]), (1, "lunge_finish"))
+        self.assertEqual((row["rep"], row["phase"]), (1, None))
         self.assertEqual(packet["answer_affordances"]["supported_corrections"], [])
 
     def test_weapon_query_gets_weapon_evidence_without_requiring_a_correction(self):

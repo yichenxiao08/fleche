@@ -21,6 +21,48 @@ class CoachIntent:
 
 _REP = r"(?:reps?|repetitions?|lunges?|attempts?)"
 _NUMBER_WORDS = r"(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)"
+_ALL_REP_SELECTOR = (
+    rf"\b(?:all|each|every)\s+(?:of\s+)?(?:(?:my|your|the)\s+)?"
+    rf"(?:{_NUMBER_WORDS}\s+)?{_REP}\b"
+)
+_NUMBERED_REP_SELECTOR = (
+    r"\brep(?:s|etition(?:s)?)?\s*#?\s*\d+"
+    r"(?:\s*(?:,|and|&)\s*(?:rep(?:s|etition(?:s)?)?\s*)?#?\s*\d+)*"
+)
+_REP_SELECTOR = re.compile(
+    r"\b(?:(?:in|for|across|from|over|on|during|throughout|of)\s+)?(?:"
+    + _ALL_REP_SELECTOR
+    + "|"
+    + _NUMBERED_REP_SELECTOR
+    + ")",
+    re.I,
+)
+
+
+def without_rep_selectors(text: str) -> str:
+    """Remove explicit rep coverage independently of the requested movement."""
+    return _REP_SELECTOR.sub("", text)
+
+
+# A temporal qualifier is a scope dimension, not another movement subject.
+# Share its grammar with dialogue resolution so retrieval and state agree.
+PHASE_QUALIFIER = re.compile(
+    r"\b(?:at|during|before|after)\s+(?:the\s+)?(?:starting guard|initial guard|"
+    r"active recovery|recovery peak|peak (?:of (?:the )?)?recovery|returned guard|"
+    r"return(?:ed)? to guard|lunge drive|lunge finish|lunge hold|finish|recovery|lunge)\b|"
+    r"\b(?:starting guard|initial guard|active recovery|recovery peak|returned guard)\b",
+    re.I,
+)
+
+
+def without_phase_qualifiers(text: str) -> str:
+    """Remove prepositional phase scope while keeping independently named subjects."""
+    return PHASE_QUALIFIER.sub(
+        lambda match: (
+            "" if re.match(r"(?:at|during|before|after)\b", match.group(), re.I) else match.group()
+        ),
+        text,
+    )
 
 
 def wants_rep_comparison(question: str) -> bool:
@@ -36,16 +78,7 @@ def wants_rep_comparison(question: str) -> bool:
 
 def wants_all_reps(question: str) -> bool:
     return bool(
-        re.search(
-            rf"\b(?:all|each|every)\s+(?:(?:{_NUMBER_WORDS})\s+)?{_REP}\b",
-            question,
-            re.I,
-        )
-        or re.search(
-            r"\ball of (?:my|your|the)\s+(?:reps|repetitions|lunges|attempts)\b",
-            question,
-            re.I,
-        )
+        re.search(_ALL_REP_SELECTOR, question, re.I)
         or re.search(
             r"\b(?:all|each|every)\s+(?:of\s+)?(?:(?:my|your|the)\s+)?(?:recoveries|returns to guard)\b",
             question,
@@ -57,7 +90,7 @@ def wants_all_reps(question: str) -> bool:
 def mentioned_rep_numbers(text: str) -> set[int]:
     """Read explicit rep numbers from prose or a compact grouped list."""
     mentions = re.finditer(
-        r"\brep(?:s|etition(?:s)?)?\s*#?\s*\d+(?:\s*(?:,|and|&)\s*(?:rep(?:s|etition(?:s)?)?\s*)?#?\s*\d+)*",
+        _NUMBERED_REP_SELECTOR,
         text,
         re.I,
     )
@@ -93,7 +126,12 @@ def question_topics(question: str) -> list[str]:
         ("front_leg", r"\b(?:front|lead)\s+(?:leg|foot|knee)\b|\bknees?\b"),
         ("lunge", r"\b(?:lunge|lunges|technique|form|footwork)\b"),
     )
-    topics = [topic for topic, pattern in patterns if re.search(pattern, question, re.I)]
+    subject = without_phase_qualifiers(question)
+    topics = [topic for topic, pattern in patterns if re.search(pattern, subject, re.I)]
+    if not topics:
+        # A standalone recovery question still names a movement; it only acts
+        # as phase scope when another subject is explicitly present.
+        topics = [topic for topic, pattern in patterns if re.search(pattern, question, re.I)]
     if (
         "arm" in topics
         and set(topics).intersection({"front_leg", "rear_leg", "torso"})
@@ -178,23 +216,45 @@ def arm_sides(question: str, profile: dict) -> set[str]:
     }
 
 
-def question_phases(question: str) -> set[str]:
-    """Resolve named phases first, then use the phase implied by the requested movement."""
-    question = corrected_subject(question)
+def _named_phases(phase_text: str) -> set[str]:
+    """Map an explicit phase name to its measured scope, without topic inference."""
     if re.search(
-        r"\b(?:peak|deepest point)\s+(?:of )?(?:the )?recovery\b|\brecovery peak\b", question, re.I
+        r"\b(?:peak|deepest point)\s+(?:of )?(?:the )?recovery\b|\brecovery peak\b",
+        phase_text,
+        re.I,
     ):
         return {"recovery_peak"}
-    if re.search(r"\bactive recovery\b", question, re.I):
+    if re.search(r"\bactive recovery\b", phase_text, re.I):
         return {"active_recovery"}
-    if re.search(r"\b(?:return(?:ed)? to guard|back in guard|returned guard)\b", question, re.I):
+    if re.search(r"\b(?:return(?:ed)? to guard|back in guard|returned guard)\b", phase_text, re.I):
         return {"returned_guard"}
-    if re.search(r"\b(?:recover(?:y|ies|ing)?|return(?:ed|ing)?|reset|en garde)\b", question, re.I):
+    if re.search(
+        r"\b(?:recover(?:y|ies|ing)?|return(?:ed|ing)?|reset|en garde)\b", phase_text, re.I
+    ):
         return {"active_recovery", "recovery_peak", "returned_guard"}
-    if re.search(r"\b(?:starting|initial) guard\b|\bbefore the lunge\b", question, re.I):
+    if re.search(r"\b(?:starting|initial) guard\b|\bbefore (?:the )?lunge\b", phase_text, re.I):
         return {"starting_guard"}
-    if re.search(r"\bat (?:the )?(?:lunge )?finish\b|\bfinish position\b", question, re.I):
-        return {"finish", "lunge_finish", "lunge_hold"}
+    if re.search(r"\blunge (?:drive|hold)\b", phase_text, re.I):
+        return {"lunge_hold" if re.search(r"\bhold\b", phase_text, re.I) else "lunge_drive"}
+    if re.search(
+        r"\b(?:at|during) (?:the )?(?:lunge )?finish\b|\bfinish position\b", phase_text, re.I
+    ):
+        # "finish" is a legacy name for the finish sample. A held lunge is
+        # a different measured interval and cannot stand in for that sample.
+        return {"finish", "lunge_finish"}
+    return set()
+
+
+def question_phases(question: str) -> set[str]:
+    """Prefer explicit phase scope, then named movement, then implied phases."""
+    question = corrected_subject(question)
+    qualifier = PHASE_QUALIFIER.search(question)
+    phases = _named_phases(qualifier.group()) if qualifier else set()
+    # A qualifier such as "after the lunge" has no single measured phase.
+    # Keep an explicitly named return/recovery elsewhere in the question.
+    phases = phases or _named_phases(question)
+    if phases:
+        return phases
     topic_phases = {
         "recovery": {"active_recovery", "recovery_peak", "returned_guard"},
         "speed": {"lunge_drive", "active_recovery"},

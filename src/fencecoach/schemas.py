@@ -84,7 +84,22 @@ class DialogueState(BaseModel):
     arm_roles: list[str] = Field(default_factory=list)
     scope: Literal["session", "general", "history"] = "session"
     rep_numbers: list[int] = Field(default_factory=list)
+    all_reps: bool = False
     last_cited_evidence: list[str] = Field(default_factory=list)
+    core_version: str = "old"
+    current_topic: str = ""
+    movement: str = ""
+    open_clarifying_question: dict | None = None
+    last_provider: str | None = None
+    turns_completed: int = 0
+    turn_type: str = "coaching"
+    resolution_confidence: str = "high"
+    assumption_note: str = ""
+    last_packet: dict | None = None
+    packet_snapshot_hash: str = ""
+    already_given: list[dict] = Field(default_factory=list)
+    history_reset: bool = False
+    assessment_explained: list[str] = Field(default_factory=list)
 
 
 class CoachRequest(MetricSet):
@@ -164,7 +179,7 @@ class RunRecord(BaseModel):
     question: str
     response_kind: Literal["report", "conversation"] = "report"
     focus_metric_id: str | None = None
-    mode: Literal["demo", "bedrock", "local", "gemini"]
+    mode: Literal["demo", "bedrock", "local", "gemini", "groq"]
     model_id: str | None = None
     retrieval_method: str
     report: CoachingReport
