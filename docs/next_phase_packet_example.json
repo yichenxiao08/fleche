@@ -1,0 +1,199 @@
+{
+  "availability": {
+    "status": "measurements_available",
+    "requested_scope": "available",
+    "tracking_warning": null,
+    "visibility_observations": [],
+    "interpretation": "Missing measurements do not establish that the footage fails to show a body part."
+  },
+  "scope": {
+    "topics": [
+      "arm"
+    ],
+    "phases": [
+      "lunge_finish"
+    ],
+    "rep_numbers": [
+      2
+    ],
+    "all_reps": false,
+    "available_reps": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "unavailable_requested_reps": [],
+    "movement": ""
+  },
+  "requested_operation": "observation",
+  "last_cited_evidence": [
+    "rep:4:measurement:weapon_arm_direction",
+    "rep:8:measurement:weapon_arm_direction",
+    "rep:3:measurement:weapon_elbow_angle",
+    "rep:5:measurement:weapon_elbow_angle"
+  ],
+  "capture": {
+    "weapon_arm": "right",
+    "front_leg": "right",
+    "camera_view": "side"
+  },
+  "measurements": [
+    {
+      "evidence_id": "rep:2:measurement:weapon_arm_direction",
+      "feature": "weapon_arm_direction",
+      "rep": 2,
+      "phase": "lunge_finish",
+      "value": 18.2,
+      "unit": "deg",
+      "topic": "arm",
+      "display": "18.2 deg",
+      "definition": "Weapon shoulder-to-wrist direction against image horizontal.",
+      "does_not_indicate": "Elbow bend, target alignment without a known target, or right of way."
+    },
+    {
+      "evidence_id": "rep:2:measurement:weapon_elbow_angle",
+      "feature": "weapon_elbow_angle",
+      "rep": 2,
+      "phase": "lunge_finish",
+      "value": 168.1,
+      "unit": "deg",
+      "topic": "arm",
+      "display": "168.1 deg",
+      "definition": "Included angle at the weapon elbow; larger is straighter.",
+      "does_not_indicate": "Extension timing, arm direction, blade position, or technique quality."
+    }
+  ],
+  "feature_meanings": {
+    "weapon_arm_direction": "Weapon-arm direction relative to image horizontal; not elbow bend or blade tracking.",
+    "weapon_elbow_angle": "Included weapon-elbow angle; larger means straighter, not earlier extension or better technique."
+  },
+  "general_guidance": [
+    {
+      "source_id": "lunge_arm_roles.md#chunk-2",
+      "kind": "general teaching material, not an athlete target",
+      "text": "## Questions about angles\n\nAn elbow's bend and an arm's direction relative to the floor or torso are different\nangles. These references teach extending toward the chosen target and a conventional\nrear-arm finish; they do not establish a universal numeric shoulder-elevation target.\nAnswer the direction question concretely: sword arm toward the target, non-sword arm\nbehind in the traditional lunge finish. Target height changes the aiming direction.\nDo not turn an observed elbow measurement into an ideal angle for the whole arm."
+    },
+    {
+      "source_id": "lunge_arm_roles.md#chunk-0",
+      "kind": "general teaching material, not an athlete target",
+      "text": "# Sword arm and non-sword arm in a simple lunge\n\nThe weapon arm, also called the sword arm, is the arm holding the fencing weapon.\nIn the conventional simple-lunge teaching sequence, this arm reaches forward toward\nthe target with the point aimed at it. It is not extended sideways for balance.\nThe rear or non-weapon arm is the other arm. In the conventional teaching finish,\nit extends back behind the fencer, separately from the weapon arm. Do not prescribe\na shoulder-width distance between an arm and the body: that is not this instruction.\nExact non-weapon-arm positions vary with style and action; this is general instruction,\nnot a finding that an athlete's recorded arm position is faulty."
+    }
+  ],
+  "named_library_item": null,
+  "clarification": null,
+  "policy": "Athlete facts are only the measurements above. Library text is general teaching, never the athlete's target or a finding about this clip. No reference-rep ranges or universal targets are supplied. Answer on the requested subject even when tracking is unsupported.",
+  "assessments": [
+    {
+      "topic": "arm",
+      "status": "not assessed",
+      "basis": [],
+      "measured": [
+        {
+          "evidence_id": "rep:2:measurement:weapon_arm_direction",
+          "feature": "weapon_arm_direction",
+          "rep": 2,
+          "phase": "lunge_finish",
+          "value": 18.2,
+          "unit": "deg",
+          "topic": "arm",
+          "display": "18.2 deg",
+          "definition": "Weapon shoulder-to-wrist direction against image horizontal.",
+          "does_not_indicate": "Elbow bend, target alignment without a known target, or right of way."
+        },
+        {
+          "evidence_id": "rep:2:measurement:weapon_elbow_angle",
+          "feature": "weapon_elbow_angle",
+          "rep": 2,
+          "phase": "lunge_finish",
+          "value": 168.1,
+          "unit": "deg",
+          "topic": "arm",
+          "display": "168.1 deg",
+          "definition": "Included angle at the weapon elbow; larger is straighter.",
+          "does_not_indicate": "Extension timing, arm direction, blade position, or technique quality."
+        }
+      ],
+      "needed": "A matching drill-specific library standard or a coach-reviewed target and the corresponding phase footage.",
+      "reason": "No applicable explicit library grading standard; measured position alone does not establish quality."
+    }
+  ],
+  "scope_text": "This packet covers arm, movement saved session, reps [2], phases ['lunge_finish']. Missing items here do not imply they are missing throughout the session.",
+  "turn_type": "coaching",
+  "resolution": {
+    "confidence": "high",
+    "assumption": ""
+  },
+  "conversation_memory": {
+    "already_given": [
+      {
+        "scope": {
+          "topics": [
+            "arm"
+          ],
+          "phases": [
+            "lunge_finish"
+          ],
+          "rep_numbers": [],
+          "all_reps": false,
+          "available_reps": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "unavailable_requested_reps": [],
+          "movement": ""
+        },
+        "reply": "Your arm extension shows a weapon arm direction between 15.6 deg and 24.0 deg across your reps at the lunge finish, with elbow angles ranging from 145.7 deg to 174.4 deg.",
+        "cited_evidence": [
+          "rep:4:measurement:weapon_arm_direction",
+          "rep:8:measurement:weapon_arm_direction",
+          "rep:3:measurement:weapon_elbow_angle",
+          "rep:5:measurement:weapon_elbow_angle"
+        ]
+      },
+      {
+        "scope": {
+          "topics": [
+            "arm"
+          ],
+          "phases": [
+            "lunge_finish"
+          ],
+          "rep_numbers": [],
+          "all_reps": false,
+          "available_reps": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "unavailable_requested_reps": [],
+          "movement": ""
+        },
+        "reply": "The measurements alone do not establish a quality rating or target without a matching standard or coach review.",
+        "cited_evidence": []
+      }
+    ],
+    "assessment_already_explained": [
+      "arm"
+    ],
+    "instruction": "Advance the answer. Do not restate these values or advice unless explicitly asked to repeat or compare. For a previously explained not-assessed verdict, give the next useful step instead of another decline."
+  },
+  "response_plan": "Answer the current question from the scoped evidence; distinguish observation from a quality judgment.",
+  "query_scope": "session",
+  "evidence_reused": false
+}

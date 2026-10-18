@@ -1,0 +1,34 @@
+:root { color-scheme: light; font-family: "Segoe UI", sans-serif; color: #232320; background: #faf9f6; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+header { max-width: 1120px; margin: auto; padding: 28px 28px 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid #e7e3dc; }
+a { color: inherit; }
+.brand { font-size: 18px; font-weight: 800; letter-spacing: .08em; text-decoration: none; }
+.recorded { display: inline-block; border: 1px solid #d7b67a; color: #704c16; background: #fff4dc; padding: 6px 11px; border-radius: 20px; font-size: 13px; font-weight: 650; }
+main { max-width: 1120px; margin: auto; padding: 34px 28px 64px; }
+h1 { font: 400 clamp(32px, 5vw, 48px)/1.12 Georgia, serif; margin: 0 0 16px; }
+.intro { max-width: 700px; color: #66665e; line-height: 1.6; margin-bottom: 30px; }
+.layout { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 24px; align-items: start; }
+aside { display: grid; gap: 12px; }
+label { font-weight: 600; font-size: 14px; }
+select, button { font: inherit; border-radius: 8px; border: 1px solid #d9d5ce; background: #fff; padding: 11px 13px; color: inherit; }
+select { width: 100%; }
+.details { font-size: 13px; color: #74746d; line-height: 1.65; white-space: pre-line; }
+.panel { background: #fff; border: 1px solid #e7e3dc; border-radius: 16px; overflow: hidden; }
+.panel-heading { padding: 20px 24px; border-bottom: 1px solid #e7e3dc; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
+h2 { font-size: 18px; margin: 0; }
+#conversation { padding: 24px; min-height: 280px; display: flex; flex-direction: column; gap: 20px; }
+.empty { color: #74746d; margin: auto 0; text-align: center; line-height: 1.7; }
+.turn { display: flex; flex-direction: column; gap: 14px; }
+.message { margin: 0; padding: 14px 17px; border-radius: 12px; white-space: pre-wrap; line-height: 1.6; font-size: 15px; }
+.athlete { margin-left: 12%; background: #f3ede9; }
+.coach { background: #f7f7f3; margin-right: 6%; }
+.message small { display: block; color: #74746d; font-size: 12px; margin-bottom: 7px; white-space: normal; }
+.controls { border-top: 1px solid #e7e3dc; padding: 16px 24px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+button { cursor: pointer; }
+button.primary { background: #232320; color: #fff; border-color: #232320; }
+button:disabled { opacity: .45; cursor: default; }
+button:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid #b46c27; outline-offset: 3px; }
+#progress { color: #74746d; font-size: 13px; margin-left: auto; }
+.footnote { font-size: 13px; color: #74746d; line-height: 1.6; margin-top: 18px; }
+@media (max-width: 700px) { .layout { grid-template-columns: 1fr; } header, main { padding-left: 18px; padding-right: 18px; } .details { margin: 0 0 5px; } #conversation { padding: 18px; } .panel-heading, .controls { padding: 16px 18px; } .brand { font-size: 15px; } }

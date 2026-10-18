@@ -26,39 +26,88 @@ Video inference needs a paid `2c-4g` service and a 10 GB persistent disk. The di
 
 ## Run with Python
 
-Python 3.12+, Ollama, and the model are needed for local video and live coaching. On Windows:
+Python 3.12+ is required. The default coach uses the configured Groq/Gemini keys;
+Ollama is optional for the retained legacy local path. On Windows:
 
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.lock -r requirements-video.lock
 .\.venv\Scripts\python.exe -m pip install -e '.[dev,video]'
 .\.venv\Scripts\python.exe scripts/setup_video.py
-ollama pull qwen2.5:3b
 $env:FENCECOACH_SEED_EXAMPLES='true'
 .\.venv\Scripts\python.exe -m uvicorn fencecoach.api:app --host 127.0.0.1 --port 8000
 ```
 
-Start Ollama first if its desktop service is not running. On this development computer `scripts/start_local.ps1` also supports the existing portable runtime. Copy `.env.example` to `.env` for optional settings. Saved sessions/reviews and logs live in SQLite; unsent camera drafts live in browser IndexedDB. Clearing browser storage deletes unsent drafts, not saved server sessions.
+For the legacy local path, start Ollama first. On this development computer `scripts/start_local.ps1` also supports the existing portable runtime. Copy `.env.example` to `.env` for optional settings. Saved sessions/reviews and logs live in SQLite; unsent camera drafts live in browser IndexedDB. Clearing browser storage deletes unsent drafts, not saved server sessions.
 
-## Gemini coaching
+## Session coach — fewshot-v7.6
 
-The conversational path now resolves topic, phase and repetition in application-owned
-state, retrieves session evidence before the model call, and streams only validated
-phrasing. Gemini is primary; Qwen takes over after quota, timeout or transient provider
-errors. A cooldown respects Retry-After and permits one recovery probe. Invalid request
-and authentication errors are surfaced without silently switching providers.
+The default `COACH_CORE=new` answers questions about the loaded session, gives
+verdicts against usual qualitative coaching cues, and compares your own reps when
+there is no published standard. It uses available arm, knee, torso, recovery and
+relative hip-speed readings, retaining topic and rep across follow-ups.
 
-Every observation keeps its feature, phase, rep, units and source together. The model
-chooses among supported phrasings and cannot add new measurements or drills. Replies
-use shorter coaching language; explicit measurement limits remain honest. Library
-guidance is retrieved and attributed, and general advice is labeled only when relevant
-session and library evidence are absent. Bedrock and the legacy writer remain available;
-set `FENCECOACH_VERIFIED_DIALOGUE=false` to exercise the retained legacy path.
+“How good?” is decided for the measured topic: agreement with a coaching cue can
+support a positive verdict; mixed readings call for an inconsistent verdict;
+readings that contradict the cue call for a negative verdict. Where no standard
+exists, such as recovery duration or relative hip speed, the coach compares your
+own reps without inventing a numerical pass/fail boundary. None is published for
+these app measurements. Readings are 2D estimates, not correctness scores.
+
+The coach cannot assess blade control, force, calibrated speed or metres per
+second, distance travelled, arm-versus-foot sequencing, inward knee collapse or
+rear-foot roll. Flèche discussion is limited to general principles in the authored
+material. Finish angles do not establish earlier movement or tactical effects.
+`knowledge/reference_ranges.md` remains unapproved and unloaded.
+
+Provider order is **Groq Qwen → Gemini → a plain failure message**:
+“I couldn't reach the model, try again shortly.” The new core uses the existing
+free tiers with daily limits and cooldowns; it has no local-model fallback.
+No billing, extra accounts or extra keys are required. The model writes the reply
+without output checkers, guards, templates or sentence deletion.
+For use without live quota, [watch the recorded demo](docs/demo.mp4); it is an
+older recorded rehearsal, not proof of the current coach's accuracy.
+
+The owner reviewed the live acceptance and approved this default on October 18,
+2026: zero hard failures across the 13 reviewed v7.6 retest replies, all eight
+acceptance criteria PASS, including a real Groq-to-Gemini switch. Criterion 7 is
+input-only tracking/athlete-selection evidence, not model-quality evidence.
+There were 11 soft-slip turns. This result does not establish broader accuracy.
+See [full acceptance transcripts](docs/live_acceptance.md),
+[rating sheets](docs/rating_sheet.md) and [pass notes](docs/pass_notes.md).
+
+Known limitations from those soft slips:
+
+- “That's solid” recurs across different topics.
+- “Why does that matter?” answers sometimes claim more than a finish angle shows,
+  including drive, balance or recovery benefits.
+- Cues repeat across turns in a chain.
+- “Every rep” sometimes includes a rep with no reading.
+- A varying series is occasionally compressed into a trend.
+
+For a one-setting rollback, put `COACH_CORE=old` in the ignored `.env` file and
+restart the app. The old implementation remains in the code. Remove that override
+(or set `COACH_CORE=new`) and restart to restore the new default.
+
+## Legacy Gemini coaching (`COACH_CORE=old`)
+
+With `COACH_CORE=old`, the legacy coach is an LLM with read-only evidence tools. It decides which tools to
+use and writes the conversational reply. Application-owned state carries subject,
+phase, role and repetition coverage across turns; the latest athlete message remains
+the model's actual question. Gemini is primary, with a cooldown and local failover
+for quota, timeout and transient provider errors.
+
+Measurements and references retain their feature, phase, rep, units and provenance.
+The writer's answer passes evidence and conversation checks before publication;
+Gemini also receives an independent semantic review and a bounded repair opportunity.
+These checks reduce errors without proving all free-form claims correct. The earlier
+fixed-phrasing selector remains an explicit diagnostic option with
+`FENCECOACH_VERIFIED_DIALOGUE=true`. See [the conversation design and validation](docs/conversational-coach.md).
 
 The audit, measured results and remaining limits are in [the audit](docs/coach_audit.md)
 and [the evaluation report](docs/coach_audit_results.md). Replay saved-session cases with
 `python scripts/eval_coach.py --phase after --providers gemini local --run-id my-run`.
-`--offline` checks the protocol and evidence without claiming model quality or latency;
+`--engine verified --offline` checks the selector protocol and evidence without claiming model quality or latency;
 `--forced-switch` verifies the 429/cooldown conversation independently of real quota.
 
 Create a key in [Google AI Studio](https://aistudio.google.com/api-keys), then save `GEMINI_API_KEY` in the ignored server `.env` file. Never put it in browser code or commit it. Install the project dependencies, then run `python scripts/configure_gemini.py`: it lists available models, makes one generic coaching request, and selects Gemini as the default only after success. Restart the server and refresh the app; choose **Gemini AI** in the coach. API usage is subject to Google quotas and billing settings. The setup command does not enable billing.
@@ -72,7 +121,7 @@ Implementation references: [LangChain Gemini integration](https://docs.langchain
 1. **Record/upload:** silent camera recording or a video under two minutes / 200 MB. Confirm the weapon/lead side, camera motion, and reusable camera setup name.
 2. **QA:** supported, supported with warnings, or unsupported with filming tips. Resolution, full-body visibility, multiple poses, usable-frame coverage, camera-motion evidence, and track reacquisitions are checked. These are engineering heuristics, not calibrated accuracy guarantees.
 3. **Review:** timestamped proposed reps, exercise regions, landmark overlays, and a 12-frame contact sheet. Proposals require review. Saving unsupported clips as personal coaching evidence is blocked, including older saved sessions.
-4. **Coach:** a natural conversation over saved measurements and retrieved notes. Assessments aim for a timestamped observation, one cue, one drill, and its purpose. Ordinary follow-ups retain conversational history. Measurements are not correctness scores.
+4. **Coach:** ask about the loaded session and its usable measurements. The default model receives the session packet and authored teaching material, retaining conversational focus across follow-ups. Drills or next steps are requested explicitly. Measurements are not correctness scores.
 5. **Practice/progress:** persistent journal entries and drills. Comparisons require the same declared, named camera setup and capture details; different setups show **Not comparable**. Shorter return time alone is not an improvement claim.
 
 ## Coach feedback workspace
@@ -86,20 +135,23 @@ Draft feedback autosaves to the server with a browser backup. Saves use revision
 ```mermaid
 flowchart LR
   Browser[Record / upload / review] --> API[FastAPI + durable queues]
-  API --> Worker[Supervised video worker]
-  Worker --> QA[Pose continuity + QA gate]
-  QA --> Evidence[Cached evidence + timestamps]
-  Evidence --> DB[SQLite / optional PostgreSQL]
-  DB --> Graph[Bounded LangGraph coach]
-  Library[Coaching library / BM25 or optional embeddings] --> Graph
-  Graph --> LLM[Ollama / Gemini / optional Bedrock]
-  Graph --> Checks[Known-claim and evidence checks]
-  Checks --> Browser
-  Graph --> Phoenix[OpenTelemetry / Phoenix + local trace log]
-  DB --> MCP[Five read-only MCP tools]
+  API --> Worker[Video worker + tracking QA]
+  Worker --> DB[Saved sessions + measurements]
+  DB --> Packet[Topic / phase / rep packet]
+  Library[Authored teaching + measurement map] --> Writer[v7.6 model writer]
+  Packet --> Writer
+  Writer --> Groq[Groq Qwen]
+  Groq -->|unavailable| Gemini[Gemini]
+  Writer --> Reply[Model reply or plain connection failure]
+  Reply --> Browser
+  DB --> Legacy[COACH_CORE=old rollback]
 ```
 
-The pipeline performs pose extraction once per clip and caches evidence; chat does not rerun video analysis. Direct questions use a compact generation path. History/comparison requests retain a bounded tool loop. Local models are warmed and responses are streamed through sentence checks. Those checks catch known failures; they do not prove all language is grounded.
+The pipeline extracts pose once per clip and caches evidence; chat does not rerun
+video analysis. The default writer receives a compact packet and completed recent
+exchanges, with no output checkers or rewriting. The retained legacy path has its
+older retrieval, tool-loop and review behavior. Tests of that path do not establish
+quality of the new model's prose.
 
 The research catalog preserves study conditions, units, and references. It does not turn a reported elite athlete average into a universal “good lunge” threshold. Knee angles are 2D estimates; physical force, spinal curvature, blade contact, tactical intent, and end balance are not measured.
 

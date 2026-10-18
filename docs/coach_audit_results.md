@@ -1,5 +1,9 @@
 # Conversational coach results — 2026-10-13
 
+Historical selector results: the default now uses the LLM/tool writer described
+in [the current conversation design](conversational-coach.md). These archived
+measurements do not establish the quality of that natural-writer path.
+
 The validated-phrasing workflow is enabled by default in source (`FENCECOACH_VERIFIED_DIALOGUE=true`). The user selected this design and requested a more natural voice. No existing application server was restarted. Restart the app to load the changed modules.
 
 ## Live before/after results
