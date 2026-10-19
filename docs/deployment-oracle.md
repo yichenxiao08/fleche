@@ -1,35 +1,19 @@
 # Oracle Cloud demo deployment
 
-This profile runs the full Flèche web app, video-analysis worker, and Caddy HTTPS proxy on one ARM VM. It uses the new Groq-then-Gemini coach core, with the existing free-tier provider keys. Caddy requires HTTP Basic Authentication over HTTPS before proxying to the app. SQLite, uploaded videos, and HTTPS certificates persist in Docker volumes. The app listens only inside the Compose network.
+This deployment runs Flèche and Checkmate on the existing Toronto tenancy using an Always Free `VM.Standard.E2.1.Micro` instance. Oracle Run Command provides administration; SSH and the app's port 8000 stay closed. The subnet accepts inbound TCP 80 and 443 for Caddy's HTTPS certificate and public site. The instance dynamic group is restricted to the exact replacement VM.
 
-## Create the VM
+## Flèche
 
-In the Oracle Cloud console, create an Ubuntu ARM64 VM in your home region with shape `VM.Standard.A1.Flex`, 2 OCPUs, 12 GB memory, and a 50 GB boot volume. Assign a public IPv4 address and add your SSH public key during creation. The Always Free A1 allowance is up to 2 OCPUs and 12 GB RAM per month, subject to capacity in your home region.
+`compose.oci.yaml` runs the full video-enabled Flèche app with `COACH_CORE=new`, the Groq Qwen provider first, Gemini second, and Caddy in front. Caddy protects the site with HTTP Basic Auth and obtains HTTPS certificates for the VM's `<public-ip-with-dashes>.nip.io` hostname. The app port is exposed only to the Compose network. SQLite data, videos, and Caddy certificates persist in named volumes.
 
-In the VM's VCN security list, allow inbound TCP 22 only from your current public IP, and TCP 80 and 443 from `0.0.0.0/0` so Caddy can obtain and renew its certificate. Do not open port 8000. Keep the SSH private key on your own computer. Caddy's HTTP Basic Authentication protects the app, but do not reuse a password from another service.
+The provider keys are optional at initial startup so the login and saved-session UI can be demonstrated before live chat is configured. Replace the `PENDING` values in the `FlecheGroqApiKey` and `FlecheGeminiApiKey` OCI secrets to enable live model replies. The VM loads them into the app's private environment and restarts the app. The application tries Groq, then Gemini, and returns its normal failure message if neither provider is available. Both providers use free tiers and have daily limits.
 
-## Install and start
+## Checkmate
 
-SSH to the VM, install Docker Engine with its Compose plugin using Docker's official Ubuntu instructions, then run:
+Checkmate runs as a separate `systemd` service and needs outbound HTTPS only. It does not need a public port. Replace the `PENDING` value in `CheckmateLichessBotToken` with a Lichess bot token using the `bot:play` scope; the VM then loads it and starts the service. Test casual games first. Flèche video analysis and Checkmate share the VM's limited CPU and memory, so both can run slowly at the same time.
 
-```sh
-git clone https://github.com/yichenxiao08/fleche.git
-cd fleche
-git switch main
-cp .env.oci.example .env.oci
-```
+## Secrets and maintenance
 
-Edit `.env.oci`: set `FENCECOACH_DOMAIN` to `<public-ip-with-dashes>.nip.io` (for example, `203-0-113-10.nip.io`), set the existing Groq and Gemini API keys, and choose an authentication username. Generate a password hash with `docker run -it --rm caddy:2-alpine caddy hash-password`; Caddy reads the password without echoing it. Paste the output into `FENCECOACH_BASIC_AUTH_HASH` and keep `.env.oci` private. Then start the stack:
+Provider API keys and the Lichess token belong in the three named OCI secrets for this deployment. Enter or rotate their values in the Oracle Console's Secret Management page. The instance can read only those secret IDs through its instance identity. Do not put secret values in Run Command text, shell history, source control, or `.env.oci.example`.
 
-```sh
-docker compose --env-file .env.oci -f compose.oci.yaml up -d --build
-docker compose --env-file .env.oci -f compose.oci.yaml logs -f caddy fencecoach
-```
-
-The first build installs video-analysis dependencies and downloads the pose model. The coach tries Groq Qwen first, Gemini second, then returns its plain failure message; no local model is loaded. Once Caddy obtains its certificate, open `https://<FENCECOACH_DOMAIN>` and sign in with the Basic Auth credentials. The VM must be reachable on ports 80 and 443 for certificate issuance.
-
-To update after a new commit reaches `main`, run `git pull` followed by the same `docker compose ... up -d --build` command. Back up the `fencecoach-data` volume before replacing or deleting the VM. The instance is a single-user demo; Basic Auth protects access, and the single-instance SQLite setup should not be scaled horizontally.
-
-## Keep Checkmate online too
-
-Checkmate runs as a separate `systemd` service from its own checkout; it needs outbound HTTPS only and no inbound port. The local Checkmate checkout has an Oracle/Lichess guide and the unit file under `deploy/lichess`. It accepts one game at a time and shares the VM's CPU with Flèche, so video analysis may run slower while Checkmate is searching.
+Oracle Run Command is the supported administrative path for this VM. Keep the dynamic group matched to the exact instance ID. Keep public ingress limited to TCP 80 and 443; do not open 22 or 8000. After a code update reaches `codex/resume-demo`, an administrator can use Run Command to update `/opt/fleche` and restart the Compose stack. Back up the persistent Docker volumes before replacing or deleting the VM.
