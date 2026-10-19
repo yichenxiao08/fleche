@@ -1,4 +1,7 @@
 {$FENCECOACH_DOMAIN} {
     encode zstd gzip
+    basic_auth {
+        {$FENCECOACH_BASIC_AUTH_USER} {$FENCECOACH_BASIC_AUTH_HASH}
+    }
     reverse_proxy fencecoach:8000
 }
